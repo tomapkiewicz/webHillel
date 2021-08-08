@@ -1,0 +1,86 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Asistencias{% endblock %}
+{% block content %}
+  {% include 'pages/includes/pages_menu.html' %}
+  
+  <main role="main">
+    {% if 'ok' in request.GET %}
+      <div class="alert alert-success alert-dismissible streched-link fade show text-center">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Éxito!</strong> Registro de asistencias realizado correctamente 
+      </div>
+    {% endif %}
+          
+    <div class="container"  >
+      <div class="card  mx-auto border-1 mb-5 "    >
+        <div class="card-body  mx-auto col-md-8"  >
+          <h3  class="text-center font-weight-bold">ASISTENCIA</h3>
+          <h3 class="text-center">
+            {% if modalidad  %}
+              <a href="{% url 'pages:asistencia' 0 %}" class="text-center badge badge-pill badge-online text-white">ONLINE</a> 
+            {% else %}
+              <a href="{% url 'pages:asistencia' 1 %}" class="text-center badge badge-pill badge-presencial text-white">PRESENCIAL</a>
+              <h4 class="text-center">{{request.user.profile.provincia}}</h4>
+              {% endif %}
+          </h3>
+
+          {% for day in days %}
+            {% if  day.order == dia or day.order > 7 %} 
+              {% if modalidad == 0 and day.HayActividadPresencial or modalidad == 1 and day.HayActividadOnline %}
+                <div class="row mt-2">
+                  <h5 class="mb-1 text-muted ">{{day}}</h5>
+                </div>
+                <hr>
+              {% endif %}
+            {% endif %}
+
+            {% for page in page_list|dictsort:"id" reversed %}
+              {% if  day.order == dia or day.order > 7 %}
+                {% if day == page.dia  and modalidad == page.modalidad %}
+                  {% if modalidad == 1 or modalidad == 0 and request.user.profile.provincia == page.provincia %}
+
+                  <div class="row mt-3">
+                    <div class="col-md-12    ">
+                      <a class="btn btn-dark btn-block"  href="{% url 'pages:asistenciaDetail' page.id page.title|slugify %}"> 
+                        <dl class="mb-0" style="white-space: normal; ">
+                        <dt class="mb-0 text-center">
+                          {{page.title}}
+
+                        </dt>
+                        <dd class=" mb-0 text-center">
+                      
+                          {% if request.user.is_staff %}
+                            <span class="text-left badge badge-pill badge-info">{{page.Qasistentes}}/{{page.Qanotados}}</span>
+                          {% endif %}
+ 
+                          De {{page.horaDesde}}
+                          {% if page.horaHasta > 0 %}
+                            a {{page.horaHasta}}
+                          {% endif %}
+                          HS.
+
+                        {% if page.Qanotados >= page.cupo and page.cupo != 0 %}
+                          <span class="badge badge-pill badge-danger">AGOTADO</span>
+                        {% endif %}
+
+                        {% if page.nuevo %}
+                          <span class="badge badge-pill badge-warning">NUEVO!</span>
+                        {% endif %}
+
+
+                        </dd>
+                        </dl>
+                      </a>                   
+                    </div>  
+                  </div>      
+                {% endif %}
+              {% endif %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}

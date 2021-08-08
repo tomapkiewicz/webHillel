@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    {% load static %} 
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}{% endblock %} - {% if request.user.is_anonymous %}Invitado{% else %}{{request.user}}{% endif %}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="https://images.squarespace-cdn.com/content/v1/5f8a2848ebd44c30a517b8af/1603721080395-6LYRK4SB60L6MNNWTOQ3/ke17ZwdGBToddI8pDm48kKqLHjXszxz84pvaVsJ3tcFZw-zPPgdn4jUwVcJE1ZvWhcwhEtWJXoshNdA9f1qD7aXK0t8ahyzoOLFEHArbPTJePHVPXdD8ABIMXMzvT9O6YoJRo1LT1BKDBcvOpZq6UA/favicon.ico?format=100w">
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,400i,700,700i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i" rel="stylesheet">
+    <!-- Estilos -->
+    <link href="{% static 'core/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <script defer src="{% static 'core/vendor/font-awesome/js/all.js' %}"></script> <!--load all styles -->
+    <link href="{% static 'core/css/main.css' %}" rel="stylesheet">
+  </head>
+  <body class="fondo" >
+
+    <body>
+      <!-- Navegación -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top footer-sample">
+        <div class="container">
+          <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="fas fa-home"></i> 
+            Hillel</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ned" aria-controls="ned" aria-expanded="false">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="ned">
+            <ul class="navbar-nav mr-auto">
+            <!--  <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">Inicio</a>
+              </li> !-->
+           <!--   <li class="nav-item">
+                <a class="nav-link" href="{% url 'pages:pages' 0 %}">Calendario</a>
+              </li> !-->
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+                  <i class="fas fa-calendar-week"></i> 
+                Calendario semanal 
+                </a>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item" href="{% url 'pages:pages' 0 %}">
+                    <i class="fas fa-male"></i> 
+                  Presencial</a>
+                  <a class="dropdown-item" href="{% url 'pages:pages' 1 %}">
+                    <i class="fas fa-signal"></i> 
+                  Online</a>
+                </div>
+                   {% if request.user.is_staff %}
+              </li>
+                 <li class="nav-item">
+                <a class="nav-link" href="{% url 'profiles:list' %}"> 
+                  <i class="fas fa-users"></i>
+                  Perfiles</a> 
+              </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav">
+
+            {% if request.user.is_staff %}
+              <li class="nav-item">
+                <a class="nav-link " href="{% url 'pages:exportar' %}">
+                  <i class="fa fa-file-export"></i> 
+                  Descargas</a>
+              </li> 
+            {% endif %}  
+            {% if request.user.is_staff or bitajon %}           
+              <li class="nav-item">
+            
+                <a class="nav-link" href="{% url 'pages:asistencia' 0 %}">
+                  <i class="fas fa-calendar-check"></i> 
+                  Asistencias</a>
+              </li> 
+            {% endif %}
+         
+
+            <!-- Menù dinamico para logueado/Deslogueado !-->
+            {% if not request.user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}"> 
+                  <i class="fas fa-sign-in-alt"></i>
+                  Acceder</a> 
+              </li>
+                <li class="nav-item">
+                <a class="nav-link" href="{% url 'signup' %}"> 
+                  <i class="fas fa-user-plus"></i> 
+                  Registrarse</a> 
+              </li>
+              {% else %}
+             <!-- <li class="nav-item">
+                <a class="nav-link" href="{% url 'messenger:list' %}"> Mensajes</a> 
+              </li> !-->
+            <!--
+             {% if not bitajon %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'profile' %}"> Perfil</a> 
+                </li>
+            -->
+
+              {% endif %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}"> 
+                  <i class="fas fa-sign-out-alt"></i> 
+                  Salir</a> 
+              </li>
+              {% endif %}
+
+            <!--  MUESTRA EL NOMBRE DE USUARIO
+              <li class="nav-item">
+                <span class="nav-link" href="{% url 'profile' %}"> {{request.user}}</span> 
+              </li>
+              !-->
+
+            </ul>
+          </div>
+        </div>
+      </nav>
+  
+ <!--
+<div class="circle-imageL"></div>
+<div id="circle"></div>
+ -->
+
+
+      {% block content %}{% endblock %}
+
+
+      <a id="whatsapp" href="https://wa.me/+541135614883" class="float badge badge-pill" target="_blank" data-toggle="tooltipW" title="Whatsapp">
+        <i class="fab fa-whatsapp my-float"></i>
+      </a>
+
+    <!-- Pié de página -->
+    <!-- Redes sociales !-->
+ 
+    <footer class="footer text-faded text-center py-5 footer-sample ">
+      <div class="container">
+        <p class="m-0">
+        {% if LINK_FACEBOOK %}
+            <a href="{{LINK_FACEBOOK}}" class="link">
+              <span class="fa-stack fa-lg ">
+                <i class="fas fa-circle fa-stack-2x" style="color:black"></i>
+                <i class="fab fa-facebook fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>       
+
+              {% endif %}
+             {% if LINK_INSTAGRAM %}
+            <a href="{{LINK_INSTAGRAM}}" class="link">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x" style="color:black"></i>
+                <i class="fab fa-instagram fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+              {% endif %}
+    </div>
+      <p class="m-0 mbt1" style="color:white">Hillel Argentina</p>
+    </footer>
+
+
+
+
+      <!-- Javascript -->
+      <script src="{% static 'core/vendor/jquery/jquery.min.js' %}"></script>
+      <script src="{% static 'core/vendor/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+      <script src="{% static 'core/js/main.js' %}"></script>
+  </body>
+</html>
+
+<script>
+  $(document).ready(function(){
+    $('[data-toggle="tooltipW"]').tooltip();
+  });
+  </script>  
+ 

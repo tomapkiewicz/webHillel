@@ -1,0 +1,94 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Perfil{% endblock %}
+{% block content %}
+<style>.errorlist{color:red;} label{display:none}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+</style>
+
+
+<main role="main">
+  <div class="card container">
+    <div class="row mt-3">
+      <div class="col-md-9 mx-auto mb-5">
+        <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+          <div class="row">
+            <!-- Previa del avatar
+            
+            <div class="col-md-2">
+            <!--
+              {% if request.user.profile.avatar %}
+                <img src="{{request.user.profile.avatar.url}}" class="img-fluid">
+                <p class="mt-1">¿Borrar? <input type="checkbox" id="avatar-clear" name="avatar-clear" /></p>
+              {% else %}
+                <img src="{% static 'registration/img/no-avatar.jpg' %}" class="img-fluid">
+              {% endif %}
+               -->
+            </div>
+             {% if 'ok' in request.GET %}
+          <div class="alert alert-success alert-dismissible fade show">
+           <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>Éxito!</strong> Perfil actualizado correctamente
+          </div>
+             {% endif %}
+            
+          {% if 'completar' in request.GET %}
+          <div class="alert alert-info alert-dismissible fade show">
+           <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>No podía ser tan fácil! </strong>Completá tu perfil <b>por única vez</b> y volvé a anotarte 🚣  
+          </div>
+             {% endif %}
+
+            <!-- Formulario -->
+            <div class="col-md-10">
+              <h3>Perfil</h3>
+          <!--     <input type="file" name="avatar" class="form-control-file mt-3" id="id_avatar"> !-->
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show">
+             <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>Error!</strong> Revisá los campos
+             {{form.errors}}
+          </div> 
+            {% endif %}
+              <!--{{ form.dni }}
+              {{ form.bio }}!-->
+              
+              {{ form.nombre }}
+              {{ form.apellido }}
+              {{ form.fechaNacimiento }}  
+              <span class="form-text mt-5">¿En dónde vivís ?</span>         
+
+              {{ form.provincia }}
+              {{ form.celular }}
+              {{ form.instagram }}
+              <span class="form-text mt-5">¿Viajaste a Onward? ¿Cuándo?</span>  
+              {{ form.onward }}
+              <span class="form-text mt-5">¿Viajaste a Taglit? ¿Cuándo?</span>  
+              {{ form.taglit }}
+              <span class="form-text mt-5">¿Cómo conociste Hillel?</span>  
+              {{ form.comoConociste }}
+              <span class="form-text mt-5">¿Estás estudiando, o te recibiste? ¿Qué estudias/te y en qué institución?</span>  
+              {{ form.estudios }}
+              <span class="form-text mt-5">¿Participás/te de algún otro espacio comunitario?</span>  
+              {{ form.experienciaComunitaria }}
+              <div class="jumbotron">
+              <span class="form-text mt-5"><b>¡Te invitamos a seguirnos en las redes tocando los links al pie de la página! 🎉 </b></span>  
+             </div>
+              {{ form.validado }}
+              <input type="email" class="form-control mt-3" value={{request.user.email}} readonly>
+              <p class="mt-3">Si querés editar tu mail cliqueá <a href="{% url 'profile_email' %}">Acá</a>.<br>
+              Y si querés cambiar tu contraseña cliqueá <a href="{% url 'password_change' %}">Acá</a>.</p>
+              <input type="submit" class="btn btn-dark btn-block mt-3" value="Actualizar">
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
