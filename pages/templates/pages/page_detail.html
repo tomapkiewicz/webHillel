@@ -1,0 +1,272 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}{{page.title}}{% endblock %}
+{% block content %}
+{% include 'pages/includes/pages_menu.html' %}
+<main role="main">
+
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+
+    {% if 'claveincorrecta' in request.GET %}
+      <div class="alert alert-danger alert-dismissible fade show  text-center">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Error!</strong> La clave ingresada es incorrecta. Volvé a ingresarla o comunicate con el staff.
+      </div>
+    {% endif %}
+
+    {% if 'perfilcompleto' in request.GET %}
+      <div class="alert alert-success alert-dismissible fade show  text-center">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Ahora si!</strong> Ya podés anotarte a la actividad 😎
+      </div>
+    {% endif %}
+  <div class="container">
+    <div class="card  mx-auto border-1 w-20 mb-5" style="max-width:600px">
+      <div class="card-body">
+
+    <a class="btn btn-dark mb-3" href="{% url 'pages:pages' %}"> 
+    <i class="fas fa-long-arrow-alt-left"></i>
+    Volver</a> 
+          <h5 class="card-title">{{page.title}}</h5>
+        <p class="card-text"> {{page.description|safe}}</p>
+          <p class="card-text">
+            {% if request.user.is_anonymous %}
+                <a class="btn btn-primary btn-block text-white" id="MainNavConfirmarRegistrarse" data-target="#ModalConfirmarRegistrarse" data-toggle="modal"><b>Anotarse</b></a>
+            {% else %}
+              {% if usuarioAnotado %}
+                <a class="btn btn-danger btn-block text-white" id="MainNavConfirmarDesuscripcion" data-target="#ModalConfirmarDesuscripcion" data-toggle="modal"><b>Darse de baja</b></a>
+              {% else  %}
+                {% if page.Qanotados >= page.cupo and page.cupo != 0 %}
+                  <a class="btn btn-primary btn-block text-white" id="MainNavAgotados" data-target="#ModalCuposAgotados" data-toggle="modal"><b>Anotarse</b></a>
+                {% else %}
+                  <a class="btn btn-primary btn-block text-white" id="MainNavConfirmar" data-target="#ModalConfirmar" data-toggle="modal"><b>Anotarse</b></a>
+                {% endif %}
+              {% endif %}
+            {% endif %}
+
+              {% if page.flyer %}
+                <img class="card-img-bottom" src="{{page.flyer.url}}" alt="Card image">
+              {% else %}
+                <img class="card-img-bottom" src="{% static 'core/img/logohillel.JPG' %}" alt="Card image">
+              {% endif %}
+
+
+            {% if request.user.is_staff %}
+                <a class="" href="{% url 'pages:update' page.id %}">Editar</a>        
+            {% endif %}
+          </p>
+      </div>
+    </div>
+  
+    <!-- Modal Anotarse (a Registrarse) -->
+    <div class="modal fade" id="ModalConfirmarRegistrarse">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Registrate</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">  
+        Registrate o logueate con tu usuario para anotarte a las actividades!
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <a class="btn btn-success" href="{% url 'signup' %}">Registrarse</a>
+            <a class="btn btn-success" href="{% url 'login' %}">Loguearse</a>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>  
+
+
+    <!-- Modal Anotarse -->
+    <div class="modal fade" id="ModalConfirmar">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Confirmá</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+              <form action="{%  url 'pages:register' page.id %} " method="post">{% csrf_token %}  
+   
+            {% if cuestionario.pregunta1 != "" and cuestionario.pregunta1 is not None %}   
+            Pero contanos algo antes... 🤓 <br><br>
+            {% endif %}
+
+            {% if cuestionario.pregunta1 != ""  and cuestionario.pregunta1 is not None %}   
+              {{cuestionario.pregunta1}}     
+                <input type="text" name="respuesta1" required
+                id="id_respuesta1" class="form-control mt-3 mb-3" placeholder=""/>
+            {% endif %}
+
+            {% if cuestionario.pregunta2 != ""  and cuestionario.pregunta2 is not None %}   
+              {{cuestionario.pregunta2}}     
+                <input type="text" name="respuesta2" required
+                id="id_respuesta2" class="form-control mt-3 mb-3" placeholder=""/>
+            {% endif %}     
+
+            {% if cuestionario.pregunta3 != ""  and cuestionario.pregunta3 is not None %}   
+              {{cuestionario.pregunta3}}     
+                <input type="text" name="respuesta3" required
+                id="id_respuesta3" class="form-control mt-3 mb-3" placeholder=""/>
+            {% endif %}  
+
+            {% if cuestionario.pregunta4 != ""  and cuestionario.pregunta4 is not None %}   
+              {{cuestionario.pregunta4}}     
+                <input type="text" name="respuesta4" required
+                id="id_respuesta4" class="form-control mt-3 mb-3" placeholder=""/>
+            {% endif %}  
+
+            {% if cuestionario.pregunta5 != "" and cuestionario.pregunta5 is not None %}   
+              {{cuestionario.pregunta5}}     
+                <input type="text" name="respuesta5" required
+                id="id_respuesta5" class="form-control mt-3 mb-3" placeholder=""/>
+            {% endif %}     
+  
+
+            {% if page.secreta %} 
+                  <b>Este evento es privado 🔒</b><br><br>
+                   Ingresá la clave para  entrar    
+                <input type="password" name="password" required
+                  id="id_password" class="form-control mt-3 mb-3" placeholder="Contraseña"/>
+                  <br>
+            {% endif %}
+
+           {% if overlaps %}
+            <b>¡Estás anotadx a otra actividad en el mismo horario! 🤪 </b> <br>
+            {% endif %}
+            ¿Te esperamos {% if overlaps %} igual {% endif %}en {{page.title}} 
+            {% if page.dia.order < 8 %}
+              el {{page.dia}}
+            {% endif %}
+            a las {{page.horaDesde}} HS?  
+            <br><br>
+
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+                 <input type="submit" class="btn btn-success" value="Si" />    
+                     </form>              
+
+          <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+          </div>
+        </div>
+      </div>
+    </div>  
+  
+
+    <!-- Modal Confirmar Desuscripción -->
+    <div class="modal fade" id="ModalConfirmarDesuscripcion">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Confirmá</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">  
+            
+            <p class="text-center">  
+              🧾 Al darte de baja estás liberando tu cupo 🧾 <br>
+          Si querés faltar sin perder el cupo avisá por acá🙏  
+           <a href="https://wa.me/+541135614883" class="btn btn-success btn-sm" >
+           <i class="fab fa-whatsapp"></i>
+           </a> 
+           <br><br>
+       <b> ¿Te das de baja de {{page.title}} a las {{page.horaDesde}} HS? </b>
+      </p>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+        <a class="btn btn-success" href="{% url 'pages:unregister' page.id %}">Si</a>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+          </div>
+        </div>
+      </div>
+    </div>  
+  
+
+
+    <!-- Modal Cupos agotados -->
+    <div class="modal fade" id="ModalCuposAgotados">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Los cupos están agotados!</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">  
+
+            Comunicate con el staff para ingresar en la lista de espera 
+            <a href="https://wa.me/+541135614883" class="btn btn-success btn-sm" >
+              <i class="fab fa-whatsapp"></i>
+            </a> 
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>  
+  </div>
+
+
+   {% block javascript %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // catch the form's submit event
+            $('#MainNavAgotados').click(function () {
+                
+                //Se muestra el modal
+                $('#ModalCuposAgotados').modal('show');
+                
+                // create an AJAX call
+                $.ajax({
+                    data: $(this).serialize(), // get the form data
+                    url: "{% url 'pages:cuposAgotados' page.id %}",
+                    // on success
+                    success: function (response) {
+                      console.log("Mail enviado")  
+                      console.log(response)  
+
+                    },
+                    // on error
+                    error: function (response) {
+                        // alert the error if any error occured
+                        console.log(response.responseJSON.errors)
+                    }
+                });
+
+                return false;
+            });
+        })
+    </script>
+    {% endblock javascript %}
+
+</main>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}{{profile.user}}{% endblock %}
+{% block content %}
+<main role="main">
+  <div class="card container mb-5">
+    <div class="row mt-3">
+      <div class="col-md-9 mx-auto mb-5">
+        <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+          <div class="row">
+            <!-- Avatar -->
+            <div class="col-md-2">
+              {% if profile.avatar %}
+                <img src="{{profile.avatar.url}}" class="img-fluid">
+              {% else %}
+                <img src="{% static 'registration/img/no-avatar.jpg' %}" class="img-fluid">
+              {% endif %}
+              {% if profile.celular  %}
+              <a href="https://wa.me/+54{{profile.celular}}" class="text-center btn btn-success btn-sm btn-block mt-3" >
+              <i class="fab fa-whatsapp fa-2x"></i>
+                     
+              </a>
+              <a class="btn btn-dark btn-block text-white mt-1 text-center" id="MainNavDatos" data-target="#ModalDatos" data-toggle="modal">
+              <i class="fas fa-info-circle text-center"></i>
+              
+              </a>
+
+              {% endif %}
+            </div>
+            <!-- Campos -->
+            <div class="col-md-10">
+              <h3>{{profile.user}}</h3>
+                 {% if profile.nombre and profile.apellido  %}
+                 <p>{{profile.nombre}} {{profile.apellido}}</p>
+        
+
+                 {% endif %} 
+                {% if profile.fechaNacimiento  %}<p>{{profile.edad}} años</p> {% endif %}
+
+
+              {% if profile.subscription  %}
+              <h3>Anotado en:</h3>
+              
+ 
+                <dl class="row">
+                {% for sub in profile.subscription %}                                 
+                   <dt class="col-sm-4">{{sub}}</dt>
+                   <dd class="col-sm-8">{% if sub.dia.order < 8 %}Los{% endif %} {{sub.dia}} De {{sub.horaDesde}} a {{sub.horaHasta}} Hs.{% if sub.modalidad  %}<b> Online</b>{% endif %}</dd>
+                {% endfor %}
+                </dl>
+                  
+
+                  
+              {% endif %}
+
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+      <!-- Modal Anotarse -->
+    <div class="modal fade" id="ModalDatos">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">{{profile.nombre}} {{profile.apellido}} </h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">   
+        <p>Nació el {{profile.fechaNacimiento}} ({{profile.edad}} Años)</p>
+        <p>{{profile.provincia}}</p>
+         {% if profile.instagram is not None %}
+          <p>Instagram: {{profile.instagram}}</p>
+         {% endif %}
+        <p>Onward: {{profile.onward}}</p>
+        <p>Taglit: {{profile.taglit}}</p>
+        <p>Como conoció Hillel: {{profile.comoConociste}}</p>
+        <p>Estudios: {{profile.estudios}}</p> 
+        <p>Experiencia comunitaria: {{profile.experienciaComunitaria}}</p>
+
+       
+        {% if profile.categories.all is not None %}
+         <p>Intereses: </p>
+          {% for interes in profile.categories.all %} 
+            <p class="pl-2"><i>{{interes}}</i></p>
+          {% endfor %}
+        {% endif %}
+
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer"> 
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>  
+  
+  </div>
+</main>
+{% endblock %}

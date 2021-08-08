@@ -1,0 +1,109 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}{{page.title}}{% endblock %}
+{% block content %}
+  {% include 'pages/includes/pages_menu.html' %}
+  <main role="main">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+
+    <label hidden id="anotados">{{page.Qanotados}}</label>
+    <label hidden id="asistencias">{{page.Qasistentes}}</label>
+
+
+<div class="container">
+    <div class="card mx-auto border-1 mb-5 w-20 " style="max-width:600px">
+      <div class="card-body mx-auto" >
+    <a class="btn btn-dark mb-3" href="{% url 'pages:asistencia' 0 %}"> 
+        <i class="fas fa-long-arrow-alt-left"></i>
+    Volver</a> 
+
+        <h2 class="card-title text-center">¿Quién vino hoy?</h2>
+        <h4 class="card-title text-center">{{page.title}}
+        <a id="info" class="badge badge-pill badge-info" href="#" data-toggle="tooltip" title="Asistentes/Anotados">{{page.Qasistentes}}/{{page.Qanotados}}</a>
+        </h4>
+        <p class="card-text text-center"> {{page.dia}} De {{page.horaDesde}} a {{page.horaHasta}} Hs</p> 
+                            
+        {% if subscribers.count > 0 %}
+        
+          <dl>  
+            <dt class="text-center mb-2">Marcar los presentes</dt>
+            {% for subscription in subscribers %}           
+              <dd> 
+              <h5>
+                {% if subscription.user in page.asistentes %}
+                <button id="btn_{{ subscription.user  }}" class="btn btn-success btn-sm btn-block">{{ subscription.user }}</button>
+                {% else %}
+                <button id="btn_{{ subscription.user  }}" class="btn btn-dark btn-sm btn-block">{{ subscription.user }}</button>
+                {% endif %}
+              </h5>
+              </dd>
+              <script>
+                var send = document.getElementById("btn_{{ subscription.user  }}");
+                send.addEventListener("click", function(){
+                var usuario = encodeURIComponent(document.getElementById("btn_{{ subscription.user  }}").innerHTML) 
+                send = document.getElementById("btn_{{ subscription.user  }}");
+
+                var presente = true 
+                if(usuario.length > 0 ){
+                  var userBtn = document.getElementById("btn_{{ subscription.user }}")
+                  var yaRegistrado = userBtn.classList.contains("btn-success")
+                  var url = "{% url 'pages:asistenciaAdd' page.pk %}" + "?user=" + usuario;
+                  if(yaRegistrado){
+                    url = "{% url 'pages:asistenciaRemove' page.pk %}" + "?user=" + usuario;
+                  }
+                  
+
+                  fetch(url, {'credentials':'include'}).then(response => response.json()).then(function(data){
+                    console.log(data)
+                    var qanotados = 0
+                    var qasistencias = 0
+                    qasistencias = document.getElementById("asistencias").innerHTML
+                    if(yaRegistrado==false){
+                        userBtn.classList.remove("btn-dark")
+                        userBtn.classList.add("btn-success")
+                        qasistencias++           
+                      }
+                      else {
+                        userBtn.classList.remove("btn-success")
+                        userBtn.classList.add("btn-dark") 
+                        qasistencias-- 
+                      }
+                      document.getElementById("asistencias").innerHTML = qasistencias 
+                      qanotados =document.getElementById("anotados").innerHTML
+                      document.getElementById("info").innerHTML = qasistencias + "/" + qanotados
+                    })
+                  }
+                })
+              </script>
+            {% endfor %}
+          </dl>
+            
+        {% endif %}  
+
+        {% if request.user.is_staff %}  
+      
+          <!-- INFO DE STAFF  !-->
+          <dt class="text-center mt-3 mb-2">Descargar</dt> 
+          <a class="btn btn-dark btn-block" href="{% url 'pages:descargarasistencias' page.id %}">Planilla del día    
+          <i class="fa fa-download "></i></a>
+          <a class="btn btn-dark btn-block" href="{% url 'pages:descargarhistoricoasistencias' page.id %}">Planilla Histórica
+          <i class="fa fa-download "></i></a>
+    
+        {% endif %}      
+      </div>
+  
+    </div>
+
+  </div>
+  
+    
+  <script>
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+  </script>
+
+
+{% endblock %}

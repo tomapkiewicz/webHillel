@@ -1,0 +1,94 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Hillel Argentina{% endblock %}
+{% block content %}
+ 
+ <main role="main">
+
+ 
+    {% if 'ok' in request.GET %}
+      <div class="alert alert-success alert-dismissible streched-link fade show text-center">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Éxito!</strong> Inscripción realizada correctamente 
+      </div>
+    {% endif %}
+
+        {% if 'remove' in request.GET %}
+      <div class="alert alert-success alert-dismissible fade show  text-center">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Éxito!</strong> Desuscripción realizada correctamente 
+      </div>
+    {% endif %}
+    
+    <div class="container "    >
+      <div class="card mx-auto border-1 mb-5"    >
+          <div class="card-body mx-auto col-md-9 text-center mb-5"  >   
+             
+                  {% if request.user.is_authenticated == False %}
+                    <h1 class="mt-5">Hillel Argentina</h1>
+                    <h3 class="">Tu lugar de encuentro</h3>
+
+                   <a class ="mt-5 btn btn-dark" href="{% url 'login' %}">
+                    <i class ="fas fa-sign-in-alt fa-2x  mt-3"></i>
+                    <p class="row mr-4 ml-4 mt-3 mb-3" >Acceder
+                    </p>
+                  </a>  
+
+                   <a class ="mt-5 btn btn-dark" href="{% url 'signup' %}">
+                      <i class ="fas fa-user-plus fa-2x mt-3"></i>
+                    <p class="row mr-3 ml-3 mt-3 mb-3" >Registrarse
+                    </p>
+                  </a>    
+
+                  {% else %}
+                    <h2 class="">Hola {{request.user.profile.user}}!</h2>      
+                    
+                  {% if bitajon %} 
+                     
+                  <a class ="mt-5 btn btn-dark " href="{% url 'pages:asistencia' 0 %}">
+                    <i class ="fa fa-calendar fa-2x mt-3"></i>
+                    <p class="row mr-3 ml-3 mt-3 mb-3" >Tomar Lista
+                    </p>
+                  </a> 
+               
+
+                  {% else %}
+                    
+                    
+                    {% if request.user.profile.subscription  %}
+                      <h2 class="lead mt-4">Te esperamos en:</h2>
+                      <dl class="row mt-5">
+                        {% for page in request.user.profile.subscription %}                                 
+                          <dt class="col-sm-6 text-right"><a class="text-dark" href="{% url 'pages:page' page.id page.title|slugify %}">{{page}} </a></dt>
+                          <dd class="col-sm-6 text-left">{% if page.dia.order < 8 %}Los{% endif %} {{page.dia}} De {{page.horaDesde}} a {{page.horaHasta}} Hs.{% if page.modalidad  %}<b> Online</b>{% endif %}</dd>
+                        {% endfor %}             
+                      </dl>
+                    {%else%}
+                      <h2 class="lead mt-4">No estás anotadx en ninguna actividad</h2>  
+                      {% endif %}
+                        
+                          <a class ="mt-5 btn badge-presencial" href="{% url 'pages:pages' 0 %}">
+                          <i class ="fa fa-calendar-week fa-2x mt-3"></i>
+                   
+                          <i class="fas fa-people-arrows fa-2x mt-3"></i>
+                            <p class="row mr-3 ml-3 mt-3 mb-3 fa-1x font-weight-bold" >Calendario Presencial
+                            </p>
+                          </a> 
+
+                         <a class ="mt-5 btn badge-online" href="{% url 'pages:pages' 1 %}">
+                          <i class ="fa fa-calendar-week fa-2x mt-3"></i>
+                          <i class ="fa fa-signal fa-2x mt-3"></i>
+                            <p class="row mr-3 ml-3 mt-3 mb-3 fa-1x font-weight-bold" >Calendario Online
+                            </p>
+                          </a>  
+                    {% endif %}
+                  {% endif %}
+               
+              </div>
+            
+          </div>
+      </div>
+    </div>
+  </main>
+
+{% endblock %}
