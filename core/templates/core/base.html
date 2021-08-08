@@ -95,6 +95,9 @@
                   <a class="nav-link" href="{% url 'profile' %}"> Perfil</a> 
                 </li>
             -->
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}"> {{request.user}}</a> 
+              </li>
 
               {% endif %}
               <li class="nav-item">
@@ -104,23 +107,15 @@
               </li>
               {% endif %}
 
-            <!--  MUESTRA EL NOMBRE DE USUARIO
-              <li class="nav-item">
-                <span class="nav-link" href="{% url 'profile' %}"> {{request.user}}</span> 
-              </li>
-              !-->
+             
+
+               
 
             </ul>
           </div>
         </div>
       </nav>
-  
- <!--
-<div class="circle-imageL"></div>
-<div id="circle"></div>
- -->
-
-
+ 
       {% block content %}{% endblock %}
 
 
