@@ -26,7 +26,7 @@
               <a href="{% url 'pages:pages' 0 %}" class="text-center badge badge-pill text-white badge-online">ONLINE</a> 
               {% else %}
               <a href="{% url 'pages:pages' 1 %}" class="text-center badge badge-pill text-white badge-presencial">PRESENCIAL</a>
-              <h4 class="text-center">{%if provincia is not None %} {{provincia}}{% endif %}</h4>
+              <h4 class="text-center">{%if request.user.profile.provincia is not None  %} {{provincia}} {% else %} Global {% endif %}</h4>
               {% endif %}
             </h3>
 
@@ -43,7 +43,7 @@
 
               {% for page in page_list|dictsort:"id" reversed %}
                 {% if day == page.dia  and modalidad == page.modalidad and page.activa %}
-                  {% if modalidad == 1 or modalidad == 0 and provincia == page.provincia or page.provincia is None or request.user.profile.provincia is None %}
+                  {% if modalidad == 1 or modalidad == 0 and request.user.profile.provincia == page.provincia or page.provincia is None or request.user.profile.provincia is None %}
                     <div class="row mt-3">
                       <div class="col-md-12 ">
 
@@ -52,9 +52,13 @@
                         {% else %}
                           <a class="btn btn-dark btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}"> 
                         {% endif %}
+
                           <dl class="mb-0" style="white-space: normal; ">
                           <dt class="mb-0 text-center">
                         {{page.title}} 
+                        {% if request.user.profile.provincia is None and modalidad == 0 %}
+                        - {{page.provincia}}
+                        {% endif %}
                         {% if page.secreta %}<i class="fas fa-lock"></i>{% endif %}     
                           </dt>
                         <dd class=" mb-0 text-center">
