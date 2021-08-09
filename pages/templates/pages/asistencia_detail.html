@@ -15,7 +15,11 @@
 <div class="container">
     <div class="card mx-auto border-1 mb-5 w-20 " style="max-width:600px">
       <div class="card-body mx-auto" >
+{%if page.modalidad %}
+    <a class="btn btn-dark mb-3" href="{% url 'pages:asistencia' 1 %}"> 
+{% else %}
     <a class="btn btn-dark mb-3" href="{% url 'pages:asistencia' 0 %}"> 
+{% endif %}
         <i class="fas fa-long-arrow-alt-left"></i>
     Volver</a> 
 

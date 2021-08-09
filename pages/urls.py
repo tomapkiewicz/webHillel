@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PageDetail, PageList, PageCreate, PageUpdate, PageDelete, Register, Unregister, Asistencia, AsistenciaDetail, AsistenciaAdd, AsistenciaRemove, DescargarAsistencias, DescargarHistoricoAsistencias, DescargarHistoricoAsistenciasALLItem, DescargarHistoricoAsistenciasALLDetail, DescargarActividades, DescargarPerfiles, Exportar, CuposAgotados
+from .views import PageDetail, PageList, PageCreate, PageUpdate, PageDelete, Register, Unregister, Asistencia, AsistenciaDetail, AsistenciaAdd, AsistenciaRemove, DescargarAsistencias, DescargarHistoricoAsistencias, DescargarHistoricoAsistenciasALLItem, DescargarHistoricoAsistenciasALLDetail, DescargarActividades, DescargarPerfiles, Exportar, CuposAgotados, DescargarCuestionarios, DescargarCuestionariosRespuestas
 
 PagesPatterns = ([
     path('', PageList.as_view(), name='pages'),
@@ -21,6 +21,8 @@ PagesPatterns = ([
     path('descargarhistoricoasistenciasdetail/', DescargarHistoricoAsistenciasALLDetail, name='descargarhistoricoasistenciasdetail'),
     path('descargarActividades/', DescargarActividades, name='descargarActividades'),
     path('descargarPerfiles/', DescargarPerfiles, name='descargarPerfiles'),
+    path('descargarCuestionarios/', DescargarCuestionarios, name='descargarCuestionarios'),
+    path('descargarCuestionariosRespuestas/', DescargarCuestionariosRespuestas, name='descargarCuestionariosRespuestas'),
     path('exportar/', Exportar, name='exportar'),
     path('cuposAgotados/<int:pk>', CuposAgotados, name='cuposAgotados'),
 ], 'pages')

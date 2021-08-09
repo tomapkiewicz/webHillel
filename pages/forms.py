@@ -28,10 +28,11 @@ class PageForm(forms.ModelForm):
 
 
     def __init__(self, *args, **kwargs):   
-        if kwargs['instance'].modalidad is None: 
-            kwargs['initial']={"modalidad":False}
-        if kwargs['instance'].secreta is None: 
-            kwargs['initial']['secreta']=False
-        
-        
+        if kwargs['instance'] is not None:          
+            if kwargs['instance'].modalidad is None: 
+                kwargs['initial']={"modalidad":False}
+            if kwargs['instance'].secreta is None: 
+                kwargs['initial']['secreta']=False
+        else:
+            kwargs['initial']={"modalidad":False, "secreta":False}
         super(PageForm, self).__init__(*args, **kwargs)

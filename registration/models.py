@@ -54,7 +54,7 @@ class Profile(models.Model):
                                null=True, blank=True)
     apellido = models.CharField(null=True, blank=True, max_length=100)
     nombre = models.CharField(null=True, blank=True, max_length=100)
-    celular = models.CharField(verbose_name="Número de Whatsapp", null=True, blank=True, max_length=30)
+    whatsapp = models.CharField(verbose_name="Número de Whatsapp", null=True, blank=True, max_length=30)
     instagram = models.CharField(verbose_name="@ de Instagram", null=True, blank=True, max_length=100)
     onward = models.ForeignKey(FechaOnward,   on_delete=models.CASCADE, verbose_name="¿Viajaste a Onward? ¿Cuándo?", null=True, blank=True)
     taglit = models.ForeignKey(FechaTaglit,  on_delete=models.CASCADE, verbose_name="¿Viajaste a Taglit? ¿Cuándo?", null=True, blank=True)

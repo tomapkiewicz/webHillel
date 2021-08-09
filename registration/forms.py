@@ -31,7 +31,7 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['avatar','nombre','apellido','fechaNacimiento',
-        'provincia', 'celular', 'instagram',
+        'provincia', 'whatsapp', 'instagram',
         'onward', 'taglit', 'comoConociste',  
         'estudios', 'experienciaComunitaria',  
                    'validado']
@@ -76,10 +76,8 @@ class ProfileForm(forms.ModelForm):
                                           'placeholder': '',
                                           'required': True}),
             
-            'celular': NumberInput(attrs={'class': 'form-control mt-3',
-                                              'placeholder': '*Número de Whatsapp ',
-                                              #'min':1111111111,
-                                              #'max':1199999999,
+            'whatsapp': NumberInput(attrs={'class': 'form-control mt-3',
+                                              'placeholder': 'Ej. BsAs: "11xxxxxxxx" ',
                                               'required': True}),
             'provincia': forms.Select(attrs={'class': 'form-control mt-1',
                                              'placeholder': '',
