@@ -463,7 +463,7 @@ def DescargarCuestionariosRespuestas(request):
     writer = csv.writer(response, dialect= 'excel')
     response.write(u'\ufeff'.encode('utf8'))
     writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4','Pregunta5',
-                    'Usuario', 'Respuesta1', 'Respuesta2','Respuesta3','Respuesta4','Respuesta5',])
+                    'Usuario', 'Respuesta1', 'Respuesta2','Respuesta3','Respuesta4','Respuesta5','Fecha de compleción'])
     
     cuestionariosRespuesta = CuestionarioRespuesta.objects.all()
 
@@ -472,7 +472,7 @@ def DescargarCuestionariosRespuestas(request):
         if c is None:
             return Http404("Cuestionario no encontrado")
         writer.writerow([c.page.title,c.pregunta1,c.pregunta2,c.pregunta3,c.pregunta4,c.pregunta5,
-                        c.user.username,c.respuesta1,c.respuesta2,c.respuesta3,c.respuesta4,c.respuesta5])
+                        c.user.username,c.respuesta1,c.respuesta2,c.respuesta3,c.respuesta4,c.respuesta5,c.updated])
     return response
 
 def Exportar(request):
