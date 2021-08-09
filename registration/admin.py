@@ -4,7 +4,7 @@ from pages.models import Day, Category
 
 # Register your models here.
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user','nombre','apellido','edad','celular','provincia',)
+    list_display = ('user','nombre','apellido','edad','whatsapp','provincia',)
     readonly_fields = ('updated', 'created')
     search_fields = ('page__title', 'fecha')
 

@@ -32,7 +32,7 @@ def CuposAgotados(request,pk):
                     'subject':  'Se quiso anotar en ' + page.title + ' a las '
                     + str(page.horaDesde) + 'HS  '
                     + ' pero los cupos estaban agotados.' ,
-                    'description': ' Comunicate con él haciendo click acá: https://wa.me/+54' + str(request.user.profile.celular) ,                      
+                    'description': ' Comunicate con él haciendo click acá: https://wa.me/+54' + str(request.user.profile.whatsapp) ,                      
                 }
             ) 
     to_mail = ('tomapkiewicz@gmail.com',)
@@ -161,11 +161,11 @@ class PageDelete(DeleteView):
 def Register(request, pk):
     if request.user.is_authenticated:
         page = get_object_or_404(Page, pk=pk)
-        
         cuestionario = Cuestionario.objects.get(page=page)
         if cuestionario is not None:
+
             cuestionarioRespuesta = CuestionarioRespuesta.objects.find_or_create(user=request.user, page=page)
-           
+
             if request.POST.get('respuesta1',None) is not None:
                 cuestionarioRespuesta.pregunta1 = cuestionario.pregunta1
                 cuestionarioRespuesta.respuesta1 = request.POST['respuesta1']
@@ -173,7 +173,7 @@ def Register(request, pk):
             if request.POST.get('respuesta2',None) is not None:
                 cuestionarioRespuesta.pregunta2 = cuestionario.pregunta2
                 cuestionarioRespuesta.respuesta2 = request.POST['respuesta2']   
-                
+   
             if request.POST.get('respuesta3',None) is not None:
                 cuestionarioRespuesta.pregunta3 = cuestionario.pregunta3
                 cuestionarioRespuesta.respuesta3 = request.POST['respuesta3']   
@@ -181,11 +181,12 @@ def Register(request, pk):
             if request.POST.get('respuesta4',None) is not None:
                 cuestionarioRespuesta.pregunta4 = cuestionario.pregunta4
                 cuestionarioRespuesta.respuesta4 = request.POST['respuesta4']   
-                
+
             if request.POST.get('respuesta5',None) is not None:
                 cuestionarioRespuesta.pregunta5 = cuestionario.pregunta5
                 cuestionarioRespuesta.respuesta5 = request.POST['respuesta5']   
-                 
+            
+            cuestionarioRespuesta.save()       
 
         #Si la page es secreta validar la clave
         if page.secreta:
@@ -313,15 +314,10 @@ def WriteRowAsistencias(h,writer):
 
     for anotado in h.anotados.all():
         asistio = "Si"if anotado in h.asistentes.all() else "No"
-        asis = 1 if asistio =="SI" else 0
-        nombre = ""
-        apellido = ""
-        celular = ""
+        asis = 1 if asistio =="Si" else 0
+
         Profile.objects.get_or_create(user=anotado)
-        if anotado.profile is not None:
-            nombre = anotado.profile.nombre
-            apellido = anotado.profile.apellido
-            celular = anotado.profile.celular
+
         writer.writerow([h.page.title, h.page.dia, h.page.horaDesde, 
         h.fecha, anotado,asistio,asis])
 
@@ -350,7 +346,7 @@ def DescargarHistoricoAsistenciasALLDetail(request):
          'historico-' + str(datetime.now()) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect= 'excel')
-    writer.writerow(['Actividad','Dia','Hora Desde','Fecha', 'Usuario anotado','Asistio?'])
+    writer.writerow(['Actividad','Dia','Hora Desde','Fecha', 'Usuario anotado','Asistio?','Asis'])
 
     historiales = Historial.objects.all()
     for h in historiales:
@@ -385,7 +381,7 @@ def DescargarHistoricoAsistencias(request, pk):
         page.title + '-all-' + str(datetime.now()) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect= 'excel')
-    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?'])
+    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?','Asis'])
 
     hs = Historial.objects.find_page(page=page)
     if hs is None:
@@ -438,10 +434,46 @@ def DescargarPerfiles(request):
         if p is None:
             return Http404("Perfil no encontrado")
         if p.validado:
-            writer.writerow([p, p.nombre, p.apellido, p.fechaNacimiento, p.edad, p.celular, p.instagram,
+            writer.writerow([p, p.nombre, p.apellido, p.fechaNacimiento, p.edad, p.whatsapp, p.instagram,
             p.onward, p.taglit, p.comoConociste, p.estudios, p.experienciaComunitaria, p.interesesSTR])
     return response
 
+
+def DescargarCuestionarios(request):
+    response = HttpResponse(content='')
+    response['Content-Disposition'] = 'attachment; filename=Cuestionarios-' + \
+        str(datetime.now()) + '.csv'
+    writer = csv.writer(response, dialect= 'excel')
+    response.write(u'\ufeff'.encode('utf8'))
+    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4','Pregunta5',])
+    
+    cuestionarios = Cuestionario.objects.all()
+
+    for c in cuestionarios:
+        if c is None:
+            return Http404("Cuestionario no encontrado")
+        writer.writerow([c.page.title,c.pregunta1,c.pregunta2,c.pregunta3,c.pregunta4,c.pregunta5,])
+        return response
+
+
+def DescargarCuestionariosRespuestas(request):
+    response = HttpResponse(content='')
+    response['Content-Disposition'] = 'attachment; filename=Cuestionarios-Respuestas-' + \
+        str(datetime.now()) + '.csv'
+    writer = csv.writer(response, dialect= 'excel')
+    response.write(u'\ufeff'.encode('utf8'))
+    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4','Pregunta5',
+                    'Usuario', 'Respuesta1', 'Respuesta2','Respuesta3','Respuesta4','Respuesta5','Fecha de compleción'])
+    
+    cuestionariosRespuesta = CuestionarioRespuesta.objects.all()
+
+    for c in cuestionariosRespuesta:
+        print(c.user)
+        if c is None:
+            return Http404("Cuestionario no encontrado")
+        writer.writerow([c.page.title,c.pregunta1,c.pregunta2,c.pregunta3,c.pregunta4,c.pregunta5,
+                        c.user.username,c.respuesta1,c.respuesta2,c.respuesta3,c.respuesta4,c.respuesta5,c.updated])
+    return response
 
 def Exportar(request):
     if request.user.is_authenticated:

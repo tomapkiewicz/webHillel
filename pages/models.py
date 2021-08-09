@@ -327,31 +327,35 @@ class Historial(models.Model):
 
 class CuestionarioRespuestaManager(models.Manager):
 
-    def find(self, page):
-        queryset = self.filter(page=page)
+    def find(self, user,page):
+        queryset = self.filter(user=user, page=page)
         if len(queryset) > 0:
             return queryset[0]
         return None
 
     def find_or_create(self, user,page ):
-        cuestionarioRespuesta = self.find(page=page)
+        cuestionarioRespuesta = self.find(user=user, page=page)
         if cuestionarioRespuesta is None:
+            print("se crea")
+            print(user)
+            print(page)
+            
             cuestionarioRespuesta = CuestionarioRespuesta.objects.create(user=user, page= page)
         return cuestionarioRespuesta
 
 
 class CuestionarioRespuesta(models.Model):
     page = models.ForeignKey(Page, related_name="pagina_cuestionario_respuesta", verbose_name='Actividad', null=True, on_delete=models.CASCADE)
-    user = models.OneToOneField(User, on_delete=CASCADE, null=True)
-    pregunta1 = models.CharField(verbose_name="Pregunta1", null=True, blank=True, default="", max_length=200)
+    user = models.ForeignKey(User, on_delete=CASCADE, null=True)
+    pregunta1  = models.CharField(verbose_name="Pregunta1", null=True, blank=True, default="", max_length=200)
     respuesta1 = models.CharField(verbose_name="Respuesta1", null=True, blank=True, default="", max_length=200)
-    pregunta2= models.CharField(verbose_name="Pregunta2", null=True, blank=True, default="", max_length=200)
+    pregunta2  = models.CharField(verbose_name="Pregunta2", null=True, blank=True, default="", max_length=200)
     respuesta2 = models.CharField(verbose_name="Respuesta2", null=True, blank=True, default="", max_length=200)
-    pregunta3 = models.CharField(verbose_name="Pregunta3", null=True, blank=True, default="", max_length=200)
+    pregunta3  = models.CharField(verbose_name="Pregunta3", null=True, blank=True, default="", max_length=200)
     respuesta3 = models.CharField(verbose_name="Respuesta3", null=True, blank=True, default="", max_length=200)
-    pregunta4 = models.CharField(verbose_name="Pregunta4", null=True, blank=True, default="", max_length=200)
+    pregunta4  = models.CharField(verbose_name="Pregunta4", null=True, blank=True, default="", max_length=200)
     respuesta4 = models.CharField(verbose_name="Respuesta4", null=True, blank=True, default="", max_length=200)
-    pregunta5= models.CharField(verbose_name="Pregunta5", null=True, blank=True, default="", max_length=200)
+    pregunta5  = models.CharField(verbose_name="Pregunta5", null=True, blank=True, default="", max_length=200)
     respuesta5 = models.CharField(verbose_name="Respuesta5", null=True, blank=True, default="", max_length=200)
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
