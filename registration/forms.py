@@ -91,7 +91,7 @@ class ProfileForm(forms.ModelForm):
 
 
             'validado': forms.TextInput(attrs={'class': 'form-control mt-3',
-                                               'placeholder': 'Celular',
+                                               'placeholder': '',
                                                'hidden': True}),
                     }
 
