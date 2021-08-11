@@ -137,12 +137,26 @@ STATIC_URL = '/static/'
 LOGIN_REDIRECT_URL = 'home' #'pages:pages'
 LOGOUT_REDIRECT_URL = 'home'
 
+
 # emails
 if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
     EMAIL_FILE_PATH = BASE_DIR / 'send_emails'
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_HOST_USER = 'tomapkiewicz@gmail.com'
+    EMAIL_HOST_PASSWORD = 'lrmprsejwdkgaaho'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
 else:
     # Aqui hay que configurar un email real para producción
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_FILE_PATH = BASE_DIR / 'send_emails'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_HOST_USER = 'infohillel@gmail.com'
+    EMAIL_HOST_PASSWORD = 'zftsqbzhgeuqmzrz'
+    EMAIL_PORT = 587  
+    EMAIL_USE_TLS = True
+
     pass
 
 
@@ -151,9 +165,3 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'tomapkiewicz@gmail.com'
-EMAIL_HOST_PASSWORD = 'lrmprsejwdkgaaho'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True

@@ -1,0 +1,42 @@
+Content-Type: multipart/alternative;
+ boundary="===============3593890341024045900=="
+MIME-Version: 1.0
+Subject: =?utf-8?q?Te_esperamos_en_Entrenamiento_Funcional_=F0=9F=92=AA!?=
+From: Hillel Argentina <no_responder@domain.com>
+To: tomapkiewicz@gmail.com
+Date: Wed, 11 Aug 2021 00:59:17 -0000
+Message-ID: <162864355758.8592.1570119564811682221@SSD480.fibertel.com.ar>
+
+--===============3593890341024045900==
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <h1>Hola Tom!</h1>
+        <h2>Te anotaste en Entrenamiento Funcional 💪 a las 18:00:00HS. Podés darte de baja acá: 127.0.0.1:8000/pages/2</h2>
+        <h3><p>texto extra.... link.com..&nbsp;</p></h3>
+    </body>
+</html>
+--===============3593890341024045900==
+Content-Type: text/html; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <h1>Hola Tom!</h1>
+        <h2>Te anotaste en Entrenamiento Funcional 💪 a las 18:00:00HS. Podés darte de baja acá: 127.0.0.1:8000/pages/2</h2>
+        <h3><p>texto extra.... link.com..&nbsp;</p></h3>
+    </body>
+</html>
+--===============3593890341024045900==--
+
+-------------------------------------------------------------------------------

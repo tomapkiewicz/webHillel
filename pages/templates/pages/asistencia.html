@@ -5,12 +5,7 @@
   {% include 'pages/includes/pages_menu.html' %}
   
   <main role="main">
-    {% if 'ok' in request.GET %}
-      <div class="alert alert-success alert-dismissible streched-link fade show text-center">
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <strong>Éxito!</strong> Registro de asistencias realizado correctamente 
-      </div>
-    {% endif %}
+
           
     <div class="container"  >
       <div class="card  mx-auto border-1 mb-5 "    >
@@ -50,7 +45,7 @@
                         </dt>
                         <dd class=" mb-0 text-center">
                       
-                          {% if request.user.is_staff %}
+                          {% if request.user.is_staff or bitajon %}
                             <span class="text-left badge badge-pill badge-info">{{page.Qasistentes}}/{{page.Qanotados}}</span>
                           {% endif %}
  

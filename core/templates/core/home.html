@@ -22,7 +22,7 @@
     
     <div class="container "    >
       <div class="card mx-auto border-1 mb-5"    >
-          <div class="card-body mx-auto col-md-9 text-center mb-5"  >   
+          <div class="card-body mx-auto col-md-12 text-center mb-5"  >   
              
                   {% if request.user.is_authenticated == False %}
                     <h1 class="mt-5">Hillel Argentina</h1>
@@ -42,11 +42,11 @@
 
                   {% else %}
                     <h2 class="">Hola {{request.user.profile.user}}!</h2>      
-                    
+
                   {% if bitajon %} 
-                     
+                  
                   <a class ="mt-5 btn btn-dark " href="{% url 'pages:asistencia' 0 %}">
-                    <i class ="fa fa-calendar fa-2x mt-3"></i>
+                    <i class ="fa fa-calendar-check fa-2x mt-3"></i>
                     <p class="row mr-3 ml-3 mt-3 mb-3" >Tomar Lista
                     </p>
                   </a> 
@@ -59,8 +59,8 @@
                       <h2 class="lead mt-4">Te esperamos en:</h2>
                       <dl class="row mt-5">
                         {% for page in request.user.profile.subscription %}                                 
-                          <dt class="col-sm-6 text-right"><a class="text-dark" href="{% url 'pages:page' page.id page.title|slugify %}">{{page}} </a></dt>
-                          <dd class="col-sm-6 text-left">{% if page.dia.order < 8 %}Los{% endif %} {{page.dia}} De {{page.horaDesde}} a {{page.horaHasta}} Hs.{% if page.modalidad  %}<b> Online</b>{% endif %}</dd>
+                          <dt class="col-sm-6 text-center"><a class="text-dark" href="{% url 'pages:page' page.id page.title|slugify %}">{{page}} </a></dt>
+                          <dd class="col-sm-6 text-center">{% if page.dia.order < 8 %}Los{% endif %} {{page.dia}} De {{page.horaDesde}} a {{page.horaHasta}} Hs.{% if page.modalidad  %}<b> Online</b>{% endif %}</dd>
                         {% endfor %}             
                       </dl>
                     {%else%}
@@ -71,7 +71,7 @@
                           <i class ="fa fa-calendar-week fa-2x mt-3"></i>
                    
                           <i class="fas fa-people-arrows fa-2x mt-3"></i>
-                            <p class="row mr-3 ml-3 mt-3 mb-3 fa-1x font-weight-bold" >Calendario Presencial
+                            <p class="row mr-2 ml-2 mt-3 mb-3 fa-1x font-weight-bold" >Calendario Presencial
                             </p>
                           </a> 
 
