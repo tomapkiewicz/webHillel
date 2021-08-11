@@ -55,8 +55,9 @@ class EmailThread(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        send_mail(self.subject, self.html_content, self.mail_from, self.recipient_list,
+        mail= send_mail(self.subject, self.html_content, self.mail_from, self.recipient_list,
         fail_silently=True, html_message=self.html_content)
+        print(mail)
 
 
 def send_html_mail(subject, html_content, recipient_list, mail_from):
@@ -185,7 +186,67 @@ def Register(request, pk):
             if request.POST.get('respuesta5',None) is not None:
                 cuestionarioRespuesta.pregunta5 = cuestionario.pregunta5
                 cuestionarioRespuesta.respuesta5 = request.POST['respuesta5']   
-            
+ 
+            if request.POST.get('respuesta6',None) is not None:
+                cuestionarioRespuesta.pregunta6 = cuestionario.pregunta6
+                cuestionarioRespuesta.respuesta6 = request.POST['respuesta6']
+
+            if request.POST.get('respuesta7',None) is not None:
+                cuestionarioRespuesta.pregunta7 = cuestionario.pregunta7
+                cuestionarioRespuesta.respuesta7 = request.POST['respuesta7']   
+   
+            if request.POST.get('respuesta8',None) is not None:
+                cuestionarioRespuesta.pregunta8 = cuestionario.pregunta8
+                cuestionarioRespuesta.respuesta8 = request.POST['respuesta8']   
+
+            if request.POST.get('respuesta9',None) is not None:
+                cuestionarioRespuesta.pregunta9 = cuestionario.pregunta9
+                cuestionarioRespuesta.respuesta9 = request.POST['respuesta9']   
+
+            if request.POST.get('respuesta10',None) is not None:
+                cuestionarioRespuesta.pregunta10 = cuestionario.pregunta10
+                cuestionarioRespuesta.respuesta10 = request.POST['respuesta10']   
+                       
+            if request.POST.get('respuesta11',None) is not None:
+                cuestionarioRespuesta.pregunta11 = cuestionario.pregunta11
+                cuestionarioRespuesta.respuesta11 = request.POST['respuesta11']
+
+            if request.POST.get('respuesta12',None) is not None:
+                cuestionarioRespuesta.pregunta12 = cuestionario.pregunta12
+                cuestionarioRespuesta.respuesta12 = request.POST['respuesta12']   
+   
+            if request.POST.get('respuesta13',None) is not None:
+                cuestionarioRespuesta.pregunta13 = cuestionario.pregunta13
+                cuestionarioRespuesta.respuesta13 = request.POST['respuesta13']   
+
+            if request.POST.get('respuesta14',None) is not None:
+                cuestionarioRespuesta.pregunta14 = cuestionario.pregunta14
+                cuestionarioRespuesta.respuesta14 = request.POST['respuesta14']   
+
+            if request.POST.get('respuesta15',None) is not None:
+                cuestionarioRespuesta.pregunta15 = cuestionario.pregunta15
+                cuestionarioRespuesta.respuesta15 = request.POST['respuesta15']   
+
+            if request.POST.get('respuesta16',None) is not None:
+                cuestionarioRespuesta.pregunta16 = cuestionario.pregunta16
+                cuestionarioRespuesta.respuesta16 = request.POST['respuesta16']
+
+            if request.POST.get('respuesta17',None) is not None:
+                cuestionarioRespuesta.pregunta17 = cuestionario.pregunta17
+                cuestionarioRespuesta.respuesta17 = request.POST['respuesta17']   
+   
+            if request.POST.get('respuesta18',None) is not None:
+                cuestionarioRespuesta.pregunta18 = cuestionario.pregunta18
+                cuestionarioRespuesta.respuesta18 = request.POST['respuesta18']   
+
+            if request.POST.get('respuesta19',None) is not None:
+                cuestionarioRespuesta.pregunta19 = cuestionario.pregunta19
+                cuestionarioRespuesta.respuesta19 = request.POST['respuesta19']   
+
+            if request.POST.get('respuesta20',None) is not None:
+                cuestionarioRespuesta.pregunta20 = cuestionario.pregunta20
+                cuestionarioRespuesta.respuesta20 = request.POST['respuesta20']   
+
             cuestionarioRespuesta.save()       
 
         #Si la page es secreta validar la clave
@@ -211,6 +272,7 @@ def Register(request, pk):
     to_mail = [request.user.email]
     from_mail = 'Hillel Argentina <no_responder@domain.com>'
     host = request.get_host()
+    host = host if "127.0.0.1" in host else "https://" + host
     textoExtraMail = page.textoExtraMail if page.textoExtraMail is not None else page.description 
     html_message = loader.render_to_string(
                 'mail_body.html',
@@ -445,15 +507,21 @@ def DescargarCuestionarios(request):
         str(datetime.now()) + '.csv'
     writer = csv.writer(response, dialect= 'excel')
     response.write(u'\ufeff'.encode('utf8'))
-    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4','Pregunta5',])
+    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4',
+    'Pregunta5','Pregunta6', 'Pregunta7','Pregunta8','Pregunta9','Pregunta10','Pregunta11',
+     'Pregunta12','Pregunta13','Pregunta14','Pregunta15','Pregunta16', 'Pregunta17','Pregunta18',
+     'Pregunta19','Pregunta20',])
     
     cuestionarios = Cuestionario.objects.all()
 
     for c in cuestionarios:
         if c is None:
             return Http404("Cuestionario no encontrado")
-        writer.writerow([c.page.title,c.pregunta1,c.pregunta2,c.pregunta3,c.pregunta4,c.pregunta5,])
-        return response
+        writer.writerow([c.page.title,c.pregunta1,c.pregunta2,c.pregunta3,c.pregunta4,c.pregunta5,
+        c.pregunta6,c.pregunta7,c.pregunta8,c.pregunta9,c.pregunta10,
+        c.pregunta11,c.pregunta12,c.pregunta13,c.pregunta14,c.pregunta15,
+        c.pregunta16,c.pregunta17,c.pregunta18,c.pregunta19,c.pregunta20,])
+    return response
 
 
 def DescargarCuestionariosRespuestas(request):
@@ -463,7 +531,14 @@ def DescargarCuestionariosRespuestas(request):
     writer = csv.writer(response, dialect= 'excel')
     response.write(u'\ufeff'.encode('utf8'))
     writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4','Pregunta5',
-                    'Usuario', 'Respuesta1', 'Respuesta2','Respuesta3','Respuesta4','Respuesta5','Fecha de compleción'])
+    'Pregunta6', 'Pregunta7','Pregunta8','Pregunta9','Pregunta10',
+    'Pregunta11', 'Pregunta12','Pregunta13','Pregunta14','Pregunta15',
+    'Pregunta16', 'Pregunta17','Pregunta18','Pregunta19','Pregunta20',
+    'Usuario', 'Respuesta1', 'Respuesta2','Respuesta3','Respuesta4','Respuesta5',
+    'Respuesta6', 'Respuesta7','Respuesta8','Respuesta9','Respuesta10',
+    'Respuesta11', 'Respuesta12','Respuesta13','Respuesta14','Respuesta15',
+    'Respuesta16', 'Respuesta17','Respuesta18','Respuesta19','Respuesta20',
+                    'Fecha de compleción'])
     
     cuestionariosRespuesta = CuestionarioRespuesta.objects.all()
 
@@ -472,7 +547,13 @@ def DescargarCuestionariosRespuestas(request):
         if c is None:
             return Http404("Cuestionario no encontrado")
         writer.writerow([c.page.title,c.pregunta1,c.pregunta2,c.pregunta3,c.pregunta4,c.pregunta5,
-                        c.user.username,c.respuesta1,c.respuesta2,c.respuesta3,c.respuesta4,c.respuesta5,c.updated])
+        c.pregunta6,c.pregunta7,c.pregunta8,c.pregunta9,c.pregunta10,
+        c.pregunta11,c.pregunta12,c.pregunta13,c.pregunta14,c.pregunta15,
+        c.pregunta16,c.pregunta17,c.pregunta18,c.pregunta19,c.pregunta20,
+                        c.user.username,c.respuesta1,c.respuesta2,c.respuesta3,c.respuesta4,c.respuesta5,
+                        c.respuesta6,c.respuesta7,c.respuesta8,c.respuesta9,c.respuesta10,
+                        c.respuesta11,c.respuesta12,c.respuesta13,c.respuesta14,c.respuesta15,
+                        c.respuesta16,c.respuesta17,c.respuesta18,c.respuesta19,c.respuesta20,c.updated])
     return response
 
 def Exportar(request):

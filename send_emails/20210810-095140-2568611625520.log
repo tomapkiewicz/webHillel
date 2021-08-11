@@ -1,0 +1,42 @@
+Content-Type: multipart/alternative;
+ boundary="===============0307131067908496173=="
+MIME-Version: 1.0
+Subject: =?utf-8?q?Te_esperamos_en_Actualidad_Israeli_=F0=9F=8C=8D!?=
+From: Hillel Argentina <no_responder@domain.com>
+To: tomapkiewicz@gmail.com
+Date: Tue, 10 Aug 2021 12:51:40 -0000
+Message-ID: <162859990041.11840.8620567686301131524@SSD480.fibertel.com.ar>
+
+--===============0307131067908496173==
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <h1>Hola Tom!</h1>
+        <h2>Te anotaste en Actualidad Israeli 🌍 a las 19:00:00HS. Podés darte de baja acá: 127.0.0.1:8000/pages/11</h2>
+        <h3></h3>
+    </body>
+</html>
+--===============0307131067908496173==
+Content-Type: text/html; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <h1>Hola Tom!</h1>
+        <h2>Te anotaste en Actualidad Israeli 🌍 a las 19:00:00HS. Podés darte de baja acá: 127.0.0.1:8000/pages/11</h2>
+        <h3></h3>
+    </body>
+</html>
+--===============0307131067908496173==--
+
+-------------------------------------------------------------------------------
