@@ -186,7 +186,6 @@ def Register(request, pk):
             if request.POST.get('respuesta5',None) is not None:
                 cuestionarioRespuesta.pregunta5 = cuestionario.pregunta5
                 cuestionarioRespuesta.respuesta5 = request.POST['respuesta5']   
-<<<<<<< HEAD
  
             if request.POST.get('respuesta6',None) is not None:
                 cuestionarioRespuesta.pregunta6 = cuestionario.pregunta6
@@ -248,9 +247,6 @@ def Register(request, pk):
                 cuestionarioRespuesta.pregunta20 = cuestionario.pregunta20
                 cuestionarioRespuesta.respuesta20 = request.POST['respuesta20']   
 
-=======
-            
->>>>>>> master
             cuestionarioRespuesta.save()       
 
         #Si la page es secreta validar la clave
@@ -511,30 +507,21 @@ def DescargarCuestionarios(request):
         str(datetime.now()) + '.csv'
     writer = csv.writer(response, dialect= 'excel')
     response.write(u'\ufeff'.encode('utf8'))
-<<<<<<< HEAD
     writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4',
     'Pregunta5','Pregunta6', 'Pregunta7','Pregunta8','Pregunta9','Pregunta10','Pregunta11',
      'Pregunta12','Pregunta13','Pregunta14','Pregunta15','Pregunta16', 'Pregunta17','Pregunta18',
      'Pregunta19','Pregunta20',])
-=======
-    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4','Pregunta5',])
->>>>>>> master
     
     cuestionarios = Cuestionario.objects.all()
 
     for c in cuestionarios:
         if c is None:
             return Http404("Cuestionario no encontrado")
-<<<<<<< HEAD
         writer.writerow([c.page.title,c.pregunta1,c.pregunta2,c.pregunta3,c.pregunta4,c.pregunta5,
         c.pregunta6,c.pregunta7,c.pregunta8,c.pregunta9,c.pregunta10,
         c.pregunta11,c.pregunta12,c.pregunta13,c.pregunta14,c.pregunta15,
         c.pregunta16,c.pregunta17,c.pregunta18,c.pregunta19,c.pregunta20,])
     return response
-=======
-        writer.writerow([c.page.title,c.pregunta1,c.pregunta2,c.pregunta3,c.pregunta4,c.pregunta5,])
-        return response
->>>>>>> master
 
 
 def DescargarCuestionariosRespuestas(request):
@@ -544,7 +531,6 @@ def DescargarCuestionariosRespuestas(request):
     writer = csv.writer(response, dialect= 'excel')
     response.write(u'\ufeff'.encode('utf8'))
     writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4','Pregunta5',
-<<<<<<< HEAD
     'Pregunta6', 'Pregunta7','Pregunta8','Pregunta9','Pregunta10',
     'Pregunta11', 'Pregunta12','Pregunta13','Pregunta14','Pregunta15',
     'Pregunta16', 'Pregunta17','Pregunta18','Pregunta19','Pregunta20',
@@ -553,9 +539,6 @@ def DescargarCuestionariosRespuestas(request):
     'Respuesta11', 'Respuesta12','Respuesta13','Respuesta14','Respuesta15',
     'Respuesta16', 'Respuesta17','Respuesta18','Respuesta19','Respuesta20',
                     'Fecha de compleción'])
-=======
-                    'Usuario', 'Respuesta1', 'Respuesta2','Respuesta3','Respuesta4','Respuesta5','Fecha de compleción'])
->>>>>>> master
     
     cuestionariosRespuesta = CuestionarioRespuesta.objects.all()
 
@@ -564,7 +547,6 @@ def DescargarCuestionariosRespuestas(request):
         if c is None:
             return Http404("Cuestionario no encontrado")
         writer.writerow([c.page.title,c.pregunta1,c.pregunta2,c.pregunta3,c.pregunta4,c.pregunta5,
-<<<<<<< HEAD
         c.pregunta6,c.pregunta7,c.pregunta8,c.pregunta9,c.pregunta10,
         c.pregunta11,c.pregunta12,c.pregunta13,c.pregunta14,c.pregunta15,
         c.pregunta16,c.pregunta17,c.pregunta18,c.pregunta19,c.pregunta20,
@@ -572,9 +554,6 @@ def DescargarCuestionariosRespuestas(request):
                         c.respuesta6,c.respuesta7,c.respuesta8,c.respuesta9,c.respuesta10,
                         c.respuesta11,c.respuesta12,c.respuesta13,c.respuesta14,c.respuesta15,
                         c.respuesta16,c.respuesta17,c.respuesta18,c.respuesta19,c.respuesta20,c.updated])
-=======
-                        c.user.username,c.respuesta1,c.respuesta2,c.respuesta3,c.respuesta4,c.respuesta5,c.updated])
->>>>>>> master
     return response
 
 def Exportar(request):
