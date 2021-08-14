@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'pages.apps.PagesConfig',
     'social.apps.SocialConfig',
 ]
- 
+
 
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': BASE_DIR / 'backup'}
@@ -128,13 +128,8 @@ USE_L10N = True
 USE_TZ = False
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
-
-STATIC_URL = '/static/'
-
 # Login Redirect
-LOGIN_REDIRECT_URL = 'home' #'pages:pages'
+LOGIN_REDIRECT_URL = 'home'  # 'pages:pages'
 LOGOUT_REDIRECT_URL = 'home'
 
 
@@ -154,13 +149,18 @@ else:
     EMAIL_HOST = 'smtp.gmail.com'
     EMAIL_HOST_USER = 'infohillel@gmail.com'
     EMAIL_HOST_PASSWORD = 'zftsqbzhgeuqmzrz'
-    EMAIL_PORT = 587  
+    EMAIL_PORT = 587
     EMAIL_USE_TLS = True
 
     pass
 
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.1/howto/static-files/
+
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
+ 
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-
