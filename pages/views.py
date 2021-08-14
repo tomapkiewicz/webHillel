@@ -8,7 +8,7 @@ from django.urls import reverse, reverse_lazy
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Page, Subscription, Day, Historial, Cuestionario, CuestionarioRespuesta
 from registration.models import Profile
-from .forms import PageForm 
+from .forms import PageForm
 from django.http import Http404, JsonResponse
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.mail import send_mail
@@ -19,12 +19,13 @@ from django.http import HttpResponse
 import csv
 from location.models import Provincia
 
-def CuposAgotados(request,pk):
+
+def CuposAgotados(request, pk):
     page = get_object_or_404(Page, pk=pk)
 
-    usu =  request.user.profile.nombre +' '+ request.user.profile.apellido if request.user.profile.nombre  is not None else request.user
+    usu =  request.user.profile.nombre + '  ' + request.user.profile.apellido if request.user.profile.nombre  is not None else request.user
 
-    asunto = "Cupos agotados - " +   page.title 
+    asunto = "Cupos agotados - " + page.title
     html_message = loader.render_to_string(
                 'mail_body.html',
                 {
@@ -233,11 +234,11 @@ def Register(request, pk):
 
             if request.POST.get('respuesta17',None) is not None:
                 cuestionarioRespuesta.pregunta17 = cuestionario.pregunta17
-                cuestionarioRespuesta.respuesta17 = request.POST['respuesta17']   
-   
+                cuestionarioRespuesta.respuesta17 = request.POST['respuesta17']
+
             if request.POST.get('respuesta18',None) is not None:
                 cuestionarioRespuesta.pregunta18 = cuestionario.pregunta18
-                cuestionarioRespuesta.respuesta18 = request.POST['respuesta18']   
+                cuestionarioRespuesta.respuesta18 = request.POST['respuesta18']
 
             if request.POST.get('respuesta19',None) is not None:
                 cuestionarioRespuesta.pregunta19 = cuestionario.pregunta19
@@ -392,7 +393,7 @@ def DescargarAsistencias(request, pk):
         page.title + '-' + str(datetime.now()) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect= 'excel')
-    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?','Asis'])
+    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?', 'Asis'])
 
     h = Page.historialHoy(page)
 
@@ -408,7 +409,7 @@ def DescargarHistoricoAsistenciasALLDetail(request):
          'historico-' + str(datetime.now()) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect= 'excel')
-    writer.writerow(['Actividad','Dia','Hora Desde','Fecha', 'Usuario anotado','Asistio?','Asis'])
+    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Asistio?', 'Asis'])
 
     historiales = Historial.objects.all()
     for h in historiales:
@@ -425,7 +426,7 @@ def DescargarHistoricoAsistenciasALLItem(request):
         'historico-' + str(datetime.now()) + '.csv'
     responseB.write(u'\ufeff'.encode('utf8'))
     writerB = csv.writer(responseB, dialect='excel')
-    writerB.writerow(['Actividad','Dia','Hora Desde','Fecha', 'Qanotados','Qasistentes'])
+    writerB.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Qanotados', 'Qasistentes'])
 
     historiales = Historial.objects.all()
     for h in historiales:
@@ -443,7 +444,7 @@ def DescargarHistoricoAsistencias(request, pk):
         page.title + '-all-' + str(datetime.now()) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect= 'excel')
-    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?','Asis'])
+    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?', 'Asis'])
 
     hs = Historial.objects.find_page(page=page)
     if hs is None:
@@ -464,9 +465,9 @@ def DescargarActividades(request):
     
     writer = csv.writer(response, dialect= 'excel')
 
-    writer.writerow(['Titulo','Dia','Hora Desde','Hora Hasta',
+    writer.writerow(['Titulo', 'Dia', 'Hora Desde', 'Hora Hasta',
                     'Cupo', 'Modalidad', 'Nuevo', 'Activa', 'Qanotados',  
-                    'Categorias','responsable','colaborador','secreta','clave',])
+                    'Categorias', 'responsable', 'colaborador', 'secreta', 'clave',])
 
     pages = Page.objects.all()
 
@@ -487,7 +488,7 @@ def DescargarPerfiles(request):
         str(datetime.now()) + '.csv'
     writer = csv.writer(response, dialect= 'excel')
     response.write(u'\ufeff'.encode('utf8'))
-    writer.writerow(['Usuario', 'Nombre', 'Apellido','Fecha de nacimiento','Edad', 'Celular', 'Instagram',
+    writer.writerow(['Usuario', 'Nombre', 'Apellido', 'Fecha de nacimiento', 'Edad', 'Celular', 'Instagram',
      'Onward', 'Taglit', 'Cómo conoció Hillel', 'Estudios', 'Experiencia comunitaria', 'Intereses', ])
     
     profiles = Profile.objects.all()
@@ -507,10 +508,10 @@ def DescargarCuestionarios(request):
         str(datetime.now()) + '.csv'
     writer = csv.writer(response, dialect= 'excel')
     response.write(u'\ufeff'.encode('utf8'))
-    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4',
-    'Pregunta5','Pregunta6', 'Pregunta7','Pregunta8','Pregunta9','Pregunta10','Pregunta11',
-     'Pregunta12','Pregunta13','Pregunta14','Pregunta15','Pregunta16', 'Pregunta17','Pregunta18',
-     'Pregunta19','Pregunta20',])
+    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4',
+    'Pregunta5', 'Pregunta6', 'Pregunta7', 'Pregunta8', 'Pregunta9', 'Pregunta10', 'Pregunta11',
+     'Pregunta12', 'Pregunta13', 'Pregunta14', 'Pregunta15', 'Pregunta16', 'Pregunta17', 'Pregunta18',
+     'Pregunta19', 'Pregunta20',])
     
     cuestionarios = Cuestionario.objects.all()
 
@@ -530,14 +531,14 @@ def DescargarCuestionariosRespuestas(request):
         str(datetime.now()) + '.csv'
     writer = csv.writer(response, dialect= 'excel')
     response.write(u'\ufeff'.encode('utf8'))
-    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2','Pregunta3','Pregunta4','Pregunta5',
-    'Pregunta6', 'Pregunta7','Pregunta8','Pregunta9','Pregunta10',
-    'Pregunta11', 'Pregunta12','Pregunta13','Pregunta14','Pregunta15',
-    'Pregunta16', 'Pregunta17','Pregunta18','Pregunta19','Pregunta20',
-    'Usuario', 'Respuesta1', 'Respuesta2','Respuesta3','Respuesta4','Respuesta5',
-    'Respuesta6', 'Respuesta7','Respuesta8','Respuesta9','Respuesta10',
-    'Respuesta11', 'Respuesta12','Respuesta13','Respuesta14','Respuesta15',
-    'Respuesta16', 'Respuesta17','Respuesta18','Respuesta19','Respuesta20',
+    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4', 'Pregunta5',
+    'Pregunta6', 'Pregunta7', 'Pregunta8', 'Pregunta9', 'Pregunta10',
+    'Pregunta11', 'Pregunta12', 'Pregunta13', 'Pregunta14', 'Pregunta15',
+    'Pregunta16', 'Pregunta17', 'Pregunta18', 'Pregunta19', 'Pregunta20',
+    'Usuario', 'Respuesta1', 'Respuesta2', 'Respuesta3', 'Respuesta4', 'Respuesta5',
+    'Respuesta6', 'Respuesta7', 'Respuesta8', 'Respuesta9', 'Respuesta10',
+    'Respuesta11', 'Respuesta12', 'Respuesta13', 'Respuesta14', 'Respuesta15',
+    'Respuesta16', 'Respuesta17', 'Respuesta18', 'Respuesta19', 'Respuesta20',
                     'Fecha de compleción'])
     
     cuestionariosRespuesta = CuestionarioRespuesta.objects.all()

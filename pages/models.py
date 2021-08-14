@@ -3,8 +3,7 @@ from ckeditor.fields import RichTextField
 from django.contrib.auth.models import User
 from django.db.models.deletion import CASCADE
 from django.db.models.fields import BooleanField
-from django.db.models.fields.related import ForeignKey, OneToOneField
-from django.shortcuts import get_object_or_404
+
 from datetime import datetime
 from location.models import Provincia
 
@@ -21,6 +20,7 @@ class Responsable(models.Model):
     def __str__(self):
         return self.nombre
 
+
 class Colaborador(models.Model):
     nombre = models.CharField(verbose_name="Nombre", max_length=200)
 
@@ -30,7 +30,6 @@ class Colaborador(models.Model):
 
     def __str__(self):
         return self.nombre
-
 
 
 class Day(models.Model):
@@ -88,12 +87,12 @@ class PagesManager(models.Manager):
             return queryset
         return None
 
-
     def find_provincia(self, dia, modalidad, provincia):
         queryset = self.filter(modalidad=modalidad, dia=dia, activa=True, provincia=provincia)
         if len(queryset) > 0:
             return queryset
         return None
+
 
 class Page(models.Model):
     title = models.CharField(verbose_name="Título", max_length=200)
@@ -109,7 +108,7 @@ class Page(models.Model):
     nuevo = BooleanField(verbose_name="Nuevo", default=0)
     activa = BooleanField(verbose_name="Activa", default=1)
     categories = models.ManyToManyField(Category, verbose_name='categorias', related_name='get_pages',blank=True)
-    
+  
     provincia = models.ForeignKey(Provincia, on_delete=models.CASCADE, null=True, blank=True)
     responsable = models.ForeignKey(Responsable, on_delete=models.CASCADE, null=True, blank=True)
     colaborador = models.ForeignKey(Colaborador, on_delete=models.CASCADE, null=True, blank=True)
@@ -204,6 +203,8 @@ class Page(models.Model):
         if len(subscripcion) > 0:
             return subscripcion
         return None
+
+
 
 
 class SubscriptionManager(models.Manager):
