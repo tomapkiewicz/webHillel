@@ -16,3 +16,18 @@ class Link(models.Model):
 
     def __str__(self):
         return self.name
+
+# Create your models here.
+class Whatsapp(models.Model):
+    numero = models.CharField(verbose_name='Numero ej: 1112341234', max_length=100, unique=True)
+    name = models.CharField(verbose_name='Nombre', max_length=200)
+    updated = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de modificación")
+    created = models.DateTimeField(auto_now=True, verbose_name="Fecha de creación")
+
+    class Meta:
+        verbose_name = "whatsapp Hillel"
+        verbose_name_plural = "whatsapp Hillel"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.numero

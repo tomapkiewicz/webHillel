@@ -210,3 +210,9 @@ footer {
   .hr-online {
     background-color: rgb(217, 153,240) ;
   }
+
+  
+  .btn-home{
+    width:200px;
+    height: 120px;
+  }

@@ -16,13 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from pages.urls import PagesPatterns
-from profiles.urls import ProfilesPatterns 
+from profiles.urls import ProfilesPatterns
 from django.conf import settings
 
 urlpatterns = [
     path('', include('core.urls')),
     path('pages/', include(PagesPatterns)),
-    path('profiles/', include(ProfilesPatterns)), 
+    path('profiles/', include(ProfilesPatterns)),
     path('admin/', admin.site.urls),
     # paths de Auth
     path('accounts/', include('django.contrib.auth.urls')),

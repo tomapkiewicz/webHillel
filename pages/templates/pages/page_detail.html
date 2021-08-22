@@ -37,7 +37,7 @@
         <p class="card-text"> {{page.description|safe}}</p>
           <p class="card-text">
             {% if request.user.is_anonymous %}
-                <a class="btn btn-primary btn-block text-white" id="MainNavConfirmarRegistrarse" data-target="#ModalConfirmarRegistrarse" data-toggle="modal"><b>Anotarse</b></a>
+                <a class="btn btn-primary btn-block text-white" id="MainNavConfirmarRegistrarse" href="{% url 'login'%}"><b>Anotarse</b></a>
             {% else %}
               {% if usuarioAnotado %}
                 <a class="btn btn-danger btn-block text-white" id="MainNavConfirmarDesuscripcion" data-target="#ModalConfirmarDesuscripcion" data-toggle="modal"><b>Darse de baja</b></a>
@@ -311,7 +311,7 @@
           <div class="modal-body">  
 
             Comunicate con el staff para ingresar en la lista de espera 
-            <a href="https://wa.me/+541135614883" class="btn btn-success btn-sm" >
+            <a href="https://wa.me/+549{{whatsappHillel}}" class="btn btn-success btn-sm" >
               <i class="fab fa-whatsapp"></i>
             </a> 
           </div>
