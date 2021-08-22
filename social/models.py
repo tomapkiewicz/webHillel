@@ -31,3 +31,17 @@ class Whatsapp(models.Model):
 
     def __str__(self):
         return self.numero
+
+# Create your models here.
+class MailContacto(models.Model):
+    mail = models.CharField(verbose_name='mails ej: uno@uno.com; otro@otro.com; etc.', max_length=100, unique=True)
+    updated = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de modificación")
+    created = models.DateTimeField(auto_now=True, verbose_name="Fecha de creación")
+
+    class Meta:
+        verbose_name = "mail Hillel"
+        verbose_name_plural = "mail Hillel"
+        ordering = ["mail"]
+
+    def __str__(self):
+        return self.mail

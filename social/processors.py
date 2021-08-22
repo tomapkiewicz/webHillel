@@ -1,4 +1,4 @@
-from .models import Link, Whatsapp
+from .models import Link, MailContacto, Whatsapp
 
 
 def ctx_dict(request):
