@@ -1,4 +1,4 @@
-from .models import Link
+from .models import Link, Whatsapp
 
 
 def ctx_dict(request):
@@ -6,4 +6,8 @@ def ctx_dict(request):
     links = Link.objects.all()
     for link in links:
         ctx[link.key] = link.url
+    
+    whatsapp = Whatsapp.objects.all().first()
+    ctx['whatsappHillel'] = whatsapp
+
     return ctx
