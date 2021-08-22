@@ -36,8 +36,8 @@ def CuposAgotados(request, pk):
                     'description': ' Comunicate con él haciendo click acá: https://wa.me/+54' + str(request.user.profile.whatsapp) ,                      
                 }
             ) 
-    to_mail = ('tomapkiewicz@gmail.com',)
-    from_mail = 'Hillel Argentina <no_responder@domain.com>'
+    to_mail = ('administracion@hillel.org.ar',)
+    from_mail = 'Hillel Argentina <administracion@hillel.org.ar>'
 
     rta = send_html_mail(asunto, html_message, to_mail, from_mail)
     
@@ -56,10 +56,10 @@ class EmailThread(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
+        print("enviando mail")
         mail= send_mail(self.subject, self.html_content, self.mail_from, self.recipient_list,
         fail_silently=True, html_message=self.html_content)
         print(mail)
-
 
 def send_html_mail(subject, html_content, recipient_list, mail_from):
     EmailThread(subject, html_content, recipient_list, mail_from).start()
