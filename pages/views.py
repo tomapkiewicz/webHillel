@@ -1,3 +1,4 @@
+from typing import ContextManager
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -18,7 +19,7 @@ from datetime import datetime
 from django.http import HttpResponse
 import csv
 from location.models import Provincia
-
+from social.models import MailContacto 
 
 def CuposAgotados(request, pk):
     page = get_object_or_404(Page, pk=pk)
@@ -33,11 +34,12 @@ def CuposAgotados(request, pk):
                     'subject':  'Se quiso anotar en ' + page.title + ' a las '
                     + str(page.horaDesde) + 'HS  '
                     + ' pero los cupos estaban agotados.' ,
-                    'description': ' Comunicate con él haciendo click acá: https://wa.me/+54' + str(request.user.profile.whatsapp) ,                      
+                    'description': ' Comunicate con él haciendo click acá: https://wa.me/+549' + str(request.user.profile.whatsapp) ,                      
                 }
-            ) 
-    to_mail = ('administracion@hillel.org.ar',)
-    from_mail = 'Hillel Argentina <administracion@hillel.org.ar>'
+            )
+    mailContacto = MailContacto.objects.all().first()
+    to_mail = (mailContacto,)
+    from_mail = 'Hillel Argentina'
 
     rta = send_html_mail(asunto, html_message, to_mail, from_mail)
     
