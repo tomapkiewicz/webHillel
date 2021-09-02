@@ -33,7 +33,7 @@
 
     <i class="fas fa-long-arrow-alt-left"></i>
     Volver</a> 
-          <h5 class="card-title">{{page.title}}</h5>
+          <h5 class="card-title">{{page.title}} {% if page.modalidad  %}<b> Online</b>{% else %} <b> Presencial</b> {% endif %}</h5>
         <p class="card-text"> {{page.description|safe}}</p>
           <p class="card-text">
             {% if request.user.is_anonymous %}
@@ -239,7 +239,7 @@
            {% if overlaps %}
             <b>¡Estás anotadx a otra actividad en el mismo horario! 🤪 </b> <br>
             {% endif %}
-            ¿Te esperamos {% if overlaps %} igual {% endif %}en {{page.title}} 
+            ¿Te esperamos {% if overlaps %} igual {% endif %}en {{page.title}} {% if page.modalidad  %}<b> Online</b>{% else %} <b> Presencial</b> {% endif %}
             {% if page.dia.order < 8 %}
               el {{page.dia}}
             {% endif %}
@@ -281,7 +281,7 @@
            <i class="fab fa-whatsapp"></i>
            </a> 
            <br><br>
-       <b> ¿Te das de baja de {{page.title}} a las {{page.horaDesde}} HS? </b>
+       <b> ¿Te das de baja de {{page.title}} {% if page.modalidad  %}<b> Online</b>{% else %} <b> Presencial</b> {% endif %}a las {{page.horaDesde}} HS? </b>
       </p>
           </div>
 

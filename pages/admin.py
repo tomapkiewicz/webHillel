@@ -1,27 +1,30 @@
 from django.contrib import admin
-from .models import Page, Subscription, Historial,Responsable, Colaborador, Cuestionario, CuestionarioRespuesta
+from .models import Page, Subscription, Historial, Responsable, Colaborador, Cuestionario, CuestionarioRespuesta
 from django.contrib.admin.models import LogEntry
 
 
 # Register your models here.
 class CuestionarioAdmin(admin.ModelAdmin):
-    list_display = ('page', 'updated' ,)
+    list_display = ('page', 'updated',)
     search_fields = ('page__title',)
-    
+
+
 class CuestionarioRespuestaAdmin(admin.ModelAdmin):
-    list_display = ('page', 'user','updated' )
+    list_display = ('page', 'user', 'updated')
     search_fields = ('page__title', 'user__username')
 
 # Register your models here.
+
+
 class HistorialAdmin(admin.ModelAdmin):
-    list_display = ('page', 'fecha','Qasistentes','Qanotados' )
+    list_display = ('page', 'fecha', 'Qasistentes', 'Qanotados')
     search_fields = ('page__title', 'fecha')
     readonly_fields = ('anotados',)
 
 
 class PageAdmin(admin.ModelAdmin):
-    list_display = ('actividadSTR', 'dia','provincia', 'cupo', 'Qanotados','secreta', 'activa','horaDesde')
-    search_fields = ('title', 'dia__day', 'activa','secreta','provincia__title',)
+    list_display = ('actividadSTR', 'dia', 'provincia', 'cupo', 'Qanotados', 'secreta', 'activa', 'horaDesde')
+    search_fields = ('title', 'dia__day', 'activa', 'secreta', 'provincia__title',)
 
     class Media:
         css = {
@@ -33,9 +36,11 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('user', 'updated')
     search_fields = ('user__username',)
 
+
 class ResponsableAdmin(admin.ModelAdmin):
     list_display = ('nombre',)
     search_fields = ('nombre',)
+
 
 class ColaboradorAdmin(admin.ModelAdmin):
     list_display = ('nombre',)

@@ -17,7 +17,6 @@ def custom_upload_to(instance, filename):
     return 'profiles/' + filename
 
 
-
 class FechaTaglit(models.Model):
     fecha = models.CharField(verbose_name="Fecha", max_length=200)
     order = models.SmallIntegerField(verbose_name="Orden")
@@ -35,7 +34,7 @@ class FechaTaglit(models.Model):
 
 class FechaOnward(models.Model):
     fecha = models.CharField(verbose_name="Fecha", max_length=200)
-    order = models.SmallIntegerField(verbose_name="Orden",default=0)
+    order = models.SmallIntegerField(verbose_name="Orden", default=0)
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
 
@@ -56,13 +55,13 @@ class Profile(models.Model):
     nombre = models.CharField(null=True, blank=True, max_length=100)
     whatsapp = models.CharField(verbose_name="Número de Whatsapp", null=True, blank=True, max_length=30)
     instagram = models.CharField(verbose_name="@ de Instagram", null=True, blank=True, max_length=100)
-    onward = models.ForeignKey(FechaOnward,   on_delete=models.CASCADE, verbose_name="¿Viajaste a Onward? ¿Cuándo?", null=True, blank=True)
-    taglit = models.ForeignKey(FechaTaglit,  on_delete=models.CASCADE, verbose_name="¿Viajaste a Taglit? ¿Cuándo?", null=True, blank=True)
+    onward = models.ForeignKey(FechaOnward, on_delete=models.CASCADE, verbose_name="¿Viajaste a Onward? ¿Cuándo?", null=True, blank=True)
+    taglit = models.ForeignKey(FechaTaglit, on_delete=models.CASCADE, verbose_name="¿Viajaste a Taglit? ¿Cuándo?", null=True, blank=True)
     comoConociste = models.CharField(verbose_name="¿Cómo conociste Hillel?", null=True, blank=True, max_length=250)
     estudios = models.CharField(verbose_name="¿Estás estudiando, o te recibiste? ¿Qué estudias/te y en qué institución?", null=True, blank=True, max_length=250)
     experienciaComunitaria = models.CharField(null=True, blank=True, max_length=250)
     fechaNacimiento = models.DateField(null=True, blank=True)
-    provincia = models.ForeignKey(Provincia, on_delete=models.CASCADE,verbose_name="provincia", null=True, blank=True)
+    provincia = models.ForeignKey(Provincia, on_delete=models.CASCADE, verbose_name="provincia", null=True, blank=True)
     categories = models.ManyToManyField(Category, verbose_name='Intereses', related_name='get_user_pages', blank=True)
     validado = models.BooleanField(verbose_name="Perfil validado", default=0)
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
@@ -99,7 +98,7 @@ class Profile(models.Model):
         if self.categories.all() is None:
             return False
         return ', '.join(str(c) for c in self.categories.all())
-    
+
     def save(self, *args, **kwargs):
         if self.fechaNacimiento is not None:
             if self.fechaNacimiento > datetime.date.today():
