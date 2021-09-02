@@ -18,7 +18,7 @@ class PageTestCase(TestCase):
         # self.subscripcion = Subscription.objects.create(user=self.user1) Esto pinchó por metodo get de find
         self.subscripcion = Subscription.objects.find_or_create(self.user2)
         self.subscripcion.pages.add(self.page.pk)
-        fecha = datetime.datetime.now() 
+        fecha = datetime.datetime.now()
         self.assertEqual(self.page.Qanotados, 1)
 
     def test_add_users_to_historial(self):

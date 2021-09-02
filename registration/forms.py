@@ -30,74 +30,74 @@ class NumberInput(forms.NumberInput):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['avatar','nombre','apellido','fechaNacimiento',
-        'provincia', 'whatsapp', 'instagram',
-        'onward', 'taglit', 'comoConociste',  
-        'estudios', 'experienciaComunitaria',  
-                   'validado']
+        fields = ['avatar', 'nombre', 'apellido', 'fechaNacimiento',
+                  'provincia', 'whatsapp', 'instagram',
+                  'onward', 'taglit', 'comoConociste',
+                  'estudios', 'experienciaComunitaria',
+                  'validado']
         widgets = {
             'avatar': forms.ClearableFileInput(attrs={
-                                            'class':
-                                            'form-control-file mt-3'}),
-                                            
-            'onward': forms.Select( attrs={'class': 'form-control mt-1',
-                                         'rows': 3,
-                                         'placeholder': '',
-                                        'initial':'NO',
-                                         'required': True}),
+                'class':
+                'form-control-file mt-3'}),
+
+            'onward': forms.Select(attrs={'class': 'form-control mt-1',
+                                          'rows': 3,
+                                          'placeholder': '',
+                                          'initial': 'NO',
+                                          'required': True}),
 
             'taglit': forms.Select(attrs={'class': 'form-control mt-1',
-                                         'rows': 3,
-                                         'placeholder': '',
-                                         'required': True}),
+                                          'rows': 3,
+                                          'placeholder': '',
+                                          'required': True}),
 
             'comoConociste': forms.Textarea(attrs={'class': 'form-control mt-1',
-                                         'rows': 3,
-                                         'placeholder': '',
-                                         'required': True}),
+                                                   'rows': 3,
+                                                   'placeholder': '',
+                                                   'required': True}),
 
             'instagram': forms.TextInput(attrs={'class': 'form-control mt-3',
-                                          'placeholder': '@ de Instagram',
-                                          'required': True}),
+                                                'placeholder': '@ de Instagram',
+                                                'required': True}),
 
             'nombre': forms.TextInput(attrs={'class': 'form-control mt-3',
-                                          'placeholder': 'Nombre',
-                                          'required': True}),
+                                             'placeholder': 'Nombre',
+                                             'required': True}),
 
             'apellido': forms.TextInput(attrs={'class': 'form-control mt-3',
-                                          'placeholder': 'Apellido',
-                                          'required': True}),
-                                          
+                                               'placeholder': 'Apellido',
+                                               'required': True}),
+
             'estudios': forms.Textarea(attrs={'class': 'form-control mt-1',
-                                          'placeholder': '',
-                                          'required': True}),
+                                              'placeholder': '',
+                                              'required': True}),
 
             'experienciaComunitaria': forms.Textarea(attrs={'class': 'form-control mt-1',
-                                          'placeholder': '',
-                                          'required': True}),
-            
+                                                            'placeholder': '',
+                                                            'required': True}),
+
             'whatsapp': NumberInput(attrs={'class': 'form-control mt-3',
-                                              'placeholder': 'Ej. BsAs: "11xxxxxxxx" ',
-                                              'required': True}),
+                                           'placeholder': 'Ej. BsAs: "11xxxxxxxx" ',
+                                           'required': True}),
             'provincia': forms.Select(attrs={'class': 'form-control mt-1',
                                              'placeholder': '',
                                              'required': True}),
 
             'fechaNacimiento': TextInput(attrs={'class':
-                                                     'form-control mt-3',
-                                                     'placeholder':
-                                                     '*Fecha de nacimiento "dd/mm/aaaa"',
-                                                     'required': True}),
+                                                'form-control mt-3',
+                                                'placeholder':
+                                                '*Fecha de nacimiento "dd/mm/aaaa"',
+                                                'required': True}),
 
 
             'validado': forms.TextInput(attrs={'class': 'form-control mt-3',
                                                'placeholder': '',
                                                'hidden': True}),
-                    }
+        }
 
-    def __init__(self, *args, **kwargs):   
-        if kwargs['instance'].nombre is None: 
-            kwargs['initial']={"taglit":0,"onward":0,"provincia":0}
+    def __init__(self, *args, **kwargs):
+        if kwargs['instance'].nombre is None:
+            kwargs['initial'] = {"taglit": 0, "onward": 0, "provincia": 0}
         super(ProfileForm, self).__init__(*args, **kwargs)
         self.fields['fechaNacimiento'].widget.format = '%d/%m/%Y'
 
