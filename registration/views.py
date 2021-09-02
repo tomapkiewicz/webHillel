@@ -39,22 +39,21 @@ class SignUpView(CreateView):
 
 
 @method_decorator(login_required, name='dispatch')
-class ProfileUpdate(UpdateView ):
+class ProfileUpdate(UpdateView):
     form_class = ProfileForm
     # success_url = reverse_lazy('profile')
     # template_name = 'registration/profile_form.html'
     template_name_suffix = '_form'
-   
+
     def get_success_url(self):
         if 'completar' in self.request.GET:
-            return reverse_lazy('pages:page', args=[self.request.GET['pk']] )+'?perfilcompleto'
+            return reverse_lazy('pages:page', args=[self.request.GET['pk']])+'?perfilcompleto'
         return reverse_lazy('profile')+'?ok'
-
 
     def get_object(self):
         # Recupera el objeto que se va a editar
         profile, created = Profile.objects.get_or_create(
-                                                        user=self.request.user)
+            user=self.request.user)
         return profile
 
 

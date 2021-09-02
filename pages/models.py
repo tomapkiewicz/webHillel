@@ -9,8 +9,9 @@ from location.models import Provincia
 
 
 def custom_upload_to(instance, filename):
-    old_instance = Page.objects.get(pk=instance.pk)
-    old_instance.flyer.delete()
+    old_instance = Page.objects.filter(pk=instance.pk).first()
+    if old_instance is not None:
+        old_instance.flyer.delete()
     return 'pages/' + filename
 
 
@@ -48,8 +49,8 @@ class Day(models.Model):
             return False
         return True
 
-    def HayActividadPresencial_provincia(self,provincia):
-        pages = Page.objects.find_provincia(self, 0,provincia)
+    def HayActividadPresencial_provincia(self, provincia):
+        pages = Page.objects.find_provincia(self, 0, provincia)
         if pages is None:
             return False
         return True
@@ -96,19 +97,19 @@ class PagesManager(models.Manager):
 
 class Page(models.Model):
     title = models.CharField(verbose_name="Título", max_length=200)
-    horaDesde = models.TimeField(verbose_name="Hora desde", null=True, blank=True,auto_now=False, auto_now_add=False,)
-    horaHasta = models.TimeField(verbose_name="Hora hasta", null=True, blank=True,auto_now=False, auto_now_add=False,)
+    horaDesde = models.TimeField(verbose_name="Hora desde", null=True, blank=True, auto_now=False, auto_now_add=False,)
+    horaHasta = models.TimeField(verbose_name="Hora hasta", null=True, blank=True, auto_now=False, auto_now_add=False,)
     description = RichTextField(verbose_name="Descripción", null=True, blank=True)
     textoExtraMail = RichTextField(verbose_name="Texto extra del mail", null=True, blank=True)
     flyer = models.ImageField(upload_to=custom_upload_to,
-                               null=True, blank=True)
+                              null=True, blank=True)
     dia = models.ForeignKey(Day, verbose_name='dia', null=True, on_delete=models.CASCADE)
     cupo = models.SmallIntegerField(verbose_name="Cupo", default=0)
     modalidad = BooleanField(verbose_name="Online", default=0)
     nuevo = BooleanField(verbose_name="Nuevo", default=0)
     activa = BooleanField(verbose_name="Activa", default=1)
-    categories = models.ManyToManyField(Category, verbose_name='categorias', related_name='get_pages',blank=True)
-  
+    categories = models.ManyToManyField(Category, verbose_name='categorias', related_name='get_pages', blank=True)
+
     provincia = models.ForeignKey(Provincia, on_delete=models.CASCADE, null=True, blank=True)
     responsable = models.ForeignKey(Responsable, on_delete=models.CASCADE, null=True, blank=True)
     colaborador = models.ForeignKey(Colaborador, on_delete=models.CASCADE, null=True, blank=True)
@@ -116,7 +117,6 @@ class Page(models.Model):
     secreta = BooleanField(verbose_name="Tiene clave?", default=0)
     clave = models.CharField(verbose_name="Clave", null=True, blank=True, default="", max_length=200)
 
-  
     objects = PagesManager()
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
@@ -128,7 +128,7 @@ class Page(models.Model):
 
     def __str__(self):
         return self.title
-        
+
     @property
     def categoriesSTR(self):
         if self.categories is None:
@@ -137,15 +137,13 @@ class Page(models.Model):
             return False
         return ', '.join(str(c) for c in self.categories.all())
 
-
     @property
     def modalidadSTR(self):
         return "Online" if self.modalidad else "Presencial"
-        
 
     @property
     def actividadSTR(self):
-        str = self.modalidadSTR +" - " + self.title
+        str = self.modalidadSTR + " - " + self.title
         str += " (nuevo)" if self.nuevo else ""
         return str
 
@@ -205,8 +203,6 @@ class Page(models.Model):
         return None
 
 
-
-
 class SubscriptionManager(models.Manager):
     def overlaps(self, user, page):
         subs = self.find(user)
@@ -217,12 +213,12 @@ class SubscriptionManager(models.Manager):
         for s in subs.pages.all():
             if s.dia == page.dia:
                 if s.horaDesde is None or s.horaHasta is None or page.horaDesde is None or page.horaHasta is None:
-                    return False 
+                    return False
                 sfechadesde = datetime.strptime(str(s.horaDesde), '%H:%M:%S')
                 sfechahasta = datetime.strptime(str(s.horaHasta), '%H:%M:%S')
                 pagefechadesde = datetime.strptime(str(page.horaDesde), '%H:%M:%S')
                 pagefechahasta = datetime.strptime(str(page.horaHasta), '%H:%M:%S')
-                
+
                 if sfechadesde <= pagefechadesde < sfechahasta or sfechadesde < pagefechahasta <= sfechahasta:
                     return True
         return False
@@ -252,7 +248,6 @@ class Subscription(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
 
- 
     objects = SubscriptionManager()
 
     class Meta:
@@ -288,7 +283,6 @@ class HistorialManager(models.Manager):
         if len(historial) == 0:
             return None
         return historial[0]
-
 
     def find_page(self, page):
         historial = self.filter(page=page)
@@ -326,72 +320,72 @@ class Historial(models.Model):
     def Qanotados(self):
         return self.anotados.count()
 
+
 class CuestionarioRespuestaManager(models.Manager):
 
-    def find(self, user,page):
+    def find(self, user, page):
         queryset = self.filter(user=user, page=page)
         if len(queryset) > 0:
             return queryset[0]
         return None
 
-    def find_or_create(self, user,page ):
+    def find_or_create(self, user, page):
         cuestionarioRespuesta = self.find(user=user, page=page)
         if cuestionarioRespuesta is None:
             print("se crea")
             print(user)
             print(page)
-            
-            cuestionarioRespuesta = CuestionarioRespuesta.objects.create(user=user, page= page)
+
+            cuestionarioRespuesta = CuestionarioRespuesta.objects.create(user=user, page=page)
         return cuestionarioRespuesta
 
 
 class CuestionarioRespuesta(models.Model):
     page = models.ForeignKey(Page, related_name="pagina_cuestionario_respuesta", verbose_name='Actividad', null=True, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=CASCADE, null=True)
-    pregunta1  = models.CharField(verbose_name="Pregunta1", null=True, blank=True, default="", max_length=200)
+    pregunta1 = models.CharField(verbose_name="Pregunta1", null=True, blank=True, default="", max_length=200)
     respuesta1 = models.CharField(verbose_name="Respuesta1", null=True, blank=True, default="", max_length=200)
-    pregunta2  = models.CharField(verbose_name="Pregunta2", null=True, blank=True, default="", max_length=200)
+    pregunta2 = models.CharField(verbose_name="Pregunta2", null=True, blank=True, default="", max_length=200)
     respuesta2 = models.CharField(verbose_name="Respuesta2", null=True, blank=True, default="", max_length=200)
-    pregunta3  = models.CharField(verbose_name="Pregunta3", null=True, blank=True, default="", max_length=200)
+    pregunta3 = models.CharField(verbose_name="Pregunta3", null=True, blank=True, default="", max_length=200)
     respuesta3 = models.CharField(verbose_name="Respuesta3", null=True, blank=True, default="", max_length=200)
-    pregunta4  = models.CharField(verbose_name="Pregunta4", null=True, blank=True, default="", max_length=200)
+    pregunta4 = models.CharField(verbose_name="Pregunta4", null=True, blank=True, default="", max_length=200)
     respuesta4 = models.CharField(verbose_name="Respuesta4", null=True, blank=True, default="", max_length=200)
-    pregunta5  = models.CharField(verbose_name="Pregunta5", null=True, blank=True, default="", max_length=200)
+    pregunta5 = models.CharField(verbose_name="Pregunta5", null=True, blank=True, default="", max_length=200)
     respuesta5 = models.CharField(verbose_name="Respuesta5", null=True, blank=True, default="", max_length=200)
-    pregunta6  = models.CharField(verbose_name="Pregunta6", null=True, blank=True, default="", max_length=200)
+    pregunta6 = models.CharField(verbose_name="Pregunta6", null=True, blank=True, default="", max_length=200)
     respuesta6 = models.CharField(verbose_name="Respuesta6", null=True, blank=True, default="", max_length=200)
-    pregunta7  = models.CharField(verbose_name="Pregunta7", null=True, blank=True, default="", max_length=200)
+    pregunta7 = models.CharField(verbose_name="Pregunta7", null=True, blank=True, default="", max_length=200)
     respuesta7 = models.CharField(verbose_name="Respuesta7", null=True, blank=True, default="", max_length=200)
-    pregunta8  = models.CharField(verbose_name="Pregunta8", null=True, blank=True, default="", max_length=200)
+    pregunta8 = models.CharField(verbose_name="Pregunta8", null=True, blank=True, default="", max_length=200)
     respuesta8 = models.CharField(verbose_name="Respuesta8", null=True, blank=True, default="", max_length=200)
-    pregunta9  = models.CharField(verbose_name="Pregunta9", null=True, blank=True, default="", max_length=200)
+    pregunta9 = models.CharField(verbose_name="Pregunta9", null=True, blank=True, default="", max_length=200)
     respuesta9 = models.CharField(verbose_name="Respuesta9", null=True, blank=True, default="", max_length=200)
-    pregunta10  = models.CharField(verbose_name="Pregunta10", null=True, blank=True, default="", max_length=200)
+    pregunta10 = models.CharField(verbose_name="Pregunta10", null=True, blank=True, default="", max_length=200)
     respuesta10 = models.CharField(verbose_name="Respuesta10", null=True, blank=True, default="", max_length=200)
-    pregunta11  = models.CharField(verbose_name="Pregunta11", null=True, blank=True, default="", max_length=200)
+    pregunta11 = models.CharField(verbose_name="Pregunta11", null=True, blank=True, default="", max_length=200)
     respuesta11 = models.CharField(verbose_name="Respuesta11", null=True, blank=True, default="", max_length=200)
-    pregunta12  = models.CharField(verbose_name="Pregunta12", null=True, blank=True, default="", max_length=200)
+    pregunta12 = models.CharField(verbose_name="Pregunta12", null=True, blank=True, default="", max_length=200)
     respuesta12 = models.CharField(verbose_name="Respuesta12", null=True, blank=True, default="", max_length=200)
-    pregunta13  = models.CharField(verbose_name="Pregunta13", null=True, blank=True, default="", max_length=200)
+    pregunta13 = models.CharField(verbose_name="Pregunta13", null=True, blank=True, default="", max_length=200)
     respuesta13 = models.CharField(verbose_name="Respuesta13", null=True, blank=True, default="", max_length=200)
-    pregunta14  = models.CharField(verbose_name="Pregunta14", null=True, blank=True, default="", max_length=200)
+    pregunta14 = models.CharField(verbose_name="Pregunta14", null=True, blank=True, default="", max_length=200)
     respuesta14 = models.CharField(verbose_name="Respuesta14", null=True, blank=True, default="", max_length=200)
-    pregunta15  = models.CharField(verbose_name="Pregunta15", null=True, blank=True, default="", max_length=200)
+    pregunta15 = models.CharField(verbose_name="Pregunta15", null=True, blank=True, default="", max_length=200)
     respuesta15 = models.CharField(verbose_name="Respuesta15", null=True, blank=True, default="", max_length=200)
-    pregunta16  = models.CharField(verbose_name="Pregunta16", null=True, blank=True, default="", max_length=200)
+    pregunta16 = models.CharField(verbose_name="Pregunta16", null=True, blank=True, default="", max_length=200)
     respuesta16 = models.CharField(verbose_name="Respuesta16", null=True, blank=True, default="", max_length=200)
-    pregunta17  = models.CharField(verbose_name="Pregunta17", null=True, blank=True, default="", max_length=200)
+    pregunta17 = models.CharField(verbose_name="Pregunta17", null=True, blank=True, default="", max_length=200)
     respuesta17 = models.CharField(verbose_name="Respuesta17", null=True, blank=True, default="", max_length=200)
-    pregunta18  = models.CharField(verbose_name="Pregunta18", null=True, blank=True, default="", max_length=200)
+    pregunta18 = models.CharField(verbose_name="Pregunta18", null=True, blank=True, default="", max_length=200)
     respuesta18 = models.CharField(verbose_name="Respuesta18", null=True, blank=True, default="", max_length=200)
-    pregunta19  = models.CharField(verbose_name="Pregunta19", null=True, blank=True, default="", max_length=200)
+    pregunta19 = models.CharField(verbose_name="Pregunta19", null=True, blank=True, default="", max_length=200)
     respuesta19 = models.CharField(verbose_name="Respuesta19", null=True, blank=True, default="", max_length=200)
-    pregunta20  = models.CharField(verbose_name="Pregunta20", null=True, blank=True, default="", max_length=200)
+    pregunta20 = models.CharField(verbose_name="Pregunta20", null=True, blank=True, default="", max_length=200)
     respuesta20 = models.CharField(verbose_name="Respuesta20", null=True, blank=True, default="", max_length=200)
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
     objects = CuestionarioRespuestaManager()
-
 
     class Meta:
         verbose_name = "Cuestionario Respuesta"
@@ -417,28 +411,29 @@ class CuestionarioManager(models.Manager):
             cuestionario = Cuestionario.objects.create(page=page)
         return cuestionario
 
+
 class Cuestionario(models.Model):
     page = models.ForeignKey(Page, related_name="pagina_cuestionario", verbose_name='Actividad', null=True, on_delete=models.CASCADE)
-    pregunta1 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta2 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta3 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta4 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta5 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta6 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta7 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta8 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta9 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta10 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta11 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta12 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta13 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta14 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta15 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta16 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta17 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta18 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta19 = models.CharField( null=True, blank=True, default="", max_length=200)
-    pregunta20 = models.CharField( null=True, blank=True, default="", max_length=200)
+    pregunta1 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta2 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta3 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta4 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta5 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta6 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta7 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta8 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta9 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta10 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta11 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta12 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta13 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta14 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta15 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta16 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta17 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta18 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta19 = models.CharField(null=True, blank=True, default="", max_length=200)
+    pregunta20 = models.CharField(null=True, blank=True, default="", max_length=200)
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
     objects = CuestionarioManager()
