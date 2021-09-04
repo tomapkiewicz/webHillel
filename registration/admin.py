@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, FechaOnward, FechaTaglit
+from .models import Profile, FechaOnward, FechaTaglit, PropuestaInteres, TematicaInteres
 from pages.models import Day, Category
 
 # Register your models here.
@@ -15,6 +15,14 @@ class FechaTaglitAdmin(admin.ModelAdmin):
     readonly_fields = ('updated', 'created')
 
 
+class PropuestaInteresAdmin(admin.ModelAdmin):
+    readonly_fields = ('updated', 'created')
+
+
+class TematicaInteresAdmin(admin.ModelAdmin):
+    readonly_fields = ('updated', 'created')
+
+
 class FechaOnwardAdmin(admin.ModelAdmin):
     readonly_fields = ('updated', 'created')
 
@@ -27,6 +35,8 @@ class CategoriesAdmin(admin.ModelAdmin):
     readonly_fields = ('updated', 'created')
 
 
+admin.site.register(PropuestaInteres, PropuestaInteresAdmin)
+admin.site.register(TematicaInteres, TematicaInteresAdmin)
 admin.site.register(FechaTaglit, FechaTaglitAdmin)
 admin.site.register(FechaOnward, FechaOnwardAdmin)
 admin.site.register(Profile, ProfileAdmin)
