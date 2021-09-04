@@ -138,6 +138,10 @@ class Page(models.Model):
         return ', '.join(str(c) for c in self.categories.all())
 
     @property
+    def titleSTR(self):
+        return ''.join([c if c.isalnum() else " " for c in self.title])
+
+    @property
     def modalidadSTR(self):
         return "Online" if self.modalidad else "Presencial"
 

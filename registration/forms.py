@@ -2,8 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms.widgets import TextInput, Widget
-from .models import Profile
-import datetime
+from .models import Profile, PropuestaInteres
 
 
 class UserCreationFormWithEmail(UserCreationForm):
@@ -32,7 +31,7 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = ['avatar', 'nombre', 'apellido', 'fechaNacimiento',
                   'provincia', 'whatsapp', 'instagram',
-                  'onward', 'taglit', 'comoConociste',
+                  'onward', 'taglit', 'propuestasInteres', 'tematicasInteres', 'comoConociste',
                   'estudios', 'experienciaComunitaria',
                   'validado']
         widgets = {
@@ -41,15 +40,27 @@ class ProfileForm(forms.ModelForm):
                 'form-control-file mt-3'}),
 
             'onward': forms.Select(attrs={'class': 'form-control mt-1',
-                                          'rows': 3,
+                                          'rows': 4,
                                           'placeholder': '',
                                           'initial': 'NO',
                                           'required': True}),
 
             'taglit': forms.Select(attrs={'class': 'form-control mt-1',
-                                          'rows': 3,
+                                          'rows': 4,
                                           'placeholder': '',
                                           'required': True}),
+
+            'propuestasInteres': forms.CheckboxSelectMultiple(
+                attrs={'placeholder': '',
+                       'required': False}
+            ),
+
+
+            'tematicasInteres': forms.CheckboxSelectMultiple(
+                attrs={'placeholder': '',
+                       'required': False}
+            ),
+
 
             'comoConociste': forms.Textarea(attrs={'class': 'form-control mt-1',
                                                    'rows': 3,

@@ -47,6 +47,36 @@ class FechaOnward(models.Model):
         return self.fecha
 
 
+class PropuestaInteres(models.Model):
+    nombre = models.CharField(verbose_name="Propuesta", max_length=200)
+    order = models.SmallIntegerField(verbose_name="Orden", default=0)
+    created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
+    updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "PropuestaInteres"
+        verbose_name_plural = "PropuestasInteres"
+        ordering = ['order']
+
+    def __str__(self):
+        return self.nombre
+
+
+class TematicaInteres(models.Model):
+    nombre = models.CharField(verbose_name="Tematica", max_length=200)
+    order = models.SmallIntegerField(verbose_name="Orden", default=0)
+    created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
+    updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "TematicaInteres"
+        verbose_name_plural = "TematicasInteres"
+        ordering = ['order']
+
+    def __str__(self):
+        return self.nombre
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to=custom_upload_to,
@@ -57,6 +87,8 @@ class Profile(models.Model):
     instagram = models.CharField(verbose_name="@ de Instagram", null=True, blank=True, max_length=100)
     onward = models.ForeignKey(FechaOnward, on_delete=models.CASCADE, verbose_name="¿Viajaste a Onward? ¿Cuándo?", null=True, blank=True)
     taglit = models.ForeignKey(FechaTaglit, on_delete=models.CASCADE, verbose_name="¿Viajaste a Taglit? ¿Cuándo?", null=True, blank=True)
+    propuestasInteres = models.ManyToManyField(PropuestaInteres)
+    tematicasInteres = models.ManyToManyField(TematicaInteres, null=True, blank=True)
     comoConociste = models.CharField(verbose_name="¿Cómo conociste Hillel?", null=True, blank=True, max_length=250)
     estudios = models.CharField(verbose_name="¿Estás estudiando, o te recibiste? ¿Qué estudias/te y en qué institución?", null=True, blank=True, max_length=250)
     experienciaComunitaria = models.CharField(null=True, blank=True, max_length=250)
@@ -98,6 +130,22 @@ class Profile(models.Model):
         if self.categories.all() is None:
             return False
         return ', '.join(str(c) for c in self.categories.all())
+
+    @property
+    def tematicasInteresSTR(self):
+        if self.tematicasInteres is None:
+            return False
+        if self.tematicasInteres.all() is None:
+            return False
+        return ', '.join(str(c) for c in self.tematicasInteres.all())
+
+    @property
+    def propuestasInteresSTR(self):
+        if self.propuestasInteres is None:
+            return False
+        if self.propuestasInteres.all() is None:
+            return False
+        return ', '.join(str(c) for c in self.propuestasInteres.all())
 
     def save(self, *args, **kwargs):
         if self.fechaNacimiento is not None:
