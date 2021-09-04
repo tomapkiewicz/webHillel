@@ -6,8 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django import forms
 from .models import Profile
-from django.shortcuts import render, get_object_or_404, redirect
-from pages.views import Register
+
 
 # Create your views here.
 
