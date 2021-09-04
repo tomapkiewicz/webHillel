@@ -216,3 +216,9 @@ footer {
     width:200px;
     height: 120px;
   }
+ 
+  ul
+{
+    list-style-type: none;
+}  
+ 

@@ -82,15 +82,27 @@
         <p>Como conoció Hillel: {{profile.comoConociste}}</p>
         <p>Estudios: {{profile.estudios}}</p> 
         <p>Experiencia comunitaria: {{profile.experienciaComunitaria}}</p>
-
-       
+    
         {% if profile.categories.all is not None %}
-         <p>Intereses: </p>
+      <!--   <p>Intereses: </p>
           {% for interes in profile.categories.all %} 
             <p class="pl-2"><i>{{interes}}</i></p>
           {% endfor %}
         {% endif %}
+        -->
+        {% if profile.propuestasInteres.all is not None %}
+         <p>Propuestas de interés: </p>
+          {% for interes in profile.propuestasInteres.all %} 
+            <p class="pl-2"><i>{{interes}}</i></p>
+          {% endfor %}
+        {% endif %}
 
+        {% if profile.tematicasInteres.all is not None %}
+         <p>Temáticas de interes: </p>
+          {% for interes in profile.tematicasInteres.all %} 
+            <p class="pl-2"><i>{{interes}}</i></p>
+          {% endfor %}
+        {% endif %}
           </div>
 
           <!-- Modal footer -->

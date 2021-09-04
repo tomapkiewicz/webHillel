@@ -11,7 +11,7 @@ from .models import Page, Subscription, Day, Historial, Cuestionario, Cuestionar
 from registration.models import Profile
 from .forms import PageForm
 from django.http import Http404, JsonResponse
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.template import loader
 import threading
@@ -31,8 +31,7 @@ def CuposAgotados(request, pk):
         'mail_body.html',
         {
             'user_name': usu + ' quedó afuera!',
-            'subject': 'Se quiso anotar en ' + page.title + ' a las '
-            + str(page.horaDesde) + 'HS  ' + ' pero los cupos estaban agotados.',
+            'subject': 'Se quiso anotar en ' + page.title + ' a las ' + str(page.horaDesde) + 'HS  ' + ' pero los cupos estaban agotados.',
             'description': ' Comunicate con él haciendo click acá: https://wa.me/+549' + str(request.user.profile.whatsapp),
         }
     )
@@ -83,10 +82,10 @@ class PageList(ListView):
         context['days'] = Day.objects.all()
 
         if self.request.user.is_anonymous:
-            provincia = Provincia.objects.get(title="CABA")
+            provincia = None  # Provincia.objects.get(title="CABA")
         else:
             if self.request.user.profile is None:
-                provincia = Provincia.objects.get(title="CABA")
+                provincia = None  # Provincia.objects.get(title="CABA")
             else:
                 provincia = self.request.user.profile.provincia
 
@@ -280,9 +279,7 @@ def Register(request, pk):
         'mail_body.html',
         {
             'user_name': 'Hola ' + request.user.username + '!',
-            'subject': 'Te anotaste en ' + page.title + modalidad + ' a las '
-            + str(page.horaDesde) + 'HS.'
-            + ' Podés darte de baja acá: '+host+'/pages/'+str(page.id),
+            'subject': 'Te anotaste en ' + page.title + modalidad + ' a las ' + str(page.horaDesde) + 'HS.' + ' Podés darte de baja acá: '+host+'/pages/'+str(page.id),
             'description': textoExtraMail,
         }
     )
@@ -381,7 +378,7 @@ def WriteRowAsistencias(h, writer):
 
         Profile.objects.get_or_create(user=anotado)
 
-        writer.writerow([h.page.title, h.page.dia, h.page.horaDesde,
+        writer.writerow([h.page.titleSTR, h.page.dia, h.page.horaDesde,
                          h.fecha, anotado, asistio, asis])
 
 
@@ -390,7 +387,7 @@ def DescargarAsistencias(request, pk):
 
     response = HttpResponse(content='')
     response['Content-Disposition'] = 'attachment; filename=asistencias-' + \
-        page.title + '-' + str(datetime.now()) + '.csv'
+        page.titleSTR + '-' + str(datetime.now()) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect='excel')
     writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?', 'Asis'])
@@ -430,7 +427,7 @@ def DescargarHistoricoAsistenciasALLItem(request):
     historiales = Historial.objects.all()
     for h in historiales:
         h.fecha = h.fecha.strftime("%d/%m/%Y")
-        writerB.writerow([h.page.title, h.page.dia, h.page.horaDesde, h.fecha, h.Qanotados, h.Qasistentes])
+        writerB.writerow([h.page.titleSTR, h.page.dia, h.page.horaDesde, h.fecha, h.Qanotados, h.Qasistentes])
 
     return responseB
 
@@ -440,7 +437,7 @@ def DescargarHistoricoAsistencias(request, pk):
 
     response = HttpResponse(content='')
     response['Content-Disposition'] = 'attachment; filename=asistencias-' + \
-        page.title + '-all-' + str(datetime.now()) + '.csv'
+        page.titleSTR + '-all-' + str(datetime.now()) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect='excel')
     writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?', 'Asis'])
@@ -473,7 +470,7 @@ def DescargarActividades(request):
         if p is None:
             return Http404("Actividad no encontrada")
 
-        writer.writerow([p.title, p.dia, p.horaDesde, p.horaHasta, p.cupo,
+        writer.writerow([p.titleSTR, p.dia, p.horaDesde, p.horaHasta, p.cupo,
                          p.modalidadSTR, p.nuevo, p.activa, p.Qanotados, p.categoriesSTR,
                          p.responsable, p.colaborador, p.secreta, p.clave, ])
 
@@ -487,7 +484,7 @@ def DescargarPerfiles(request):
     writer = csv.writer(response, dialect='excel')
     response.write(u'\ufeff'.encode('utf8'))
     writer.writerow(['Usuario', 'Nombre', 'Apellido', 'Fecha de nacimiento', 'Edad', 'Celular', 'Instagram',
-                     'Onward', 'Taglit', 'Cómo conoció Hillel', 'Estudios', 'Experiencia comunitaria', 'Intereses', ])
+                     'Onward', 'Taglit', 'Cómo conoció Hillel', 'Estudios', 'Experiencia comunitaria', 'tematicasInteres', 'propuestasInteres'])
 
     profiles = Profile.objects.all()
 
@@ -496,7 +493,7 @@ def DescargarPerfiles(request):
             return Http404("Perfil no encontrado")
         if p.validado:
             writer.writerow([p, p.nombre, p.apellido, p.fechaNacimiento, p.edad, p.whatsapp, p.instagram,
-                             p.onward, p.taglit, p.comoConociste, p.estudios, p.experienciaComunitaria, p.interesesSTR])
+                             p.onward, p.taglit, p.comoConociste, p.estudios, p.experienciaComunitaria, p.tematicasInteresSTR, p.propuestasInteresSTR])
     return response
 
 
@@ -516,7 +513,7 @@ def DescargarCuestionarios(request):
     for c in cuestionarios:
         if c is None:
             return Http404("Cuestionario no encontrado")
-        writer.writerow([c.page.title, c.pregunta1, c.pregunta2, c.pregunta3, c.pregunta4, c.pregunta5,
+        writer.writerow([c.page.titleSTR, c.pregunta1, c.pregunta2, c.pregunta3, c.pregunta4, c.pregunta5,
                          c.pregunta6, c.pregunta7, c.pregunta8, c.pregunta9, c.pregunta10,
                          c.pregunta11, c.pregunta12, c.pregunta13, c.pregunta14, c.pregunta15,
                          c.pregunta16, c.pregunta17, c.pregunta18, c.pregunta19, c.pregunta20, ])
@@ -545,7 +542,7 @@ def DescargarCuestionariosRespuestas(request):
         print(c.user)
         if c is None:
             return Http404("Cuestionario no encontrado")
-        writer.writerow([c.page.title, c.pregunta1, c.pregunta2, c.pregunta3, c.pregunta4, c.pregunta5,
+        writer.writerow([c.page.titleSTR, c.pregunta1, c.pregunta2, c.pregunta3, c.pregunta4, c.pregunta5,
                          c.pregunta6, c.pregunta7, c.pregunta8, c.pregunta9, c.pregunta10,
                          c.pregunta11, c.pregunta12, c.pregunta13, c.pregunta14, c.pregunta15,
                          c.pregunta16, c.pregunta17, c.pregunta18, c.pregunta19, c.pregunta20,
