@@ -88,7 +88,7 @@ class Profile(models.Model):
     onward = models.ForeignKey(FechaOnward, on_delete=models.CASCADE, verbose_name="¿Viajaste a Onward? ¿Cuándo?", null=True, blank=True)
     taglit = models.ForeignKey(FechaTaglit, on_delete=models.CASCADE, verbose_name="¿Viajaste a Taglit? ¿Cuándo?", null=True, blank=True)
     propuestasInteres = models.ManyToManyField(PropuestaInteres)
-    tematicasInteres = models.ManyToManyField(TematicaInteres, null=True, blank=True)
+    tematicasInteres = models.ManyToManyField(TematicaInteres)
     comoConociste = models.CharField(verbose_name="¿Cómo conociste Hillel?", null=True, blank=True, max_length=250)
     estudios = models.CharField(verbose_name="¿Estás estudiando, o te recibiste? ¿Qué estudias/te y en qué institución?", null=True, blank=True, max_length=250)
     experienciaComunitaria = models.CharField(null=True, blank=True, max_length=250)

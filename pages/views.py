@@ -47,6 +47,7 @@ def CuposAgotados(request, pk):
     return JsonResponse(response)
 
 
+# En desuso porque el servidor no acepta hilos
 class EmailThread(threading.Thread):
     def __init__(self, subject, html_content, recipient_list, mail_from):
         self.subject = subject
@@ -63,7 +64,10 @@ class EmailThread(threading.Thread):
 
 
 def send_html_mail(subject, html_content, recipient_list, mail_from):
-    EmailThread(subject, html_content, recipient_list, mail_from).start()
+    # EmailThread(subject, html_content, recipient_list, mail_from).start()
+    print("enviando mail")
+    mail = send_mail(subject, html_content, mail_from, recipient_list,
+                     fail_silently=True, html_message=html_content)
 
 
 class StaffRequiredMixin(object):
@@ -84,7 +88,8 @@ class PageList(ListView):
         if self.request.user.is_anonymous:
             provincia = None  # Provincia.objects.get(title="CABA")
         else:
-            if self.request.user.profile is None:
+            profile = Profile.objects.get_or_create(user=self.request.user)
+            if profile is None:
                 provincia = None  # Provincia.objects.get(title="CABA")
             else:
                 provincia = self.request.user.profile.provincia
