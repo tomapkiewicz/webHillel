@@ -94,8 +94,8 @@ class ProfileForm(forms.ModelForm):
                                              'placeholder': '',
                                              'required': True}),
 
-            'fechaNacimiento': TextInput(attrs={'class':
-                                                'form-control mt-3',
+            'fechaNacimiento': TextInput(attrs={'class': 'form-control mt-3',
+                                                'type':'date',
                                                 'placeholder':
                                                 '*Fecha de nacimiento "dd/mm/aaaa"',
                                                 'required': True}),

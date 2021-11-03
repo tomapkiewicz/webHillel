@@ -78,6 +78,13 @@ class StaffRequiredMixin(object):
 
 
 # Create your views here.
+
+
+def Onward(request):
+    return render(request, 'pages/onward.html')
+
+
+
 class PageList(ListView):
     model = Page
 
