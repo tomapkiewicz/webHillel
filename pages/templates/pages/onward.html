@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Onward{% endblock %}
+{% block content %}
+<style>.errorlist{color:red;}  
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+</style>
+
+
+<main role="main">
+ 
+  
+    <div class="card container mb-5" >
+<!--
+<div class="card container freebirdFormviewerViewHeaderCard freebirdFormviewerViewCenteredContent freebirdViewerHeaderCard freebirdHeaderCard"></div>
+  -->
+<iframe  class="mx-auto" src="https://docs.google.com/forms/d/e/1FAIpQLSdKOOrEIYI3iZ6fFWwqT4LuHl9nOju15tABMTmBu4nPRBkzsA/viewform?embedded=true"   scrolling="yes" width=105% height="800px" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
+
+</div>
+
+<!-- Opcion alternativa fallida. Se corta en dispositivos móviles
+ <div class="card container mb-5 border-0 fondo" >
+<iframe  class="mx-auto" src="https://docs.google.com/forms/d/e/1FAIpQLSdKOOrEIYI3iZ6fFWwqT4LuHl9nOju15tABMTmBu4nPRBkzsA/viewform?embedded=true"   scrolling="no" width=105% height="540px" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
+</div>
+  -->
+
+</main>
+{% endblock %}

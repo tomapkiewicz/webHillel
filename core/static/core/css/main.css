@@ -177,6 +177,16 @@ footer {
     background-color:rgb(178, 119, 196);
   }
 
+  .badge-onward{
+    color: #fff;
+    background-color: rgb(224, 21, 72);
+}
+  .badge-onward[href]:hover, .badge-online[href]:focus {
+    color: #fff;
+    text-decoration: none;
+    background-color:rgb(143, 12, 34);
+  }
+
 .btn-online {
     color: #fff;
     background-color: rgb(230,216,73) ;
@@ -213,6 +223,7 @@ footer {
 
   
   .btn-home{
+    
     text-align: left;
     width: 200px;
     display: inline-block;
@@ -232,6 +243,31 @@ footer {
     list-style-type: none;
 }  
  
+
+.freebirdHeaderCard.freebirdViewerHeaderCard {
+  /* max-height: 22.5
+vw
+; */
+  /* max-width: 90
+vw
+; */
+  height: 160px
+;
+  width: 640px
+;
+}
+.freebirdHeaderCard {
+  background-image: url(https://lh5.googleusercontent.com/cKVRxcVhA4Eg5whbmzGfUkAokkGV1wvh5Kx0CGJYYmfXMuR7RnK_nnf128eXi5Uwg5INIs5OC4edasUB61m3nU_hhogoKQD-UBtr9KjQhlUgmInTHpU64QEqC3o4OwhPpg=w1200);
+  background-size: cover;
+  background-position: center;
+}
+.freebirdFormviewerViewHeaderCard {
+  /* border: 1
+px
+solid #dadce0; */
+  border-radius: 8px;
+  margin-top: 12px;
+}
 .logo-home {
   max-width: 20%;
   margin-bottom: 25px !important;
@@ -292,3 +328,7 @@ color: rgba(255,255,255,.5);
 .banerActividades {
   max-height: 160px;
   }
+.iconoMenu2{
+  max-width: 25px;
+  margin-right: 15px; 
+}

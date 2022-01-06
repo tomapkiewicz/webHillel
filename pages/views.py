@@ -78,6 +78,14 @@ class StaffRequiredMixin(object):
 
 
 # Create your views here.
+
+
+def Onward(request):
+    if request.user.is_authenticated:
+        return render(request, 'pages/onward.html')
+    raise Http404("Usuario no está autenticado")
+
+
 class PageList(ListView):
     model = Page
 
