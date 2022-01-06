@@ -50,14 +50,19 @@
             {% if request.user.is_anonymous %}
                 <a class="btn btn-primary btn-block text-white" id="MainNavConfirmarRegistrarse" href="{% url 'login'%}"><b>Anotarse</b></a>
             {% else %}
-              {% if usuarioAnotado %}
-                <a class="btn btn-danger btn-block text-white" id="MainNavConfirmarDesuscripcion" data-target="#ModalConfirmarDesuscripcion" data-toggle="modal"><b>Darse de baja</b></a>
-              {% else  %}
-                {% if page.Qanotados >= page.cupo and page.cupo != 0 %}
-                  <a class="btn btn-primary btn-block text-white" id="MainNavAgotados" data-target="#ModalCuposAgotados" data-toggle="modal"><b>Anotarse</b></a>
-                {% else %}
-                  <a class="btn btn-primary btn-block text-white" id="MainNavConfirmar" data-target="#ModalConfirmar" data-toggle="modal"><b>Anotarse</b></a>
+            {% if not request.user.profile.validado %}
+                <a class="btn btn-primary btn-block text-white" id="MainNavConfirmarRegistrarse" href="{% url 'profile' page.id %}?completar=si&pk={{page.id}}"><b>Anotarse</b></a>
+            {% else %}
+
+                {% if usuarioAnotado %}
+                  <a class="btn btn-danger btn-block text-white" id="MainNavConfirmarDesuscripcion" data-target="#ModalConfirmarDesuscripcion" data-toggle="modal"><b>Darse de baja</b></a>
+                {% else  %}
+                  {% if page.Qanotados >= page.cupo and page.cupo != 0 %}
+                    <a class="btn btn-primary btn-block text-white" id="MainNavAgotados" data-target="#ModalCuposAgotados" data-toggle="modal"><b>Anotarse</b></a>
+                  {% else %}
+                    <a class="btn btn-primary btn-block text-white" id="MainNavConfirmar" data-target="#ModalConfirmar" data-toggle="modal"><b>Anotarse</b></a>
                 {% endif %}
+               {% endif %}
               {% endif %}
             {% endif %}
 

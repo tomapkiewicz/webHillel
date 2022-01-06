@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PageDetail, PageList, PageCreate, PageUpdate, PageDelete, Register, Unregister, Asistencia, AsistenciaDetail, AsistenciaAdd, AsistenciaRemove, DescargarAsistencias, DescargarHistoricoAsistencias, DescargarHistoricoAsistenciasALLItem, DescargarHistoricoAsistenciasALLDetail, DescargarActividades, DescargarPerfiles, Exportar, CuposAgotados, DescargarCuestionarios, DescargarCuestionariosRespuestas
+from .views import PageDetail, PageList, PageCreate, PageUpdate, PageDelete, Register, Unregister, Asistencia, AsistenciaDetail, AsistenciaAdd, AsistenciaRemove, DescargarAsistencias, DescargarHistoricoAsistencias, DescargarHistoricoAsistenciasALLItem, DescargarHistoricoAsistenciasALLDetail, DescargarActividades, DescargarPerfiles, Exportar, CuposAgotados, DescargarCuestionarios, DescargarCuestionariosRespuestas, Onward
 
 PagesPatterns = ([
     path('', PageList.as_view(), name='pages'),
@@ -24,5 +24,6 @@ PagesPatterns = ([
     path('descargarCuestionarios/', DescargarCuestionarios, name='descargarCuestionarios'),
     path('descargarCuestionariosRespuestas/', DescargarCuestionariosRespuestas, name='descargarCuestionariosRespuestas'),
     path('exportar/', Exportar, name='exportar'),
+    path('onward/', Onward, name='onward'),
     path('cuposAgotados/<int:pk>', CuposAgotados, name='cuposAgotados'),
 ], 'pages')

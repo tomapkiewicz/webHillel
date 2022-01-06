@@ -25,7 +25,7 @@ SECRET_KEY = '+k!@)$demq7!z@dlf4hk0jiy=z3l3_d)&cx4hxhtc^u85ps_rj'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'www.hillelargentina.org.ar']
 
 
 # Application definition
@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'registration.processors.ctx_dict',
                 'social.processors.ctx_dict',
                 'profiles.processors.ctx_dict',
             ],
