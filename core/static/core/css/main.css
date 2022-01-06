@@ -280,3 +280,15 @@ footer {
   margin-right: 15px;
 
 }
+
+.iconoMenuOnward{
+  max-width: 25px;
+}
+
+.onwardMenu{
+color: rgba(255,255,255,.5);
+}
+
+.banerActividades {
+  max-height: 160px;
+  }

@@ -47,13 +47,16 @@
                     <img class="iconoMenu float-left" src="{% static 'core/img/virtual-menu.png' %}" alt="">
                   Online</a>
 
-                  <a class="dropdown-item" href="{% url 'pages:pages' 1 %}">
-                    <img class="iconoMenu float-left" src="{% static 'core/img/onward-menu.png' %}" alt="">
-                  Onward</a>
-
                 </div>
                    {% if request.user.is_staff %}
               </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'pages:pages' 1 %}">
+                  <img class="iconoMenuOnward" src="{% static 'core/img/onward-menuB.png' %}" alt="">
+                Onward</a>
+              </li>
+
                  <li class="nav-item">
                 <a class="nav-link" href="{% url 'profiles:list' %}"> 
                   <i class="fas fa-users"></i>
