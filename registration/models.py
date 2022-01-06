@@ -47,6 +47,20 @@ class FechaOnward(models.Model):
         return self.fecha
 
 
+class TemporadaOnward(models.Model):
+    temporada = models.BooleanField(verbose_name="En temporada")
+    updated = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de modificación")
+    created = models.DateTimeField(auto_now=True, verbose_name="Fecha de creación")
+
+    class Meta:
+        verbose_name = "TemporadaOnward"
+        verbose_name_plural = "TemporadaOnward"
+        ordering = ['temporada']
+
+    def __str__(self):
+        return "Temporada: Activa" if self.temporada else "Temporada: Inactiva"
+
+
 class PropuestaInteres(models.Model):
     nombre = models.CharField(verbose_name="Propuesta", max_length=200)
     order = models.SmallIntegerField(verbose_name="Orden", default=0)

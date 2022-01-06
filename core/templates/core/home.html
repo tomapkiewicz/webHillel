@@ -90,15 +90,16 @@
                           </div>
   
                             </a>  
-  
+       
+        {% if temporadaOnward %}
                             <a class ="mt-5 mt-md-2  btn badge-onward btn-home" href="{% url 'pages:onward' %}">
                               <div class="contenedorBotonOnward">
-                                <img class="btnCasita mt-1 float-left" src="{% static 'core/img/icono-onward.png' %}" alt="">
+                                <img class="btnCasita mt-1 float-left" src="{% static 'core/img/icono-Onward.png' %}" alt="">
                               <p class=" mb-3 float-left" > VIAJES <br> <b>ONWARD</b>
                               </p>
                             </div>  
                               </a>  
- 
+        {% endif %}
 
                           </div>
                     {% endif %}
