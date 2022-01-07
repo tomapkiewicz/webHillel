@@ -33,8 +33,19 @@
 
     <i class="fas fa-long-arrow-alt-left"></i>
     Volver</a> 
+
+  
+
+
           <h5 class="card-title">{{page.title}} {% if page.modalidad  %}<b> Online</b>{% else %} <b> Presencial</b> {% endif %}</h5>
-        <p class="card-text"> {{page.description|safe}}</p>
+        
+          {% if page.flyer %}
+                <img class="card-img-bottom banerActividades" src="{{page.flyer.url}}" alt="Card image">
+              {% else %}
+                <img class="card-img-bottom banerActividades" src="{% static 'core/img/logohillel.JPG' %}" alt="Card image">
+              {% endif %}
+              
+              <p class="card-text"> {{page.description|safe}}</p>
           <p class="card-text">
             {% if request.user.is_anonymous %}
                 <a class="btn btn-primary btn-block text-white" id="MainNavConfirmarRegistrarse" href="{% url 'login'%}"><b>Anotarse</b></a>
@@ -55,11 +66,7 @@
               {% endif %}
             {% endif %}
 
-              {% if page.flyer %}
-                <img class="card-img-bottom" src="{{page.flyer.url}}" alt="Card image">
-              {% else %}
-                <img class="card-img-bottom" src="{% static 'core/img/logohillel.JPG' %}" alt="Card image">
-              {% endif %}
+              
 
 
             {% if request.user.is_staff %}
