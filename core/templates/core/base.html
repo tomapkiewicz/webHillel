@@ -57,7 +57,7 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
                     <img class="iconoMenu float-left" src="{% static 'core/img/virtual-menu.png' %}" alt="">
                   Online</a>
 
-   {% if temporadaOnward and request.user.is_authenticated %}
+   {% if temporadaOnward  %}
                   <a class="dropdown-item" href="{% url 'pages:onward' %}">
                     <img class="iconoMenu float-left" src="{% static 'core/img/onward-menu.png' %}" alt="">
                   Onward</a>
@@ -66,7 +66,7 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
                 </div>
                 </li>
 
-   {% if temporadaOnward and request.user.is_authenticated %}
+   {% if temporadaOnward  %}
                  <li class="nav-item">
                 <a class="nav-link" href="{% url 'pages:onward' %}"> 
                  <i class="fas fa-plane-departure"></i>     
