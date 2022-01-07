@@ -316,6 +316,18 @@ solid #dadce0; */
   margin-right: 15px;
 
 }
+
+.iconoMenuOnward{
+  max-width: 25px;
+}
+
+.onwardMenu{
+color: rgba(255,255,255,.5);
+}
+
+.banerActividades {
+  max-height: 160px;
+  }
 .iconoMenu2{
   max-width: 25px;
   margin-right: 15px; 
