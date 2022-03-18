@@ -41,7 +41,7 @@
               {% endif %}
             {% endif %}
 
-              {% for page in page_list|dictsort:"id" reversed %}
+              {% for page in page_list|dictsort:"horaDesde" %}
                 {% if day == page.dia  and modalidad == page.modalidad and page.activa %}
                   {% if modalidad == 1 or modalidad == 0 and request.user.profile.provincia == page.provincia or page.provincia is None or request.user.profile.provincia is None %}
                     <div class="row mt-3">

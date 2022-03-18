@@ -70,8 +70,67 @@
 
 
             {% if request.user.is_staff %}
-                <a class="" href="{% url 'pages:update' page.id %}">Editar</a>        
+                <a class="" href="{% url 'pages:update' page.id %}">Editar</a>   
+
+            {% if page.Qanotados > 0 %}
+            
+
+
+    <div class="card  mx-auto border-0 w-20 mb-5" style="max-width:600px">
+      <h5 class="card-title mx-auto mt-4">
+      Anotados
+      </h5>
+      <div class="card-body">
+
+                {% for UserSubscripcion in page.anotados %}
+
+                  <div class="row mt-3">
+                      <div class="col-md-4 ">
+
+         <b><a href="{% url 'profiles:detail' UserSubscripcion.user %}">
+         {{UserSubscripcion.user|truncatechars:"16"}}</a></b>
+   </div>
+   <div class="col-md-4 ">
+                  
+                  {{UserSubscripcion.user.profile.nombre}}
+                  {{UserSubscripcion.user.profile.apellido}}
+                    
+
+              {% if UserSubscripcion.user.profile.whatsapp  %}
+                </div>
+   <div class="col-md-1 ">
+
+              <a href="https://wa.me/+549{{UserSubscripcion.user.profile.whatsapp}}" 
+              class="text-center btn btn-success btn-sm  mt-0" >
+              <i class="fab fa-whatsapp fa-2x"></i>                     
+              </a>
+                </div>
+ 
+              {% endif %}
+    
+   <div class="col-md-2 ">
+              
+            <a class="btn btn-dark " href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id  %}">
+            Observacion</a>
+        </div>
+                  {% if UserSubscripcion.user.profile.observaciones is not none %}
+                   <p> 
+               <div class="col-md-12 ">
+                    {{UserSubscripcion.user.profile.observaciones}}
+                    </div>
+                    </p>
+                  {% endif %}
+           
+
+</div>
+                {% endfor %}
+
             {% endif %}
+
+    </div>
+  </div>
+{% endif %}
+
           </p>
       </div>
     </div>
