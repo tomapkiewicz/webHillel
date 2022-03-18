@@ -92,9 +92,10 @@ class TematicaInteres(models.Model):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE) #,related_name='get_user_profile'
     avatar = models.ImageField(upload_to=custom_upload_to,
-                               null=True, blank=True)
+                               null=True, blank=True)                
+    observaciones = models.CharField(null=True, blank=True, max_length=999)
     apellido = models.CharField(null=True, blank=True, max_length=100)
     nombre = models.CharField(null=True, blank=True, max_length=100)
     whatsapp = models.CharField(verbose_name="Número de Whatsapp", null=True, blank=True, max_length=30)

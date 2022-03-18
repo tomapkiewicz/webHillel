@@ -94,7 +94,7 @@ class PageList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['days'] = Day.objects.all()
+        context['days'] = Day.objects.all().order_by('order')#,'page__horaDesde')
 
         if self.request.user.is_anonymous:
             provincia = None  # Provincia.objects.get(title="CABA")
@@ -118,6 +118,8 @@ class PageList(ListView):
         else:
             context['modalidad'] = 0
         context['modalidadStr'] = 'presencial' if context['modalidad'] == 0 else 'online'
+
+
         return context
 
 

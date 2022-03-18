@@ -7,7 +7,6 @@ from django.db.models.fields import BooleanField
 from datetime import datetime
 from location.models import Provincia
 
-
 def custom_upload_to(instance, filename):
     old_instance = Page.objects.filter(pk=instance.pk).first()
     if old_instance is not None:
@@ -160,6 +159,17 @@ class Page(models.Model):
             return subscripcion.count()
         return 0
 
+    @property
+    def anotados(self):
+        subscripcion = Subscription.objects.find_page(self)
+        if subscripcion is None:
+            return 0
+        if len(subscripcion) > 0:
+            return subscripcion
+        return 0
+
+      
+
     def historialHoyCreate(self):
         # Se busca la plantilla de asistencias del día correspondientes a la página
         date = datetime.now()
@@ -260,9 +270,11 @@ class Subscription(models.Model):
         ordering = ['-updated']
 
     def __str__(self):
+        print(self.user)
         if self.user is None:
             return 'Sin datos'
-        return 'Subscripciones'
+        return self.user.username
+
 
 
 class HistorialManager(models.Manager):
