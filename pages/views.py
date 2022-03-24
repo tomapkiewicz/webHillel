@@ -82,9 +82,6 @@ class StaffRequiredMixin(object):
 
 def Onward(request):
     
-    #if request.user.is_authenticated:
-    #    return render(request, 'pages/onward.html')
-    #raise Http404("Usuario no está autenticado")
     return render(request, 'pages/onward.html')
 
 
@@ -317,16 +314,21 @@ def Unregister(request, pk):
 
 
 def Asistencia(request, modalidad):
+
+
     if request.user.is_authenticated:
-        dia = datetime.now().weekday()+1
-        dias = Day.objects.all()
-        pages = Page.objects.all()
+        if request.user.is_staff:
 
-        for day in dias:
-            day.mostrar = Day.HayActividadPresencial_provincia(day, request.user.profile.provincia)
+            dia = datetime.now().weekday()+1
+            dias = Day.objects.all()
+            pages = Page.objects.all()
 
-        return render(request, 'pages/asistencia.html',
-                      {'page_list': pages, 'dia': dia, 'days': dias, 'modalidad': modalidad})
+            for day in dias:
+                day.mostrar = Day.HayActividadPresencial_provincia(day, request.user.profile.provincia)
+
+            return render(request, 'pages/asistencia.html',
+                        {'page_list': pages, 'dia': dia, 'days': dias, 'modalidad': modalidad})
+        raise Http404("Usuario no es staff")
     raise Http404("Usuario no está autenticado")
 
 

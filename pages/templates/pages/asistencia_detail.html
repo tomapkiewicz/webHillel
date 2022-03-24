@@ -33,20 +33,20 @@
         
           <dl>  
             <dt class="text-center mb-2">Marcar los presentes</dt>
-            {% for subscription in subscribers %}           
+            {% for subscription in subscribers|dictsort:"user.profile.apellido" %}           
               <dd> 
               <h5>
                 {% if subscription.user in page.asistentes %}
-                <button id="btn_{{ subscription.user  }}" class="btn btn-success btn-sm btn-block">{{ subscription.user }}</button>
+                <button id="btn_{{ subscription.user  }}" class="btn btn-success btn-sm btn-block">{{ subscription.user.profile.apellido }} {{ subscription.user.profile.nombre }}</button>
                 {% else %}
-                <button id="btn_{{ subscription.user  }}" class="btn btn-dark btn-sm btn-block">{{ subscription.user }}</button>
+                <button id="btn_{{ subscription.user  }}" class="btn btn-dark btn-sm btn-block">{{ subscription.user.profile.apellido }} {{ subscription.user.profile.nombre }}</button>
                 {% endif %}
               </h5>
               </dd>
               <script>
                 var send = document.getElementById("btn_{{ subscription.user  }}");
                 send.addEventListener("click", function(){
-                var usuario = encodeURIComponent(document.getElementById("btn_{{ subscription.user  }}").innerHTML) 
+                var usuario = encodeURIComponent("{{subscription.user}}") 
                 send = document.getElementById("btn_{{ subscription.user  }}");
 
                 var presente = true 
