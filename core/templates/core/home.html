@@ -45,7 +45,18 @@
 
 
                   {% else %}
-                    <h2 class="">Hola {{request.user.profile.user}}!</h2>      
+
+
+                    {% if request.user.profile.nombre is None %} 
+                    
+                    {% else %}
+
+                    <h2 class="">Hola 
+                      {{request.user.profile.nombre}}!
+                    </h2>      
+                    
+                    {% endif %}
+                    
 
                   {% if bitajon %} 
                   

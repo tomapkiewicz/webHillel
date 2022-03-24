@@ -8,6 +8,12 @@ from .models import Profile, PropuestaInteres
 class UserCreationFormWithEmail(UserCreationForm):
     email = forms.EmailField(
         required=True,
+        label = "",
+        help_text="")
+
+    username = forms.EmailField(
+        required=True,
+        label = "Email",
         help_text="Requerido, 254 caracteres como máximo y debe ser válido")
 
     class Meta:
@@ -19,6 +25,11 @@ class UserCreationFormWithEmail(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError(
                 "El email ya está registrado, probá con otro.")
+        
+        username = self.cleaned_data.get("username")
+        if username!=email:
+            raise forms.ValidationError(
+                "Los mails ingresados no son iguales")
         return email
 
 

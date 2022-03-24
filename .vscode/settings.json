@@ -4,9 +4,9 @@
 
     "python.linting.enabled": true,  
     "python.linting.pylintPath": "pylint",
-    "python.linting.pylintEnabled": false,
+    "python.linting.pylintEnabled": true,
     "python.languageServer": "Pylance",
-    "python.linting.pycodestyleEnabled": true, 
+    "python.linting.pycodestyleEnabled": false, 
     "python.analysis.useImportHeuristic": true,    
     "python.linting.pycodestyleArgs": ["--ignore=E501,E226,E116"],
     "python.formatting.autopep8Args": ["--max-line-length=200"],

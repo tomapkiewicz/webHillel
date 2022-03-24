@@ -131,7 +131,14 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
 
             
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'home' %}"> {{request.user}}</a> 
+                <a class="nav-link" href="{% url 'home' %}">
+                  {% if request.user.profile.nombre is None %}
+                   {{request.user}}
+                  {% else  %}
+                    {{request.user.profile.nombre}}
+                  {% endif %}
+
+                  </a> 
               </li>
 
               <li class="nav-item">

@@ -16,7 +16,7 @@
     {% endif %}
 
     {% if 'perfilcompleto' in request.GET %}
-      <div class="alert alert-success alert-dismissible fade show  text-center">
+      <div class="alert alert-warning alert-dismissible fade show  text-center">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <strong>Ahora si!</strong> Ya podés anotarte a la actividad 😎
       </div>
@@ -82,48 +82,40 @@
       </h5>
       <div class="card-body">
 
-                {% for UserSubscripcion in page.anotados %}
+        {% for UserSubscripcion in page.anotados|dictsort:"user.profile.apellido" %}
 
-                  <div class="row mt-3">
-                      <div class="col-md-4 ">
+        <div class="row mt-3">
+        
+          <p class="col-6 ">
 
-         <b><a href="{% url 'profiles:detail' UserSubscripcion.user %}">
-         {{UserSubscripcion.user|truncatechars:"16"}}</a></b>
-   </div>
-   <div class="col-md-4 ">
-                  
-                  {{UserSubscripcion.user.profile.nombre}}
-                  {{UserSubscripcion.user.profile.apellido}}
-                    
+         <b><a href="{% url 'profiles:detail' UserSubscripcion.id  %}">
+          {{UserSubscripcion.user.profile.apellido|truncatechars:"16"}}
+          {{UserSubscripcion.user.profile.nombre|truncatechars:"16"}}</a></b>
+         </p>
 
-              {% if UserSubscripcion.user.profile.whatsapp  %}
-                </div>
-   <div class="col-md-1 ">
-
-              <a href="https://wa.me/+549{{UserSubscripcion.user.profile.whatsapp}}" 
-              class="text-center btn btn-success btn-sm  mt-0" >
-              <i class="fab fa-whatsapp fa-2x"></i>                     
-              </a>
-                </div>
- 
-              {% endif %}
+            {% if UserSubscripcion.user.profile.whatsapp  %}
+              <p class="col-2 ">
+                <a href="https://wa.me/+549{{UserSubscripcion.user.profile.whatsapp}}" 
+                class="text-center btn btn-success btn-sm  mt-0" >
+                <i class="fab fa-whatsapp fa-2x"></i>                     
+                </a>
+              </p> 
+            {% endif %}
     
-   <div class="col-md-2 ">
-              
+           <p class="col-2 ">      
             <a class="btn btn-dark " href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id  %}">
             Observacion</a>
-        </div>
-                  {% if UserSubscripcion.user.profile.observaciones is not none %}
-                   <p> 
-               <div class="col-md-12 ">
+            </p>
+              {% if UserSubscripcion.user.profile.observaciones is not none %}
+                  
+              <p class="col-md-12 ">
                     {{UserSubscripcion.user.profile.observaciones}}
-                    </div>
-                    </p>
+              </p>
                   {% endif %}
            
 
-</div>
-                {% endfor %}
+      </div>
+        {% endfor %}
 
             {% endif %}
 
