@@ -2,7 +2,7 @@
 Calendario web Hillel
 
 
-	Log  06-04
+	Log  06-04-2022
 	• Corrección del CSV
 	• CSV: Agregar el mail en lista de perfiles
 	• Que el mail aparezca en la página del detalle del perfil
