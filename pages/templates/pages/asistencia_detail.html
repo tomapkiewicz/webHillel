@@ -61,6 +61,15 @@
 
                   fetch(url, {'credentials':'include'}).then(response => response.json()).then(function(data){
                     console.log(data)
+                    toogleRegistro(userBtn, yaRegistrado)
+                    })
+                  }
+                })
+              </script>
+            {% endfor %}
+            <script>
+
+              function toogleRegistro(userBtn,yaRegistrado){
                     var qanotados = 0
                     var qasistencias = 0
                     qasistencias = document.getElementById("asistencias").innerHTML
@@ -77,11 +86,8 @@
                       document.getElementById("asistencias").innerHTML = qasistencias 
                       qanotados =document.getElementById("anotados").innerHTML
                       document.getElementById("info").innerHTML = qasistencias + "/" + qanotados
-                    })
-                  }
-                })
-              </script>
-            {% endfor %}
+              }
+            </script>
           </dl>
             
         {% endif %}  

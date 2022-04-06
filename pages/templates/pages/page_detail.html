@@ -88,7 +88,7 @@
         
           <p class="col-6 ">
 
-         <b><a href="{% url 'profiles:detail' UserSubscripcion.id  %}">
+         <b><a href="{% url 'profiles:detail' UserSubscripcion.user.username  %}">
           {{UserSubscripcion.user.profile.apellido|truncatechars:"16"}}
           {{UserSubscripcion.user.profile.nombre|truncatechars:"16"}}</a></b>
          </p>
