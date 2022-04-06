@@ -32,7 +32,8 @@
               <h3>{{profile.user}}</h3>
                  {% if profile.nombre and profile.apellido  %}
                  <p>{{profile.nombre}} {{profile.apellido}}</p>
-        
+                 <p>{{profile.user.email}}</p>
+                 
 
                  {% endif %} 
                 {% if profile.fechaNacimiento  %}<p>{{profile.edad}} años</p> {% endif %}
@@ -66,12 +67,13 @@
 
           <!-- Modal Header -->
           <div class="modal-header">
-            <h4 class="modal-title">{{profile.nombre}} {{profile.apellido}} </h4>
+            <h4 class="modal-title">{{profile.nombre}} {{profile.apellido}}</h4>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
 
           <!-- Modal body -->
           <div class="modal-body">   
+        <p>Email: {{profile.email}} </p>
         <p>Nació el {{profile.fechaNacimiento}} ({{profile.edad}} Años)</p>
         <p>{{profile.provincia}}</p>
          {% if profile.instagram is not None %}

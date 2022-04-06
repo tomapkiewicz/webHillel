@@ -316,9 +316,10 @@ def Unregister(request, pk):
 def Asistencia(request, modalidad):
 
 
-    if request.user.is_authenticated:
-        if request.user.is_staff:
+    if request.user.is_authenticated:   
 
+        if request.user.groups.filter(name='BITAJON').exists() or request.user.is_staff:
+            
             dia = datetime.now().weekday()+1
             dias = Day.objects.all()
             pages = Page.objects.all()
@@ -328,7 +329,7 @@ def Asistencia(request, modalidad):
 
             return render(request, 'pages/asistencia.html',
                         {'page_list': pages, 'dia': dia, 'days': dias, 'modalidad': modalidad})
-        raise Http404("Usuario no es staff")
+        raise Http404("Usuario no es bitajon/staff")
     raise Http404("Usuario no está autenticado")
 
 
@@ -399,7 +400,8 @@ def WriteRowAsistencias(h, writer):
         Profile.objects.get_or_create(user=anotado)
 
         writer.writerow([h.page.titleSTR, h.page.dia, h.page.horaDesde,
-                         h.fecha, anotado, asistio, asis])
+                         h.fecha, anotado, anotado.profile.nombre,
+                        anotado.profile.apellido,anotado.profile.whatsapp,anotado.email , asistio, asis])
 
 
 def DescargarAsistencias(request, pk):
@@ -410,7 +412,7 @@ def DescargarAsistencias(request, pk):
         page.titleSTR + '-' + str(datetime.now()) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect='excel')
-    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?', 'Asis'])
+    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular','Mail', 'Asistio?', 'Asis'])
 
     h = Page.historialHoy(page)
 
@@ -425,7 +427,7 @@ def DescargarHistoricoAsistenciasALLDetail(request):
         'historico-' + str(datetime.now()) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect='excel')
-    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Asistio?', 'Asis'])
+    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado','Nombre', 'Apellido', 'Celular','Mail', 'Asistio?', 'Asis'])
 
     historiales = Historial.objects.all()
     for h in historiales:
@@ -503,7 +505,7 @@ def DescargarPerfiles(request):
         str(datetime.now()) + '.csv'
     writer = csv.writer(response, dialect='excel')
     response.write(u'\ufeff'.encode('utf8'))
-    writer.writerow(['Usuario', 'Nombre', 'Apellido', 'Fecha de nacimiento', 'Edad', 'Celular', 'Instagram',
+    writer.writerow(['Usuario','Mail', 'Nombre', 'Apellido', 'Fecha de nacimiento', 'Edad', 'Celular', 'Instagram',
                      'Onward', 'Taglit', 'Cómo conoció Hillel', 'Estudios', 'Experiencia comunitaria', 'tematicasInteres', 'propuestasInteres'])
 
     profiles = Profile.objects.all()
@@ -512,7 +514,7 @@ def DescargarPerfiles(request):
         if p is None:
             return Http404("Perfil no encontrado")
         if p.validado:
-            writer.writerow([p, p.nombre, p.apellido, p.fechaNacimiento, p.edad, p.whatsapp, p.instagram,
+            writer.writerow([p,p.user.email ,p.nombre, p.apellido, p.fechaNacimiento, p.edad, p.whatsapp, p.instagram,
                              p.onward, p.taglit, p.comoConociste, p.estudios, p.experienciaComunitaria, p.tematicasInteresSTR, p.propuestasInteresSTR])
     return response
 

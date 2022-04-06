@@ -7,8 +7,7 @@ from pages.models import Day, Category
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'nombre', 'apellido', 'edad', 'whatsapp', 'provincia',)
-    readonly_fields = ('updated', 'created')
-    search_fields = ('page__title', 'fecha')
+    search_fields = ('apellido','nombre','user__username','provincia__title')
 
 
 class FechaTaglitAdmin(admin.ModelAdmin):

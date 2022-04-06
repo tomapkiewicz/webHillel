@@ -32,7 +32,7 @@
 
             {% for page in page_list|dictsort:"id" reversed %}
               {% if  day.order == dia or day.order > 7 %}
-                {% if day == page.dia  and modalidad == page.modalidad %}
+                {% if day == page.dia  and modalidad == page.modalidad and page.activa %}
                   {% if modalidad == 1 or modalidad == 0 and request.user.profile.provincia == page.provincia %}
 
                   <div class="row mt-3">
@@ -45,10 +45,8 @@
                         </dt>
                         <dd class=" mb-0 text-center">
                       
-                          {% if request.user.is_staff or bitajon %}
                             <span class="text-left badge badge-pill badge-info">{{page.Qasistentes}}/{{page.Qanotados}}</span>
-                          {% endif %}
- 
+                         
                           De {{page.horaDesde}}
                           {% if page.horaHasta > 0 %}
                             a {{page.horaHasta}}

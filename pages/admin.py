@@ -1,6 +1,23 @@
 from django.contrib import admin
-from .models import Page, Subscription, Historial, Responsable, Colaborador, Cuestionario, CuestionarioRespuesta
 from django.contrib.admin.models import LogEntry
+from .models import Page, Subscription, Historial, Responsable, Colaborador, Cuestionario, CuestionarioRespuesta
+from django.contrib.admin import  SimpleListFilter
+
+class ModalidadFilter(SimpleListFilter):
+    title = "Modalidad"  # a label for our filter
+    parameter_name = "modalidad"  # you can put anything here
+
+    def lookups(self, request, model_admin):
+        # This is where you create filter options; we have two:
+        return [
+            (0, "Presencial"),
+            (1, "Online"),
+        ]
+
+    def queryset(self, request, queryset):
+        # This is where you process parameters selected by use via filter options:
+        if self.value() is None: return queryset.all() 
+        return queryset.distinct().filter(modalidad=self.value())
 
 
 # Register your models here.
@@ -25,6 +42,7 @@ class HistorialAdmin(admin.ModelAdmin):
 class PageAdmin(admin.ModelAdmin):
     list_display = ('actividadSTR', 'dia', 'provincia', 'cupo', 'Qanotados', 'secreta', 'activa', 'horaDesde')
     search_fields = ('title', 'dia__day', 'activa', 'secreta', 'provincia__title',)
+    list_filter = (ModalidadFilter, 'dia','activa','secreta','horaDesde','cupo','provincia')
 
     class Media:
         css = {
