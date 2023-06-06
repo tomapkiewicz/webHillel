@@ -18,11 +18,11 @@
               {% if profile.whatsapp  %}
               <a href="https://wa.me/+549{{profile.whatsapp}}" class="text-center btn btn-success btn-sm btn-block mt-3" >
               <i class="fab fa-whatsapp fa-2x"></i>
-                     
+
               </a>
               <a class="btn btn-dark btn-block text-white mt-1 text-center" id="MainNavDatos" data-target="#ModalDatos" data-toggle="modal">
               <i class="fas fa-info-circle text-center"></i>
-              
+
               </a>
 
               {% endif %}
@@ -33,25 +33,25 @@
                  {% if profile.nombre and profile.apellido  %}
                  <p>{{profile.nombre}} {{profile.apellido}}</p>
                  <p>{{profile.user.email}}</p>
-                 
 
-                 {% endif %} 
+
+                 {% endif %}
                 {% if profile.fechaNacimiento  %}<p>{{profile.edad}} años</p> {% endif %}
 
 
               {% if profile.subscription  %}
               <h3>Anotado en:</h3>
-              
- 
+
+
                 <dl class="row">
-                {% for sub in profile.subscription %}                                 
+                {% for sub in profile.subscription %}
                    <dt class="col-sm-4">{{sub}}</dt>
                    <dd class="col-sm-8">{% if sub.dia.order < 8 %}Los{% endif %} {{sub.dia}} De {{sub.horaDesde}} a {{sub.horaHasta}} Hs.{% if sub.modalidad  %}<b> Online</b>{% endif %}</dd>
                 {% endfor %}
                 </dl>
-                  
 
-                  
+
+
               {% endif %}
 
             </div>
@@ -72,8 +72,8 @@
           </div>
 
           <!-- Modal body -->
-          <div class="modal-body">   
-        <p>Email: {{profile.email}} </p>
+          <div class="modal-body">
+        <p>Email: {{profile.user.email}} </p>
         <p>Nació el {{profile.fechaNacimiento}} ({{profile.edad}} Años)</p>
         <p>{{profile.provincia}}</p>
          {% if profile.instagram is not None %}
@@ -82,39 +82,39 @@
         <p>Onward: {{profile.onward}}</p>
         <p>Taglit: {{profile.taglit}}</p>
         <p>Como conoció Hillel: {{profile.comoConociste}}</p>
-        <p>Estudios: {{profile.estudios}}</p> 
+        <p>Estudios: {{profile.estudios}}</p>
         <p>Experiencia comunitaria: {{profile.experienciaComunitaria}}</p>
-    
+
         {% if profile.categories.all is not None %}
       <!--   <p>Intereses: </p>
-          {% for interes in profile.categories.all %} 
+          {% for interes in profile.categories.all %}
             <p class="pl-2"><i>{{interes}}</i></p>
           {% endfor %}
         {% endif %}
         -->
         {% if profile.propuestasInteres.all is not None %}
          <p>Propuestas de interés: </p>
-          {% for interes in profile.propuestasInteres.all %} 
+          {% for interes in profile.propuestasInteres.all %}
             <p class="pl-2"><i>{{interes}}</i></p>
           {% endfor %}
         {% endif %}
 
         {% if profile.tematicasInteres.all is not None %}
          <p>Temáticas de interes: </p>
-          {% for interes in profile.tematicasInteres.all %} 
+          {% for interes in profile.tematicasInteres.all %}
             <p class="pl-2"><i>{{interes}}</i></p>
           {% endfor %}
         {% endif %}
           </div>
 
           <!-- Modal footer -->
-          <div class="modal-footer"> 
+          <div class="modal-footer">
           <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
           </div>
         </div>
       </div>
-    </div>  
-  
+    </div>
+
   </div>
 </main>
 {% endblock %}
