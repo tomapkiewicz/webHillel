@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='profile',
             name='onward',
-            field=models.ForeignKey(blank=True, default=0, null=True, on_delete=django.db.models.deletion.CASCADE, to='registration.fechaonward', verbose_name='¿Viajaste a Onward? ¿Cuándo?'),
+            field=models.ForeignKey(blank=True, default=0, null=True, on_delete=django.db.models.deletion.CASCADE, to='registration.fechaonward', verbose_name='¿Viajaste o vas a viajar a Onward? ¿Cuándo?'),
         ),
         migrations.AlterField(
             model_name='profile',
             name='taglit',
-            field=models.ForeignKey(blank=True, default=0, null=True, on_delete=django.db.models.deletion.CASCADE, to='registration.fechataglit', verbose_name='¿Viajaste a Taglit? ¿Cuándo?'),
+            field=models.ForeignKey(blank=True, default=0, null=True, on_delete=django.db.models.deletion.CASCADE, to='registration.fechataglit', verbose_name='¿Viajaste o vas a viajar a Taglit? ¿Cuándo?'),
         ),
     ]
