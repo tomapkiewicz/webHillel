@@ -61,16 +61,22 @@ class TemporadaOnward(models.Model):
         return "Temporada: Activa" if self.temporada else "Temporada: Inactiva"
 
 
+class RandomOrderManager(models.Manager):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.order_by('?')
+
 class PropuestaInteres(models.Model):
     nombre = models.CharField(verbose_name="Propuesta", max_length=200)
     order = models.SmallIntegerField(verbose_name="Orden", default=0)
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
+    objects = RandomOrderManager()
 
     class Meta:
         verbose_name = "PropuestaInteres"
         verbose_name_plural = "PropuestasInteres"
-        ordering = ['order']
+    
 
     def __str__(self):
         return self.nombre
@@ -81,11 +87,11 @@ class TematicaInteres(models.Model):
     order = models.SmallIntegerField(verbose_name="Orden", default=0)
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
+    objects = RandomOrderManager()
 
     class Meta:
         verbose_name = "TematicaInteres"
         verbose_name_plural = "TematicasInteres"
-        ordering = ['order']
 
     def __str__(self):
         return self.nombre
