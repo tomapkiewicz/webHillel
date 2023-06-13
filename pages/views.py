@@ -284,21 +284,28 @@ def Register(request, pk):
 
     # Mail automático
     modalidad = " Online" if page.modalidad else " Presencial"
-    asunto = "Te esperamos en " + page.title + modalidad + "!"
+    asunto = "Te esperamos en " + page.title + modalidad + "!" if not page.con_mail_personalizado else page.asunto_mail
     to_mail = [request.user.email]
     from_mail = 'Hillel Argentina <no_responder@domain.com>'
     host = request.get_host()
     host = host if "127.0.0.1" in host else "https://" + host
     textoExtraMail = page.textoExtraMail if page.textoExtraMail is not None else page.description
-    html_message = loader.render_to_string(
-        'mail_body.html',
-        {
-            'user_name': 'Hola ' + request.user.username + '!',
-            'subject': 'Te anotaste en ' + page.title + modalidad + ' a las ' + str(page.horaDesde) + 'HS.' + ' Podés darte de baja acá: '+host+'/pages/'+str(page.id),
-            'description': textoExtraMail,
-        }
-    )
-
+    if page.con_mail_personalizado:
+        html_message = loader.render_to_string(
+            'custom_mail_body.html',
+            {
+                'mail_body': page.cuerpo_mail,
+            }
+        )
+    else:
+        html_message = loader.render_to_string(
+            'mail_body.html',
+            {
+                'user_name': 'Hola ' + request.user.username + '!',
+                'subject': 'Te anotaste en ' + page.title + modalidad + ' a las ' + str(page.horaDesde) + 'HS.' + ' Podés darte de baja acá: '+host+'/pages/'+str(page.id),
+                'description': textoExtraMail,
+            }
+        )
     send_html_mail(asunto, html_message, to_mail, from_mail)
     return redirect(reverse_lazy('home') + '?ok')
 
