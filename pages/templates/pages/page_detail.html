@@ -161,7 +161,11 @@
 
           <!-- Modal Header -->
           <div class="modal-header">
+            {% if page.con_preinscripcion  %}
+            <h4 class="modal-title">¿Querés preinscribirte a {{page.title}}?</h4>
+            {% else %}
             <h4 class="modal-title">Confirmá</h4>
+            {% endif %}
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
 
@@ -304,8 +308,7 @@
             {% endif %}
 
             {% if page.con_preinscripcion  %}
-            Te recordamos que esto es una preinscripción a {{page.title}}. 
-            Te vamos a escribir por Whatsapp para confirmar tu cupo por si o por no, dentro de las 72 horas hábiles al inicio de la actividad.
+            Te recordamos que esto es una preinscripción. 📱Te vamos a escribir por Whatsapp para confirmar tu cupo por si o por no, al menos 3 días antes de la actividad.
             <br><br>
             {% else %}
             ¿Te esperamos {% if overlaps %} igual {% endif %}en {{page.title}} {% if page.modalidad  %}<b> Online</b>{% else %} <b> Presencial</b> {% endif %}
@@ -327,7 +330,7 @@
 
             <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
             {% else %}
-            <input type="submit" class="btn btn-success" value="Confirmar" />    
+            <input type="submit" class="btn btn-success" value="Preinscribirme" />    
             </form>              
             {% endif %}
           </div>
