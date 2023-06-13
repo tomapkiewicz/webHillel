@@ -100,6 +100,10 @@ class Page(models.Model):
     horaHasta = models.TimeField(verbose_name="Hora hasta", null=True, blank=True, auto_now=False, auto_now_add=False,)
     description = RichTextField(verbose_name="Descripción", null=True, blank=True)
     textoExtraMail = RichTextField(verbose_name="Texto extra del mail", null=True, blank=True)
+    con_mail_personalizado = BooleanField(verbose_name="Tiene mail personalizado?", default=False)
+    asunto_mail = models.CharField(verbose_name="Asunto del mail", null=True, blank=True, default="", max_length=200)
+    cuerpo_mail= RichTextField(verbose_name="Cuerpo del mail", null=True, blank=True)
+
     flyer = models.ImageField(upload_to=custom_upload_to,
                               null=True, blank=True)
     dia = models.ForeignKey(Day, verbose_name='dia', null=True, on_delete=models.CASCADE)
@@ -115,6 +119,7 @@ class Page(models.Model):
 
     secreta = BooleanField(verbose_name="Tiene clave?", default=0)
     clave = models.CharField(verbose_name="Clave", null=True, blank=True, default="", max_length=200)
+    con_preinscripcion = BooleanField(verbose_name="Tiene preinscripción?", default=False)
 
     objects = PagesManager()
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)

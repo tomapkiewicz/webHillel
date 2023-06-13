@@ -302,21 +302,34 @@
            {% if overlaps %}
             <b>¡Estás anotadx a otra actividad en el mismo horario! 🤪 </b> <br>
             {% endif %}
+
+            {% if page.con_preinscripcion  %}
+            Te recordamos que esto es una preinscripción a {{page.title}}. 
+            Te vamos a escribir por Whatsapp para confirmar tu cupo por si o por no, dentro de las 72 horas hábiles al inicio de la actividad.
+            <br><br>
+            {% else %}
             ¿Te esperamos {% if overlaps %} igual {% endif %}en {{page.title}} {% if page.modalidad  %}<b> Online</b>{% else %} <b> Presencial</b> {% endif %}
             {% if page.dia.order < 8 %}
               el {{page.dia}}
             {% endif %}
             a las {{page.horaDesde}} HS?  
+            {% endif %}
             <br><br>
 
           </div>
 
           <!-- Modal footer -->
+
           <div class="modal-footer">
+            {% if not page.con_preinscripcion  %}
                  <input type="submit" class="btn btn-success" value="Si" />    
                      </form>              
 
-          <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+            {% else %}
+            <input type="submit" class="btn btn-success" value="Confirmar" />    
+            </form>              
+            {% endif %}
           </div>
         </div>
       </div>
