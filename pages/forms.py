@@ -7,7 +7,7 @@ class PageForm(forms.ModelForm):
     class Meta:
         model = Page
         fields = ['title', 'description', 'textoExtraMail', 'dia', 'horaDesde', 'horaHasta', 'flyer', 'cupo',
-                  'modalidad', 'categories', 'provincia', 'secreta', 'clave', 'responsable', 'colaborador', ]
+                  'modalidad', 'categories', 'provincia','con_preinscripcion', 'secreta', 'clave' , 'responsable', 'colaborador',]
         widgets = {
             'title': forms.TextInput(attrs={'required': True, 'class': 'form-control', 'placeholder': 'Título'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
@@ -22,8 +22,10 @@ class PageForm(forms.ModelForm):
             'responsable': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Responsable'}),
             'colaborador': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Colaborador'}),
             'provincia': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Provincia'}),
+            'con_preinscripcion': forms.CheckboxInput(attrs={'class': 'form-control', 'placeholder': 'Es con preinscripcion?', 'initial': 0, 'default': 0}),
             'secreta': forms.CheckboxInput(attrs={'class': 'form-control', 'placeholder': 'Es secreta?', 'initial': 0, 'default': 0}),
             'clave': forms.TextInput(attrs={'class': 'form-control', 'placeholder': ''}),
+            
         }
         labels = {'title': '', 'description': ''}
 

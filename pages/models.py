@@ -115,6 +115,7 @@ class Page(models.Model):
 
     secreta = BooleanField(verbose_name="Tiene clave?", default=0)
     clave = models.CharField(verbose_name="Clave", null=True, blank=True, default="", max_length=200)
+    con_preinscripcion = BooleanField(verbose_name="Tiene preinscripción?", default=False)
 
     objects = PagesManager()
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
