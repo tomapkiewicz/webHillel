@@ -70,14 +70,12 @@
                   {% else %}
                     
                     
-                    {% if request.user.profile.subscription  %}
+                    {% if request.user.profile.active_subscription  %}
                       <h2 class="lead mt-4">Te esperamos en:</h2>
                       <dl class="row mt-5">
-                        {% for page in request.user.profile.subscription %}    
-                          {%if page.activa %}                             
+                        {% for page in request.user.profile.active_subscription %}                         
                           <dt class="col-sm-6 text-center"><a class="text-dark" href="{% url 'pages:page' page.id page.title|slugify %}">{{page}} </a></dt>
                           <dd class="col-sm-6 text-center">{% if page.dia.order < 8 %}Los{% endif %} {{page.dia}} De {{page.horaDesde}} a {{page.horaHasta}} Hs.{% if page.modalidad  %}<b> Online</b>{% else %} <b>Presencial</b> {% endif %}</dd>
-                          {%endif%}
                         {% endfor %}             
                       </dl>
                     {%else%}

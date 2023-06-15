@@ -136,6 +136,15 @@ class Profile(models.Model):
         if subscription.pages is None:
             return
         return subscription.pages.all()
+    
+    @property
+    def active_subscription(self):
+        subscription = Subscription.objects.find(self.user)
+        if subscription is None:
+            return
+        if subscription.pages is None:
+            return
+        return subscription.pages.filter(activa=True)
 
     @property
     def edad(self):
