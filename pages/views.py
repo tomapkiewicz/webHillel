@@ -20,6 +20,7 @@ from django.http import HttpResponse
 import csv
 from location.models import Provincia
 from social.models import MailContacto
+import pytz
 
 
 def CuposAgotados(request, pk):
@@ -326,8 +327,8 @@ def Asistencia(request, modalidad):
     if request.user.is_authenticated:   
 
         if request.user.groups.filter(name='BITAJON').exists() or request.user.is_staff:
-            
-            dia = datetime.now().weekday()+1
+            local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+            dia = datetime.now(local_tz).weekday()+1
             dias = Day.objects.all()
             pages = Page.objects.all()
 
@@ -356,8 +357,8 @@ def AsistenciaAdd(request, pk):
         user = User.objects.get(username=username)
         if username:
             page = get_object_or_404(Page, pk=pk)
-
-            hoy = datetime.now()
+            local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+            hoy = datetime.now(local_tz)
             historial = Historial.objects.find_or_create(page, hoy)
             historial.asistentes.add(user)
 
@@ -380,8 +381,8 @@ def AsistenciaRemove(request, pk):
         user = User.objects.get(username=username)
         if username:
             page = get_object_or_404(Page, pk=pk)
-
-            hoy = datetime.now()
+            local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+            hoy = datetime.now(local_tz)
             historial = Historial.objects.find_or_create(page, hoy)
             historial.asistentes.remove(user)
 
@@ -415,8 +416,9 @@ def DescargarAsistencias(request, pk):
     page = get_object_or_404(Page, pk=pk)
 
     response = HttpResponse(content='')
+    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
     response['Content-Disposition'] = 'attachment; filename=asistencias-' + \
-        page.titleSTR + '-' + str(datetime.now()) + '.csv'
+        page.titleSTR + '-' + str(datetime.now(local_tz)) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect='excel')
     writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular','Mail', 'Asistio?', 'Asis'])
@@ -428,10 +430,10 @@ def DescargarAsistencias(request, pk):
 
 
 def DescargarHistoricoAsistenciasALLDetail(request):
-
+    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
     response = HttpResponse(content='')
     response['Content-Disposition'] = 'attachment; filename=asistenciasDETALLE-' + \
-        'historico-' + str(datetime.now()) + '.csv'
+        'historico-' + str(datetime.now(local_tz)) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect='excel')
     writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado','Nombre', 'Apellido', 'Celular','Mail', 'Asistio?', 'Asis'])
@@ -444,11 +446,11 @@ def DescargarHistoricoAsistenciasALLDetail(request):
 
 
 def DescargarHistoricoAsistenciasALLItem(request):
-
+    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
     # Genera un archivo por actividad-fecha y otro por actividad-fecha-asistente
     responseB = HttpResponse(content='')
     responseB['Content-Disposition'] = 'attachment; filename=asistenciasITEM-' + \
-        'historico-' + str(datetime.now()) + '.csv'
+        'historico-' + str(datetime.now(local_tz)) + '.csv'
     responseB.write(u'\ufeff'.encode('utf8'))
     writerB = csv.writer(responseB, dialect='excel')
     writerB.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Qanotados', 'Qasistentes'])
@@ -463,10 +465,10 @@ def DescargarHistoricoAsistenciasALLItem(request):
 
 def DescargarHistoricoAsistencias(request, pk):
     page = get_object_or_404(Page, pk=pk)
-
+    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
     response = HttpResponse(content='')
     response['Content-Disposition'] = 'attachment; filename=asistencias-' + \
-        page.titleSTR + '-all-' + str(datetime.now()) + '.csv'
+        page.titleSTR + '-all-' + str(datetime.now(local_tz)) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect='excel')
     writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?', 'Asis'])
@@ -481,9 +483,10 @@ def DescargarHistoricoAsistencias(request, pk):
 
 
 def DescargarActividades(request):
+    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
     response = HttpResponse(content='')
     response['Content-Disposition'] = 'attachment; filename=actividades-' + \
-        str(datetime.now()) + '.csv'
+        str(datetime.now(local_tz)) + '.csv'
 
     response.write(u'\ufeff'.encode('utf8'))
 
@@ -507,9 +510,10 @@ def DescargarActividades(request):
 
 
 def DescargarPerfiles(request):
+    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
     response = HttpResponse(content='')
     response['Content-Disposition'] = 'attachment; filename=perfiles-' + \
-        str(datetime.now()) + '.csv'
+        str(datetime.now(local_tz)) + '.csv'
     writer = csv.writer(response, dialect='excel')
     response.write(u'\ufeff'.encode('utf8'))
     writer.writerow(['Usuario','Mail', 'Nombre', 'Apellido', 'Fecha de nacimiento', 'Edad', 'Celular', 'Instagram',
@@ -527,9 +531,10 @@ def DescargarPerfiles(request):
 
 
 def DescargarCuestionarios(request):
+    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
     response = HttpResponse(content='')
     response['Content-Disposition'] = 'attachment; filename=Cuestionarios-' + \
-        str(datetime.now()) + '.csv'
+        str(datetime.now(local_tz)) + '.csv'
     writer = csv.writer(response, dialect='excel')
     response.write(u'\ufeff'.encode('utf8'))
     writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4',
@@ -550,9 +555,10 @@ def DescargarCuestionarios(request):
 
 
 def DescargarCuestionariosRespuestas(request):
+    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
     response = HttpResponse(content='')
     response['Content-Disposition'] = 'attachment; filename=Cuestionarios-Respuestas-' + \
-        str(datetime.now()) + '.csv'
+        str(datetime.now(local_tz)) + '.csv'
     writer = csv.writer(response, dialect='excel')
     response.write(u'\ufeff'.encode('utf8'))
     writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4', 'Pregunta5',

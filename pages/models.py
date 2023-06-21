@@ -5,6 +5,7 @@ from django.db.models.deletion import CASCADE
 from django.db.models.fields import BooleanField
 
 from datetime import datetime
+import pytz
 from location.models import Provincia
 
 def custom_upload_to(instance, filename):
@@ -35,6 +36,7 @@ class Colaborador(models.Model):
 class Day(models.Model):
     day = models.CharField(verbose_name="Día", max_length=200)
     order = models.SmallIntegerField(verbose_name="Orden", default=0)
+    mostrar = models.BooleanField(verbose_name="Mostrar", default=True)
 
     class Meta:
         verbose_name = "Día"
@@ -108,16 +110,16 @@ class Page(models.Model):
                               null=True, blank=True)
     dia = models.ForeignKey(Day, verbose_name='dia', null=True, on_delete=models.CASCADE)
     cupo = models.SmallIntegerField(verbose_name="Cupo", default=0)
-    modalidad = BooleanField(verbose_name="Online", default=0)
-    nuevo = BooleanField(verbose_name="Nuevo", default=0)
-    activa = BooleanField(verbose_name="Activa", default=1)
+    modalidad = BooleanField(verbose_name="Online", default=False)
+    nuevo = BooleanField(verbose_name="Nuevo", default=False)
+    activa = BooleanField(verbose_name="Activa", default=True)
     categories = models.ManyToManyField(Category, verbose_name='categorias', related_name='get_pages', blank=True)
 
     provincia = models.ForeignKey(Provincia, on_delete=models.CASCADE, null=True, blank=True)
     responsable = models.ForeignKey(Responsable, on_delete=models.CASCADE, null=True, blank=True)
     colaborador = models.ForeignKey(Colaborador, on_delete=models.CASCADE, null=True, blank=True)
 
-    secreta = BooleanField(verbose_name="Tiene clave?", default=0)
+    secreta = BooleanField(verbose_name="Tiene clave?", default=False)
     clave = models.CharField(verbose_name="Clave", null=True, blank=True, default="", max_length=200)
     con_preinscripcion = BooleanField(verbose_name="Tiene preinscripción?", default=False)
 
@@ -177,12 +179,14 @@ class Page(models.Model):
 
     def historialHoyCreate(self):
         # Se busca la plantilla de asistencias del día correspondientes a la página
-        date = datetime.now()
+        local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+        date = datetime.now(local_tz)
         return Historial.objects.find_or_create(page=self, date=date)
 
     def historialHoy(self):
         # Se busca la plantilla de asistencias del día correspondientes a la página
-        date = datetime.now()
+        local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+        date = datetime.now(local_tz)
         historial = Historial.objects.find(page=self, date=date)
         if historial is None:
             return None
