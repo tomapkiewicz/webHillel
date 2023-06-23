@@ -93,31 +93,38 @@ class PageList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['days'] = Day.objects.order_by('order')#,'page__horaDesde')
+        days = Day.objects.order_by('order')
 
         if self.request.user.is_anonymous:
-            provincia = None  # Provincia.objects.get(title="CABA")
+            provincia = None
         else:
             profile = Profile.objects.get_or_create(user=self.request.user)
             if profile is None:
-                provincia = None  # Provincia.objects.get(title="CABA")
+                provincia = None
             else:
                 provincia = self.request.user.profile.provincia
 
         context['provincia'] = provincia
 
-        for day in context['days']:
+        active_pages_map = []
+        for day in days:
+            active_pages = Page.objects.filter(dia=day, activa=True).order_by('horaDesde')
+            if active_pages:
+                active_pages_map.append([day, active_pages])
+
+        context['active_pages_map'] = active_pages_map
+
+        for day in context['active_pages_map']:
             if provincia is None:
-                day.mostrar = day.HayActividadPresencial
+                day[0].mostrar = day[0].HayActividadPresencial
             else:
-                day.mostrar = Day.HayActividadPresencial_provincia(day, provincia)
+                day[0].mostrar = Day.HayActividadPresencial_provincia(day[0], provincia)
 
         if len(self.kwargs) > 0:
             context['modalidad'] = self.kwargs['modalidad']
         else:
             context['modalidad'] = 0
         context['modalidadStr'] = 'presencial' if context['modalidad'] == 0 else 'online'
-
 
         return context
 

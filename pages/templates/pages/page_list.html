@@ -2,14 +2,14 @@
 {% load static %}
 {% block title %}Actividades{% endblock %}
 {% block content %}
-  {% include 'pages/includes/pages_menu.html' %}
-  <main role="main">
+{% include 'pages/includes/pages_menu.html' %}
+<main role="main">
 
   <!-- ALERTAS !-->
 
   {% if 'created' in request.GET %}
   <div class="alert alert-success alert-dismissible streched-link fade show text-center">
-   <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
     <strong>Éxito!</strong> actividad creada correctamente
   </div>
   {% endif %}
@@ -17,90 +17,91 @@
 
   <!-- FIN DE ALERTAS !-->
 
-    <div class="container"    >
-      <div class="card mx-auto border-1 mb-5"    >
-          <div class="card-body mx-auto col-md-8"  >     
-            <h3  class="text-center font-weight-bold">CALENDARIO SEMANAL</h3>
-            <h3 class="text-center">
-            {% if modalidad  %}
-              <a href="{% url 'pages:pages' 0 %}" class="text-center badge badge-pill text-white badge-online">ONLINE</a> 
-              {% else %}
-              <a href="{% url 'pages:pages' 1 %}" class="text-center badge badge-pill text-white badge-presencial">PRESENCIAL</a>
-              <h4 class="text-center">{%if request.user.profile.provincia is not None  %} {{provincia}} {% else %} Argentina {% endif %}</h4>
-              {% endif %}
-            </h3>
+  <div class="container">
+    <div class="card mx-auto border-1 mb-5">
+      <div class="card-body mx-auto col-md-8">
+        <h3 class="text-center font-weight-bold">CALENDARIO SEMANAL</h3>
+        <h3 class="text-center">
+          {% if modalidad %}
+          <a href="{% url 'pages:pages' 0 %}" class="text-center badge badge-pill text-white badge-online">ONLINE</a>
+          {% else %}
+          <a href="{% url 'pages:pages' 1 %}"
+            class="text-center badge badge-pill text-white badge-presencial">PRESENCIAL</a>
+          <h4 class="text-center">{%if request.user.profile.provincia is not None %} {{provincia}} {% else %} Argentina
+            {% endif %}</h4>
+          {% endif %}
+        </h3>
 
-            {% for day in days %}
-            {% if modalidad == 0 and day.HayActividadPresencial or modalidad == 1 and day.HayActividadOnline %}
-              {% if day.mostrar and modalidad == 0 or modalidad == 1  %}
-            
-              <div class="row mt-4">
-                  <h5 class="mb-0 text-{{modalidadStr}}">{{day}}</h5>
+
+        {% for day, active_pages in active_pages_map %}
+          {% if modalidad == 0 and day.HayActividadPresencial or modalidad == 1 and day.HayActividadOnline %}
+            {% if day.mostrar and modalidad == 0 or modalidad == 1  %}
+          
+            <div class="row mt-4">
+                <h5 class="mb-0 text-{{modalidadStr}}">{{day}}</h5>
+              </div>
+              <hr class="hr-{{modalidadStr}}">
+            {% endif %}
+        {% endif %}
+
+          {% for page in active_pages %}
+            {% if modalidad == page.modalidad %}
+              <div class="row mt-3">
+                <div class="col-md-12 ">
+                  {% if page in request.user.profile.subscription %}
+                  <a class="btn btn-{{modalidadStr}} btn-block text-center"
+                    href="{% url 'pages:page' page.id page.title|slugify %}">
+                    {% else %}
+                    <a class="btn btn-dark btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}">
+                      {% endif %}
+
+                      <dl class="mb-0" style="white-space: normal; ">
+                        <dt class="mb-0 text-center">
+                          {{page.title}}
+                          {% if request.user.profile.provincia is None and modalidad == 0 %}
+                          - {{page.provincia}}
+                          {% endif %}
+                          {% if page.secreta %}<i class="fas fa-lock"></i>{% endif %}
+                        </dt>
+                        <dd class=" mb-0 text-center">
+                          {% if request.user.is_staff %}
+                          <span class="text-left badge badge-pill badge-info">{{page.Qanotados}}/{{page.cupo}}</span>
+                          {% endif %}
+
+                          De {{page.horaDesde}}
+                          {% if page.horaHasta != None %}
+                          a {{page.horaHasta}}
+                          {% endif %}
+                          HS.
+
+                          {% if page.Qanotados >= page.cupo and page.cupo != 0 and request.user.is_staff %}
+                          <span class="badge badge-pill badge-danger">AGOTADO</span>
+                          {% endif %}
+
+                          {% if page.nuevo %}
+                          <span class="badge badge-pill badge-warning ">NUEVO!</span>
+                          {% endif %}
+
+
+                        </dd>
+                      </dl>
+                    </a>
                 </div>
-                <hr class="hr-{{modalidadStr}}">
+              </div>
+              {% if request.user.is_staff %}
+              <div class="row mt-1">
+                <div class="col-md-8">
+                  <a href="{% url 'pages:update' page.id %}">Editar</a>
+                  | <a href="{% url 'pages:delete' page.id %}">Borrar</a>
+                </div>
+              </div>
               {% endif %}
             {% endif %}
-
-              {% for page in page_list|dictsort:"horaDesde" %}
-                {% if day == page.dia  and modalidad == page.modalidad and page.activa %}
-                  {% if modalidad == 1 or modalidad == 0 and request.user.profile.provincia == page.provincia or page.provincia is None or request.user.profile.provincia is None %}
-                    <div class="row mt-3">
-                      <div class="col-md-12 ">
-
-                        {% if page in request.user.profile.subscription %}
-                          <a class="btn btn-{{modalidadStr}} btn-block text-center"  href="{% url 'pages:page' page.id page.title|slugify %}">
-                        {% else %}
-                          <a class="btn btn-dark btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}"> 
-                        {% endif %}
-
-                          <dl class="mb-0" style="white-space: normal; ">
-                          <dt class="mb-0 text-center">
-                        {{page.title}} 
-                        {% if request.user.profile.provincia is None and modalidad == 0 %}
-                        - {{page.provincia}}
-                        {% endif %}
-                        {% if page.secreta %}<i class="fas fa-lock"></i>{% endif %}     
-                          </dt>
-                        <dd class=" mb-0 text-center">
-                        {% if request.user.is_staff %}
-                          <span class="text-left badge badge-pill badge-info">{{page.Qanotados}}/{{page.cupo}}</span>
-                        {% endif %}
-
-                        De {{page.horaDesde}}
-                        {% if page.horaHasta != None %}
-                        a {{page.horaHasta}}
-                        {% endif %}
-                        HS.
-                        
-                            {% if page.Qanotados >= page.cupo and page.cupo != 0 and request.user.is_staff %}
-                              <span class="badge badge-pill badge-danger">AGOTADO</span>
-                            {% endif %}
-
-                            {% if page.nuevo %}
-                              <span class="badge badge-pill badge-warning ">NUEVO!</span>
-                            {% endif %}
-                              
-
-                          </dd>               
-                          </dl>
-                        </a>                   
-                      </div>          
-                    </div>  
-                    {% if request.user.is_staff %}
-                      <div class="row mt-1">
-                        <div class="col-md-8">       
-                          <a href="{% url 'pages:update' page.id %}">Editar</a>
-                          | <a href="{% url 'pages:delete' page.id %}">Borrar</a>
-                        </div>
-                      </div>   
-                    {% endif %}
-                  {% endif %}
-                {% endif %}
-              {% endfor %}
-            {% endfor %}
-          </div>
-        </div>
+          {% endfor %}
+        {% endfor %}
       </div>
     </div>
-  </main>
+  </div>
+  </div>
+</main>
 {% endblock %}
