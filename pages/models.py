@@ -3,13 +3,12 @@ from ckeditor.fields import RichTextField
 from django.contrib.auth.models import User
 from django.db.models.deletion import CASCADE
 from django.db.models.fields import BooleanField
-
 from datetime import datetime
 import pytz
 from location.models import Provincia
 
 def custom_upload_to(instance, filename):
-    old_instance = Page.objects.filter(pk=instance.pk).first()
+    old_instance = Page.objects.select_related().filter(pk=instance.pk).first()
     if old_instance is not None:
         old_instance.flyer.delete()
     return 'pages/' + filename
@@ -51,10 +50,7 @@ class Day(models.Model):
         return True
 
     def HayActividadPresencial_provincia(self, provincia):
-        pages = Page.objects.find_provincia(self, 0, provincia)
-        if pages is None:
-            return False
-        return True
+        return self.page_set.filter(modalidad=False, provincia=provincia).exists()
 
     @property
     def HayActividadOnline(self):
@@ -139,9 +135,10 @@ class Page(models.Model):
     def categoriesSTR(self):
         if self.categories is None:
             return False
-        if self.categories.all() is None:
+        categories = self.categories.values_list('name', flat=True)
+        if not categories.exists():
             return False
-        return ', '.join(str(c) for c in self.categories.all())
+        return ', '.join(categories)
 
     @property
     def titleSTR(self):
@@ -206,9 +203,11 @@ class Page(models.Model):
 
     @property
     def asistentes(self):
-        if self.historialHoy() is None:
+        historial = self.historialHoy()
+        if historial is None:
             return None
-        return self.historialHoy().asistentes.all()
+        return historial.asistentes.all()
+
 
     @property
     def Qasistentes(self):
@@ -233,18 +232,16 @@ class SubscriptionManager(models.Manager):
             return False
         if subs.pages is None:
             return False
-        for s in subs.pages.all():
-            if s.dia == page.dia:
-                if s.horaDesde is None or s.horaHasta is None or page.horaDesde is None or page.horaHasta is None:
-                    return False
-                sfechadesde = datetime.strptime(str(s.horaDesde), '%H:%M:%S')
-                sfechahasta = datetime.strptime(str(s.horaHasta), '%H:%M:%S')
-                pagefechadesde = datetime.strptime(str(page.horaDesde), '%H:%M:%S')
-                pagefechahasta = datetime.strptime(str(page.horaHasta), '%H:%M:%S')
-
-                if sfechadesde <= pagefechadesde < sfechahasta or sfechadesde < pagefechahasta <= sfechahasta:
-                    return True
-        return False
+        if subs.pages.filter(
+            dia=page.dia,
+            horaDesde__isnull=False,
+            horaHasta__isnull=False,
+            horaDesde__lte=page.horaHasta,
+            horaHasta__gte=page.horaDesde
+        ).exists():
+            return True
+        else:
+            return False
 
     def find(self, user):
         queryset = self.filter(user=user)
@@ -335,11 +332,11 @@ class Historial(models.Model):
 
     @property
     def Qasistentes(self):
-        if self.asistentes.all() is None:
+        asistentes_count = self.asistentes.count()
+        if asistentes_count > 0:
+            return asistentes_count
+        else:
             return 0
-        if len(self.asistentes.all()) > 0:
-            return self.asistentes.count()
-        return 0
 
     @property
     def Qanotados(self):

@@ -4,6 +4,7 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
+from django.db.models import Case, When, BooleanField
 from django.utils import timezone
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import render, get_object_or_404, redirect
@@ -36,7 +37,7 @@ def CuposAgotados(request, pk):
             'description': ' Comunicate con él haciendo click acá: https://wa.me/+549' + str(request.user.profile.whatsapp),
         }
     )
-    mailContacto = MailContacto.objects.all().first()
+    mailContacto = MailContacto.objects.first()
     to_mail = (mailContacto,)
     from_mail = 'Hillel Argentina'
 
@@ -92,7 +93,7 @@ class PageList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['days'] = Day.objects.all().order_by('order')#,'page__horaDesde')
+        context['days'] = Day.objects.order_by('order')#,'page__horaDesde')
 
         if self.request.user.is_anonymous:
             provincia = None  # Provincia.objects.get(title="CABA")
@@ -329,11 +330,17 @@ def Asistencia(request, modalidad):
         if request.user.groups.filter(name='BITAJON').exists() or request.user.is_staff:
             local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
             dia = datetime.now(local_tz).weekday()+1
-            dias = Day.objects.all()
             pages = Page.objects.all()
+            dias = Day.objects.annotate(
+                has_actividad_presencial=Case(
+                    When(page__modalidad=False, page__provincia=request.user.profile.provincia, then=True),
+                    default=False,
+                    output_field=BooleanField()
+                )
+            ).prefetch_related('page_set')
 
             for day in dias:
-                day.mostrar = Day.HayActividadPresencial_provincia(day, request.user.profile.provincia)
+                day.mostrar = day.has_actividad_presencial or day.page_set.exists()
 
             return render(request, 'pages/asistencia.html',
                         {'page_list': pages, 'dia': dia, 'days': dias, 'modalidad': modalidad})
@@ -574,7 +581,6 @@ def DescargarCuestionariosRespuestas(request):
     cuestionariosRespuesta = CuestionarioRespuesta.objects.all()
 
     for c in cuestionariosRespuesta:
-        print(c.user)
         if c is None:
             return Http404("Cuestionario no encontrado")
         writer.writerow([c.page.titleSTR, c.pregunta1, c.pregunta2, c.pregunta3, c.pregunta4, c.pregunta5,

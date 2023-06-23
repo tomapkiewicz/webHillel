@@ -155,27 +155,22 @@ class Profile(models.Model):
 
     @property
     def interesesSTR(self):
-        if self.categories is None:
-            return False
-        if self.categories.all() is None:
+        if not self.categories.exists():
             return False
         return ', '.join(str(c) for c in self.categories.all())
 
     @property
     def tematicasInteresSTR(self):
-        if self.tematicasInteres is None:
-            return False
-        if self.tematicasInteres.all() is None:
+        if not self.tematicasInteres.exists():
             return False
         return ', '.join(str(c) for c in self.tematicasInteres.all())
 
     @property
     def propuestasInteresSTR(self):
-        if self.propuestasInteres is None:
-            return False
-        if self.propuestasInteres.all() is None:
+        if not self.propuestasInteres.exists():
             return False
         return ', '.join(str(c) for c in self.propuestasInteres.all())
+
 
     def save(self, *args, **kwargs):
         if self.fechaNacimiento is not None:
