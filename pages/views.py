@@ -4,7 +4,7 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
-from django.db.models import Case, When, BooleanField
+from django.db.models import Case, When, BooleanField, F
 from django.utils import timezone
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import render, get_object_or_404, redirect
@@ -343,8 +343,17 @@ def Asistencia(request, modalidad):
             local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
             dia = datetime.now(local_tz).weekday() + 1
             pages = Page.objects.filter(activa=True, modalidad=modalidad)
-            return render(request, 'pages/asistencia.html', {'page_list': pages, 'dia': dia, 'modalidad': modalidad})
+            
+            # Get the unique dates of the pages and order them
+            unique_dates = pages.values_list('fecha', flat=True).distinct().order_by('fecha')
+            
+            # Fetch pages for each unique date and annotate with the date itself
+            annotated_pages = pages.annotate(date=F('fecha'))
+            
+            return render(request, 'pages/asistencia.html', {'pages': annotated_pages, 'dia': dia, 'modalidad': modalidad, 'unique_dates': unique_dates})
+        
         raise Http404("Usuario no es bitajon/staff")
+    
     raise Http404("Usuario no está autenticado")
 
 

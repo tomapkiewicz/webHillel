@@ -18,48 +18,64 @@
               {% endif %}
           </h3>
 
-          {% for page in page_list|dictsort:"id" reversed %}
-          <div class="row mt-3">
-            <div class="col-md-12">
-              {% if page in request.user.profile.subscription %}
-                <a class="btn btn-presencial btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}">
-              {% else %}
-                <a class="btn btn-dark btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}">
-              {% endif %}
-              <dl class="mb-0" style="white-space: normal;">
-                <dt class="mb-0 text-center">
-                  {{ page.title }}
-                  {% if page.secreta %}
-                    <i class="fas fa-lock"></i>
-                  {% endif %}
-                </dt>
-                <dd class="mb-0 text-center">
-                  {% if request.user.is_staff %}
-                    <span class="text-left badge badge-pill badge-info">{{ page.Qanotados }}/{{ page.cupo }}</span>
-                  {% endif %}
-                  De {{ page.horaDesde }}
-                  {% if page.horaHasta %}
-                    a {{ page.horaHasta }}
-                  {% endif %}
-                  HS.
-                  {% if page.Qanotados >= page.cupo and page.cupo != 0 and request.user.is_staff %}
-                    <span class="badge badge-pill badge-danger">AGOTADO</span>
-                  {% endif %}
-                  {% if page.nuevo %}
-                    <span class="badge badge-pill badge-warning">NUEVO!</span>
-                  {% endif %}
-                </dd>
-              </dl>
-            </a>
+          {% for date in unique_dates %}
+          <div class="row mt-2">
+            <h5 class="mb-1 text-muted">{{ date }}</h5>
           </div>
-        </div>
-        {% if request.user.is_staff %}
-          <div class="row mt-1">
-            <div class="col-md-8">
-              <a href="{% url 'pages:update' page.id %}">Editar</a> | <a href="{% url 'pages:delete' page.id %}">Borrar</a>
+          <hr>
+          
+          {% for page in pages %}
+            {% if page.fecha == date %}
+              <div class="row mt-3">
+                <div class="col-md-12">
+                  {% if page in request.user.profile.subscription %}
+                    <a class="btn btn-presencial btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}">
+                  {% else %}
+                    <a class="btn btn-dark btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}">
+                  {% endif %}
+                  
+                  <dl class="mb-0" style="white-space: normal;">
+                    <dt class="mb-0 text-center">
+                      {{ page.title }}
+                      {% if page.secreta %}
+                        <i class="fas fa-lock"></i>
+                      {% endif %}
+                    </dt>
+                    <dd class="mb-0 text-center">
+                      {% if request.user.is_staff %}
+                        <span class="text-left badge badge-pill badge-info">{{ page.Qanotados }}/{{ page.cupo }}</span>
+                      {% endif %}
+                      
+                      De {{ page.horaDesde }}
+                      {% if page.horaHasta %}
+                        a {{ page.horaHasta }}
+                      {% endif %}
+                      HS.
+                      
+                      {% if page.Qanotados >= page.cupo and page.cupo != 0 and request.user.is_staff %}
+                        <span class="badge badge-pill badge-danger">AGOTADO</span>
+                      {% endif %}
+                      
+                      {% if page.nuevo %}
+                        <span class="badge badge-pill badge-warning">NUEVO!</span>
+                      {% endif %}
+                    </dd>
+                  </dl>
+                </a>
+              </div>
             </div>
-          </div>
-        {% endif %}
+            
+            {% if request.user.is_staff %}
+              <div class="row mt-1">
+                <div class="col-md-8">
+                  <a href="{% url 'pages:update' page.id %}">Editar</a> | <a href="{% url 'pages:delete' page.id %}">Borrar</a>
+                </div>
+              </div>
+            {% endif %}
+            
+            {% endif %}
+          {% endfor %}
+          
         {% endfor %}
         
         </div>
