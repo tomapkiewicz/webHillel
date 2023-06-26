@@ -14,6 +14,8 @@ class ProfileList(ListView):
     template_name = "profiles/profile_list.html"
     paginate_by = 0
     is_paginated = False
+    def get_queryset(self):
+         return super().get_queryset().select_related('user').prefetch_related('categories', 'tematicasInteres', 'propuestasInteres')
 
 
 @method_decorator(login_required, name='dispatch')
