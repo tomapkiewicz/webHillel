@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Profile, FechaOnward, FechaTaglit, PropuestaInteres, TematicaInteres, TemporadaOnward
-from pages.models import Day, Category
+from pages.models import Category
 
 # Register your models here.
 
@@ -44,5 +44,4 @@ admin.site.register(FechaTaglit, FechaTaglitAdmin)
 admin.site.register(FechaOnward, FechaOnwardAdmin)
 admin.site.register(TemporadaOnward, TemporadaOnwardAdmin)
 admin.site.register(Profile, ProfileAdmin)
-admin.site.register(Day, DayAdmin)
 admin.site.register(Category, CategoriesAdmin)

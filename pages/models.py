@@ -32,37 +32,6 @@ class Colaborador(models.Model):
         return self.nombre
 
 
-class Day(models.Model):
-    day = models.CharField(verbose_name="Día", max_length=200)
-    order = models.SmallIntegerField(verbose_name="Orden", default=0)
-    mostrar = models.BooleanField(verbose_name="Mostrar", default=True)
-
-    class Meta:
-        verbose_name = "Día"
-        verbose_name_plural = "Días"
-        ordering = ['order']
-
-    @property
-    def HayActividadPresencial(self, **kwargs):
-        pages = Page.objects.find(self, 0)
-        if pages is None:
-            return False
-        return True
-
-    def HayActividadPresencial_provincia(self, provincia):
-        return self.page_set.filter(modalidad=False, provincia=provincia).exists()
-
-    @property
-    def HayActividadOnline(self):
-        pages = Page.objects.find(self, 1)
-        if pages is None:
-            return False
-        return True
-
-    def __str__(self):
-        return self.day
-
-
 class Category(models.Model):
     name = models.CharField(max_length=200, verbose_name='titulo')
     updated = models.DateTimeField(auto_now_add=True, verbose_name="modificado")
@@ -77,19 +46,19 @@ class Category(models.Model):
         return self.name
 
 
-class PagesManager(models.Manager):
+# class PagesManager(models.Manager):
 
-    def find(self, dia, modalidad):
-        queryset = self.filter(modalidad=modalidad, dia=dia, activa=True)
-        if len(queryset) > 0:
-            return queryset
-        return None
+    # def find(self, dia, modalidad):
+    #     queryset = self.filter(modalidad=modalidad, dia=dia, activa=True)
+    #     if len(queryset) > 0:
+    #         return queryset
+    #     return None
 
-    def find_provincia(self, dia, modalidad, provincia):
-        queryset = self.filter(modalidad=modalidad, dia=dia, activa=True, provincia=provincia)
-        if len(queryset) > 0:
-            return queryset
-        return None
+    # def find_provincia(self, dia, modalidad, provincia):
+    #     queryset = self.filter(modalidad=modalidad, dia=dia, activa=True, provincia=provincia)
+    #     if len(queryset) > 0:
+    #         return queryset
+    #     return None
 
 
 class Page(models.Model):
@@ -104,7 +73,7 @@ class Page(models.Model):
 
     flyer = models.ImageField(upload_to=custom_upload_to,
                               null=True, blank=True)
-    dia = models.ForeignKey(Day, verbose_name='dia', null=True, on_delete=models.CASCADE)
+    fecha = models.DateField(verbose_name="Fecha", null=True, blank=True)
     cupo = models.SmallIntegerField(verbose_name="Cupo", default=0)
     modalidad = BooleanField(verbose_name="Online", default=False)
     nuevo = BooleanField(verbose_name="Nuevo", default=False)
@@ -119,14 +88,14 @@ class Page(models.Model):
     clave = models.CharField(verbose_name="Clave", null=True, blank=True, default="", max_length=200)
     con_preinscripcion = BooleanField(verbose_name="Tiene preinscripción?", default=False)
 
-    objects = PagesManager()
+    # objects = PagesManager()
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
 
     class Meta:
         verbose_name = "actividad"
         verbose_name_plural = "actividades"
-        ordering = ['dia__order', 'horaDesde', '-title']
+        ordering = ['horaDesde', '-title']
 
     def __str__(self):
         return self.title
@@ -233,7 +202,6 @@ class SubscriptionManager(models.Manager):
         if subs.pages is None:
             return False
         if subs.pages.filter(
-            dia=page.dia,
             horaDesde__isnull=False,
             horaHasta__isnull=False,
             horaDesde__lte=page.horaHasta,
@@ -299,8 +267,7 @@ class HistorialManager(models.Manager):
     def find(self, page, date):
         historial = self.filter(page=page,
                                 fecha__year=date.year,
-                                fecha__month=date.month,
-                                fecha__day=date.day
+                                fecha__month=date.month
                                 )
         if len(historial) == 0:
             return None

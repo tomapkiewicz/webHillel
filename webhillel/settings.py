@@ -129,6 +129,8 @@ USE_L10N = True
 
 USE_TZ = False
 
+DATE_FORMAT = 'd-m-Y'
+
 
 # Login Redirect
 LOGIN_REDIRECT_URL = 'home'  # 'pages:pages'

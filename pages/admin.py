@@ -40,9 +40,9 @@ class HistorialAdmin(admin.ModelAdmin):
 
 
 class PageAdmin(admin.ModelAdmin):
-    list_display = ('actividadSTR', 'dia', 'provincia', 'cupo', 'Qanotados', 'secreta', 'activa', 'horaDesde')
-    search_fields = ('title', 'dia__day', 'activa', 'secreta', 'provincia__title',)
-    list_filter = (ModalidadFilter, 'dia','activa','secreta','horaDesde','cupo','provincia')
+    list_display = ('actividadSTR','fecha', 'provincia', 'cupo', 'Qanotados', 'secreta', 'activa', 'horaDesde')
+    search_fields = ('title', 'fecha', 'activa', 'secreta', 'provincia__title',)
+    list_filter = (ModalidadFilter, 'fecha','activa','secreta','horaDesde','cupo','provincia')
 
     class Media:
         css = {

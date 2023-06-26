@@ -6,13 +6,13 @@ class PageForm(forms.ModelForm):
 
     class Meta:
         model = Page
-        fields = ['title', 'description', 'textoExtraMail','con_mail_personalizado', 'asunto_mail', 'cuerpo_mail' , 'dia', 'horaDesde', 'horaHasta', 'flyer', 'cupo',
+        fields = ['title', 'description', 'textoExtraMail','con_mail_personalizado', 'asunto_mail', 'cuerpo_mail' ,'fecha', 'horaDesde', 'horaHasta', 'flyer', 'cupo',
                   'modalidad', 'categories', 'provincia','con_preinscripcion', 'secreta', 'clave' , 'responsable', 'colaborador']
         widgets = {
             'title': forms.TextInput(attrs={'required': True, 'class': 'form-control', 'placeholder': 'Título'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'textoExtraMail': forms.Textarea(attrs={'class': 'form-control'}),
-            'dia': forms.Select(attrs={'required': True, 'class': 'form-control', 'placeholder': 'Dia'}),
+            'fecha': forms.DateInput(attrs={'required': True, 'class': 'form-control', 'placeholder': 'Fecha', 'type': 'date', 'format': '%d-%m-%Y'}),
             'horaDesde': forms.TimeInput(format="%H:%M", attrs={'type': 'time', 'required': True}),
             'horaHasta': forms.TimeInput(format="%H:%M", attrs={'type': 'time', 'required': True}),
             'flyer': forms.ClearableFileInput(attrs={'class': 'form-control', 'placeholder': 'Flyer'}),
