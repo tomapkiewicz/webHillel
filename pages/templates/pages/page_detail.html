@@ -90,7 +90,10 @@
 
          <b><a href="{% url 'profiles:detail' UserSubscripcion.user.username  %}">
           {{UserSubscripcion.user.profile.apellido|truncatechars:"16"}}
-          {{UserSubscripcion.user.profile.nombre|truncatechars:"16"}}</a></b>
+          {{UserSubscripcion.user.profile.nombre|truncatechars:"16"}}
+          
+        </a></b>
+        {{UserSubscripcion.user.profile.edad}}
          </p>
 
             {% if UserSubscripcion.user.profile.whatsapp  %}
