@@ -35,7 +35,8 @@
        {% if not modalidad %}
         {% for fecha, presencial_active_pages in presencial_active_pages_map.items %}
         <div class="row mt-4">
-            <h5 class="mb-0 text-presencial">{{ fecha }}</h5>
+            <h5 class="mb-0 text-presencial">{{ fecha|date:"l d \d\e F" }}</h5>
+
         </div>
         <hr class="hr-presencial">
           {% for page in presencial_active_pages %}

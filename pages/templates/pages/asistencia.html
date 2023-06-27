@@ -20,7 +20,7 @@
 
           {% for date in unique_dates %}
           <div class="row mt-2">
-            <h5 class="mb-1 text-muted">{{ date }}</h5>
+            <h5 class="mb-0 text-presencial">{{ date|date:"l d \d\e F" }}</h5>
           </div>
           <hr>
           
