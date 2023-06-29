@@ -1,7 +1,12 @@
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from django.forms import inlineformset_factory
-from .models import Page,RecurrentPage, Subscription, Historial, Responsable, Colaborador, Cuestionario, CuestionarioRespuesta
+from .models import Page,RecurrentPage, Cuestionario, CuestionarioRespuesta
+from .subscription import Subscription
+from .responsable import Responsable
+from .historial import Historial
+from .colaborador import Colaborador
+
 from django.contrib.admin import  SimpleListFilter
 from .forms import RecurrentPageForm, PageForm
 
