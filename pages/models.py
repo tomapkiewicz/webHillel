@@ -1,8 +1,5 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from ckeditor.fields import RichTextField
-from django.contrib.auth.models import User
-from django.db.models.deletion import CASCADE
 from django.db.models.fields import BooleanField
 from datetime import datetime,timedelta
 import pytz
@@ -12,8 +9,6 @@ from .responsable import Responsable
 from .colaborador import Colaborador
 from .subscription import Subscription
 from .historial import Historial
-from .cuestionario import Cuestionario, CuestionarioRespuesta
-import calendar
 
 def custom_upload_to(instance, filename):
     old_instance = Page.objects.select_related().filter(pk=instance.pk).first()

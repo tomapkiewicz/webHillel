@@ -1,14 +1,16 @@
-from typing import ContextManager
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
-from django.db.models import Case, When, BooleanField, F
+from django.db.models import F
 from django.utils import timezone
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Page, Subscription, Historial, Cuestionario, CuestionarioRespuesta
+from .models import Page
+from .cuestionario import Cuestionario, CuestionarioRespuesta
+from .subscription import Subscription
+from .historial import Historial
 from registration.models import Profile
 from .forms import PageForm
 from django.http import Http404, JsonResponse
@@ -19,11 +21,9 @@ import threading
 from datetime import datetime
 from django.http import HttpResponse
 import csv
-from location.models import Provincia
 from social.models import MailContacto
 import pytz
 from datetime import date
-from itertools import groupby
 
 
 def CuposAgotados(request, pk):

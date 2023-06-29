@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
-from django.forms import inlineformset_factory
-from .models import Page,RecurrentPage, Cuestionario, CuestionarioRespuesta
+from .models import Page,RecurrentPage
+from .cuestionario import Cuestionario, CuestionarioRespuesta
 from .subscription import Subscription
 from .responsable import Responsable
 from .historial import Historial
