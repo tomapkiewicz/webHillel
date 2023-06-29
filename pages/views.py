@@ -24,6 +24,7 @@ from social.models import MailContacto
 import pytz
 from datetime import date
 from itertools import groupby
+from django.contrib import messages
 
 
 def CuposAgotados(request, pk):
@@ -159,6 +160,25 @@ class PageDetail(DetailView):
         if subscribers is not None:
             context['usuarioAnotado'] = subscribers.filter(user=self.request.user).exists()
         return context
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_anonymous:
+            # Handle anonymous user case if needed
+            return redirect('login')
+
+        page = self.get_object()
+        subscription = Subscription.objects.find_or_create(user=request.user)
+
+        if subscription.pages.filter(pk=page.pk).exists():
+            # Page is already in the user's subscription, remove it
+            subscription.pages.remove(page)
+            messages.success(request, 'You have unsubscribed from this page.')
+        else:
+            # Page is not in the user's subscription, add it
+            subscription.pages.add(page)
+            messages.success(request, 'You have subscribed to this page.')
+
+        return redirect('page-detail', pk=page.pk)
 
 
 class PageConfirmation(ListView):

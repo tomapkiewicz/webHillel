@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
-from .models import Page, Subscription, Historial, Responsable, Colaborador, Cuestionario, CuestionarioRespuesta
+from django.forms import inlineformset_factory
+from .models import Page,RecurrentPage, Subscription, Historial, Responsable, Colaborador, Cuestionario, CuestionarioRespuesta
 from django.contrib.admin import  SimpleListFilter
+from .forms import RecurrentPageForm, PageForm
 
 class ModalidadFilter(SimpleListFilter):
     title = "Modalidad"  # a label for our filter
@@ -38,11 +40,29 @@ class HistorialAdmin(admin.ModelAdmin):
     search_fields = ('page__title', 'fecha')
     readonly_fields = ('anotados',)
 
-
 class PageAdmin(admin.ModelAdmin):
-    list_display = ('actividadSTR','fecha', 'provincia', 'cupo', 'Qanotados', 'secreta', 'activa', 'horaDesde')
+    list_display = ('actividadSTR', 'fecha', 'provincia', 'cupo', 'Qanotados', 'secreta', 'activa', 'horaDesde')
     search_fields = ('title', 'fecha', 'activa', 'secreta', 'provincia__title',)
-    list_filter = (ModalidadFilter, 'fecha','activa','secreta','horaDesde','cupo','provincia')
+    list_filter = (ModalidadFilter, 'fecha', 'activa', 'secreta', 'horaDesde', 'cupo', 'provincia')
+    form = PageForm  # Assuming you have a custom form for Page
+
+    class Media:
+        css = {
+            'all': ('pages/css/custom_ckeditor.css',)
+        }
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        if not change:
+            # If it's a new object, create corresponding RecurrentPages
+            create_pages(form.instance)
+
+
+class RecurrentPageAdmin(admin.ModelAdmin):
+    list_display = ('actividadSTR', 'fechaDesde', 'fechaHasta', 'provincia', 'cupo', 'secreta', 'activa', 'horaDesde')
+    search_fields = ('title', 'fechaDesde', 'fechaHasta', 'activa', 'secreta', 'provincia__title',)
+    list_filter = ('fechaDesde', 'fechaHasta', 'activa', 'secreta', 'horaDesde', 'cupo', 'provincia')
+    form = RecurrentPageForm 
 
     class Media:
         css = {
@@ -69,6 +89,7 @@ admin.site.register(CuestionarioRespuesta, CuestionarioRespuestaAdmin)
 admin.site.register(Cuestionario, CuestionarioAdmin)
 admin.site.register(Historial, HistorialAdmin)
 admin.site.register(Page, PageAdmin)
+admin.site.register(RecurrentPage, RecurrentPageAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Responsable, ResponsableAdmin)
 admin.site.register(Colaborador, ColaboradorAdmin)
