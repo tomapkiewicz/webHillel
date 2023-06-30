@@ -53,6 +53,7 @@ class RecurrentPage(models.Model):
     con_preinscripcion = BooleanField(verbose_name="Tiene preinscripción?", default=False)
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
+    pages = models.ManyToManyField('Page', verbose_name='Actividades', related_name='get_pages', blank=True)
 
     class Meta:
         verbose_name = "Actividad recurrente"
@@ -88,10 +89,12 @@ class RecurrentPage(models.Model):
                 colaborador=self.colaborador,
                 secreta=self.secreta,
                 clave=self.clave,
-                con_preinscripcion=self.con_preinscripcion
+                con_preinscripcion=self.con_preinscripcion,
+                recurrent_page=self
             )
             page.save()
             page.categories.set(self.categories.all())
+            self.pages.add(page)
         
         
 
@@ -171,18 +174,10 @@ class Page(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
 
-    subscription = models.ForeignKey(
-        Subscription,
-        on_delete=models.CASCADE,
-        related_query_name='page',
-        blank=True,
-        null=True
-    )
-
     recurrent_page = models.ForeignKey(
         RecurrentPage,
         on_delete=models.CASCADE,
-        related_query_name='pages',
+        related_query_name='page',
         blank=True,
         null=True
     )
@@ -195,13 +190,6 @@ class Page(models.Model):
     def __str__(self):
         return self.title
     
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        if self.recurrent_page and self.subscription:
-            # Update the subscription of all other pages with the same title
-            Page.objects.filter(title=self.title).exclude(pk=self.pk).update(subscription=self.subscription)
 
     @property
     def categoriesSTR(self):

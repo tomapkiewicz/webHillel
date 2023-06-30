@@ -295,7 +295,17 @@ def Register(request, pk):
             return redirect(reverse_lazy('profile', args=[page.id, ]) + '?completar=si&pk='+str(pk))
 
         subscription = Subscription.objects.find_or_create(request.user)
-        subscription.pages.add(page)
+
+        
+        print("recurrent_page: " + str(page.recurrent_page))
+        if page.recurrent_page:
+            new_pages = page.recurrent_page.pages.all()
+        else:
+            new_pages = [page]
+        subscription.pages.add(*new_pages)
+
+
+
     else:
         raise Http404("Usuario no está autenticado")
 
