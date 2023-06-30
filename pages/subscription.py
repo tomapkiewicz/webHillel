@@ -11,6 +11,7 @@ class SubscriptionManager(models.Manager):
         if subs.pages is None:
             return False
         if subs.pages.filter(
+            fecha=page.fecha,
             horaDesde__isnull=False,
             horaHasta__isnull=False,
             horaDesde__lte=page.horaHasta,
