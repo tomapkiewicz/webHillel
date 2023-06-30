@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block title %}Hillel Argentina{% endblock %}
 {% block content %}
  
@@ -75,7 +76,18 @@
                       <dl class="row mt-5">
                         {% for page in request.user.profile.active_subscription %}                         
                           <dt class="col-sm-6 text-center"><a class="text-dark" href="{% url 'pages:page' page.id page.title|slugify %}">{{page}} </a></dt>
-                          <dd class="col-sm-6 text-center">{% if page.dia.order < 8 %}Los{% endif %} {{page.dia}} De {{page.horaDesde}} a {{page.horaHasta}} Hs.{% if page.modalidad  %}<b> Online</b>{% else %} <b>Presencial</b> {% endif %}</dd>
+                          <dd class="col-sm-6 text-center">
+                            {% if page.recurrent_page %}
+                              Los {{ page.fecha|weekday_name }} de {{ page.horaDesde }} a {{ page.horaHasta }} Hs.
+                            {% else %}
+                            {{ page.fecha|date:"l d \d\e F" }} de {{ page.horaDesde }} a {{ page.horaHasta }} Hs.
+                            {% endif %}
+                            {% if page.modalidad %}
+                              <b>Online</b>
+                            {% else %}
+                              <b>Presencial</b>
+                            {% endif %}
+                          </dd>
                         {% endfor %}             
                       </dl>
                     {%else%}

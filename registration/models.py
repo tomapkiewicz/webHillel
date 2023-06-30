@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from pages.models import Category, Subscription
 from location.models import Provincia
+from itertools import groupby
 
 
 def custom_upload_to(instance, filename):
@@ -140,12 +141,31 @@ class Profile(models.Model):
     @property
     def active_subscription(self):
         subscription = Subscription.objects.find(self.user)
-        if subscription is None:
-            return
-        if subscription.pages is None:
-            return
-        return subscription.pages.filter(activa=True)
+        if not subscription:
+            return []
 
+        recurrent_pages = []
+        non_recurrent_pages = []
+
+        # Separate recurrent and non-recurrent pages
+        for page in subscription.pages.filter(activa=True):
+            if page.recurrent_page:
+                recurrent_pages.append(page)
+            else:
+                non_recurrent_pages.append(page)
+
+        # Group recurrent pages by recurrent_page field
+        grouped_recurrent_pages = []
+        for _, group in groupby(recurrent_pages, key=lambda p: p.recurrent_page):
+            group = list(group)
+            first_page = group[0]
+            grouped_recurrent_pages.append(first_page)
+
+        # Combine recurrent and non-recurrent pages, sorted by fecha
+        combined_pages = grouped_recurrent_pages + non_recurrent_pages
+        sorted_pages = sorted(combined_pages, key=lambda p: p.fecha)
+
+        return sorted_pages
     @property
     def edad(self):
         if self.fechaNacimiento is None:
