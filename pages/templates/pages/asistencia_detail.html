@@ -27,7 +27,7 @@
         <h4 class="card-title text-center">{{page.title}}
         <a id="info" class="badge badge-pill badge-info" href="#" data-toggle="tooltip" title="Asistentes/Anotados">{{page.Qasistentes}}/{{page.Qanotados}}</a>
         </h4>
-        <p class="card-text text-center"> {{page.dia}} De {{page.horaDesde}} a {{page.horaHasta}} Hs</p> 
+        <p class="card-text text-center"> {{page.fecha|date:"l d \d\e F"}} De {{page.horaDesde}} a {{page.horaHasta}} Hs</p> 
                             
         {% if subscribers.count > 0 %}
         

@@ -315,9 +315,7 @@
             <br><br>
             {% else %}
             ¿Te esperamos {% if overlaps %} igual {% endif %}en {{page.title}} {% if page.modalidad  %}<b> Online</b>{% else %} <b> Presencial</b> {% endif %}
-            {% if page.dia.order < 8 %}
-              el {{page.dia}}
-            {% endif %}
+              el {{page.fecha|date:"l d \d\e F"}}
             a las {{page.horaDesde}} HS?  
             {% endif %}
             <br><br>

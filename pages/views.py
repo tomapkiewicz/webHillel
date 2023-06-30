@@ -433,9 +433,9 @@ def WriteRowAsistencias(h, writer):
         asis = 1 if asistio == "Si" else 0
 
         Profile.objects.get_or_create(user=anotado)
-
-        writer.writerow([h.page.titleSTR, h.page.dia, h.page.horaDesde,
-                         h.fecha, anotado, anotado.profile.nombre,
+        
+        writer.writerow([h.page.titleSTR, h.page.fecha, h.page.horaDesde,
+                         anotado, anotado.profile.nombre,
                         anotado.profile.apellido,anotado.profile.whatsapp,anotado.email , asistio, asis])
 
 
@@ -463,7 +463,7 @@ def DescargarHistoricoAsistenciasALLDetail(request):
         'historico-' + str(datetime.now(local_tz)) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect='excel')
-    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado','Nombre', 'Apellido', 'Celular','Mail', 'Asistio?', 'Asis'])
+    writer.writerow(['Actividad', 'Fecha', 'Hora Desde', 'Usuario anotado','Nombre', 'Apellido', 'Celular','Mail', 'Asistio?', 'Asis'])
 
     historiales = Historial.objects.all()
     for h in historiales:
@@ -480,12 +480,11 @@ def DescargarHistoricoAsistenciasALLItem(request):
         'historico-' + str(datetime.now(local_tz)) + '.csv'
     responseB.write(u'\ufeff'.encode('utf8'))
     writerB = csv.writer(responseB, dialect='excel')
-    writerB.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Qanotados', 'Qasistentes'])
+    writerB.writerow(['Actividad', 'Fecha', 'Hora Desde', 'Qanotados', 'Qasistentes'])
 
     historiales = Historial.objects.all()
     for h in historiales:
-        h.fecha = h.fecha.strftime("%d/%m/%Y")
-        writerB.writerow([h.page.titleSTR, h.page.dia, h.page.horaDesde, h.fecha, h.Qanotados, h.Qasistentes])
+        writerB.writerow([h.page.titleSTR, h.page.fecha, h.page.horaDesde, h.Qanotados, h.Qasistentes])
 
     return responseB
 
@@ -498,7 +497,7 @@ def DescargarHistoricoAsistencias(request, pk):
         page.titleSTR + '-all-' + str(datetime.now(local_tz)) + '.csv'
     response.write(u'\ufeff'.encode('utf8'))
     writer = csv.writer(response, dialect='excel')
-    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?', 'Asis'])
+    writer.writerow(['Actividad', 'Fecha', 'Hora Desde', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?', 'Asis'])
 
     hs = Historial.objects.find_page(page=page)
     if hs is None:
@@ -519,7 +518,7 @@ def DescargarActividades(request):
 
     writer = csv.writer(response, dialect='excel')
 
-    writer.writerow(['Titulo', 'Dia', 'Hora Desde', 'Hora Hasta',
+    writer.writerow(['Titulo', 'Fecha', 'Hora Desde', 'Hora Hasta',
                     'Cupo', 'Modalidad', 'Nuevo', 'Activa', 'Qanotados',
                      'Categorias', 'responsable', 'colaborador', 'secreta', 'clave', ])
 
@@ -529,7 +528,7 @@ def DescargarActividades(request):
         if p is None:
             return Http404("Actividad no encontrada")
 
-        writer.writerow([p.titleSTR, p.dia, p.horaDesde, p.horaHasta, p.cupo,
+        writer.writerow([p.titleSTR, p.fecha, p.horaDesde, p.horaHasta, p.cupo,
                          p.modalidadSTR, p.nuevo, p.activa, p.Qanotados, p.categoriesSTR,
                          p.responsable, p.colaborador, p.secreta, p.clave, ])
 
