@@ -33,16 +33,16 @@ class PageForm(forms.ModelForm):
         labels = {'title': '', 'description': ''}
 
     def __init__(self, *args, **kwargs):
-        if kwargs['instance'] is not None:
-            if kwargs['instance'].modalidad is None:
-                kwargs['initial'] = {"modalidad": False}
-            if kwargs['instance'].secreta is None:
-                kwargs['initial']['secreta'] = False
+        instance = kwargs.get('instance')  # Use get() method to safely retrieve the instance
+        if instance is not None:
+            if instance.modalidad is None:
+                kwargs.setdefault('initial', {})["modalidad"] = False
+            if instance.secreta is None:
+                kwargs.setdefault('initial', {})["secreta"] = False
         else:
-            kwargs['initial'] = {"modalidad": False, "secreta": False}
+            kwargs.setdefault('initial', {})["modalidad"] = False
+            kwargs.setdefault('initial', {})["secreta"] = False
         super(PageForm, self).__init__(*args, **kwargs)
-
-
 
 class RecurrentPageForm(forms.ModelForm):
     dias = forms.MultipleChoiceField(

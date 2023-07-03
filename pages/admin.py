@@ -58,9 +58,6 @@ class PageAdmin(admin.ModelAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        if not change:
-            # If it's a new object, create corresponding RecurrentPages
-            create_pages(form.instance)
 
 
 class RecurrentPageAdmin(admin.ModelAdmin):
