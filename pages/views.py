@@ -183,6 +183,34 @@ class PageUpdate(UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('pages:update', args=[self.object.id])+'?ok'
+    
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        if self.object.recurrent_page:
+            recurrent_pages = self.object.recurrent_page.pages
+            recurrent_pages.update(
+                title=self.object.title,
+                horaDesde=self.object.horaDesde,
+                horaHasta=self.object.horaHasta,
+                modalidad=self.object.modalidad,
+                provincia=self.object.provincia,
+                description=self.object.description,
+                cupo=self.object.cupo,
+                nuevo=self.object.nuevo,
+                activa=self.object.activa,
+                responsable=self.object.responsable,
+                colaborador=self.object.colaborador,
+                secreta=self.object.secreta,
+                clave=self.object.clave,
+                textoExtraMail=self.object.textoExtraMail,
+                con_mail_personalizado=self.object.con_mail_personalizado,
+                asunto_mail=self.object.asunto_mail,
+                cuerpo_mail=self.object.cuerpo_mail,
+            )
+        return super().form_valid(form)
+
 
 
 @method_decorator(staff_member_required, name="dispatch")
