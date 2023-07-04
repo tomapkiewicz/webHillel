@@ -49,7 +49,6 @@ class PageAdmin(admin.ModelAdmin):
     list_display = ('actividadSTR', 'fecha', 'provincia', 'cupo', 'Qanotados', 'secreta', 'activa', 'horaDesde')
     search_fields = ('title', 'fecha', 'activa', 'secreta', 'provincia__title',)
     list_filter = (ModalidadFilter, 'fecha', 'activa', 'secreta', 'horaDesde', 'cupo', 'provincia')
-    form = PageForm  # Assuming you have a custom form for Page
 
     class Media:
         css = {
