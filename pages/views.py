@@ -108,30 +108,35 @@ class PageList(ListView):
         context['provincia'] = provincia
 
         today = date.today()
-        presencial_active_pages_map = {}
-        online_active_pages_map = {}
+        active_pages = Page.objects.filter(activa=True, fecha__gte=today).order_by('fecha', 'horaDesde', '-title')
 
-        pages = Page.objects.filter(activa=True).order_by('fecha', 'horaDesde', '-title')
+        active_pages_map = {}
+        recurrent_pages_map = {}
 
-        for page in pages:
-            if page.fecha is not None and page.fecha >= today:
-                if page.modalidad:
-                    if page.fecha not in online_active_pages_map:
-                        online_active_pages_map[page.fecha] = []
-                    online_active_pages_map[page.fecha].append(page)
-                elif not page.modalidad :
-                    if page.fecha not in presencial_active_pages_map:
-                        presencial_active_pages_map[page.fecha] = []
-                    presencial_active_pages_map[page.fecha].append(page)
+        for page in active_pages:
+            if page.recurrent_page is None:
+                if page.fecha not in active_pages_map:
+                    active_pages_map[page.fecha] = []
+                active_pages_map[page.fecha].append(page)
+            else:
+                recurrent_page_id = page.recurrent_page.id  # Get the id of the recurrent_page
+                if recurrent_page_id not in recurrent_pages_map:
+                    if page.fecha not in active_pages_map:
+                        active_pages_map[page.fecha] = []
+                    active_pages_map[page.fecha].append(page)
+                    recurrent_pages_map[recurrent_page_id] = True
 
-        context['presencial_active_pages_map'] = presencial_active_pages_map
-        context['online_active_pages_map'] = online_active_pages_map
 
+
+
+        context['active_pages_map'] = active_pages_map
+
+        
         if len(self.kwargs) > 0:
-            context['modalidad'] = self.kwargs['modalidad']
+            context['cowork'] = self.kwargs['modalidad']
         else:
-            context['modalidad'] = 0
-        context['modalidadStr'] = 'presencial' if context['modalidad'] == 0 else 'online'
+            context['cowork'] = 0
+        context['coworkStr'] = 'calendario' if context['cowork'] == 0 else 'cowork'
 
         return context
 

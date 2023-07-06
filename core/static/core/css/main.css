@@ -306,10 +306,31 @@ solid #dadce0; */
 }
 
 
-.containerBotones{
-  max-width: 900px;
-  margin: 0 auto;
+.containerBotones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
+.contenedorBotonPresencial,
+.contenedorBotonVirtual,
+.contenedorBotonOnward {
+  display: flex;
+  align-items: center;
+}
+
+.centered-content,
+.centered-text {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+p {
+  margin: 0;
+}
+
 
 .iconoMenu{
   max-width: 25px;
