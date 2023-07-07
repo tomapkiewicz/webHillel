@@ -108,7 +108,7 @@ class PageList(ListView):
         context['provincia'] = provincia
 
         today = date.today()
-        active_pages = Page.objects.filter(activa=True, fecha__gte=today).order_by('fecha', 'horaDesde', '-title')
+        active_pages = Page.objects.filter(activa=True, cowork=False, fecha__gte=today).order_by('fecha', 'horaDesde', '-title')
 
         active_pages_map = {}
         recurrent_pages_map = {}
@@ -127,9 +127,10 @@ class PageList(ListView):
                     recurrent_pages_map[recurrent_page_id] = True
 
 
-
-
+        cowork_pages = Page.objects.filter(activa=True, cowork=True).order_by('horaDesde', '-title')
+        context['cowork_pages'] = cowork_pages
         context['active_pages_map'] = active_pages_map
+        context['cowork_pages'] = cowork_pages
 
         
         if len(self.kwargs) > 0:

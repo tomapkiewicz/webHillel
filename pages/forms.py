@@ -4,16 +4,18 @@ from .models import RecurrentPage
 from django.core.validators import MinValueValidator
 
 class PageForm(forms.ModelForm):
+    cowork = forms.BooleanField(label="Es para el cowork?", required=False)
+    cowork_day_title = forms.CharField(label="Título del día de cowork", max_length=200, required=False)
 
     class Meta:
         model = Page
-        fields = ['title', 'description', 'textoExtraMail','con_mail_personalizado', 'asunto_mail', 'cuerpo_mail' ,'fecha', 'horaDesde', 'horaHasta', 'flyer', 'cupo',
+        fields = ['title', 'description', 'textoExtraMail','con_mail_personalizado', 'asunto_mail', 'cuerpo_mail' ,'cowork','cowork_day_title','fecha', 'horaDesde', 'horaHasta', 'flyer', 'cupo',
                   'modalidad', 'categories', 'provincia','con_preinscripcion', 'secreta', 'clave' , 'responsable', 'colaborador']
         widgets = {
             'title': forms.TextInput(attrs={'required': True, 'class': 'form-control', 'placeholder': 'Título'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'textoExtraMail': forms.Textarea(attrs={'class': 'form-control'}),
-            'fecha': forms.DateInput(attrs={'required': True, 'class': 'form-control', 'placeholder': 'Fecha', 'type': 'date', 'format': '%d-%m-%Y'}),
+            'fecha': forms.DateInput(attrs={'required': False, 'class': 'form-control', 'placeholder': 'Fecha', 'type': 'date', 'format': '%d-%m-%Y'}),
             'horaDesde': forms.TimeInput(format="%H:%M", attrs={'type': 'time', 'required': True}),
             'horaHasta': forms.TimeInput(format="%H:%M", attrs={'type': 'time', 'required': True}),
             'flyer': forms.ClearableFileInput(attrs={'class': 'form-control', 'placeholder': 'Flyer'}),
@@ -43,6 +45,7 @@ class PageForm(forms.ModelForm):
             kwargs.setdefault('initial', {})["modalidad"] = False
             kwargs.setdefault('initial', {})["secreta"] = False
         super(PageForm, self).__init__(*args, **kwargs)
+
 
 class RecurrentPageForm(forms.ModelForm):
     dias = forms.MultipleChoiceField(

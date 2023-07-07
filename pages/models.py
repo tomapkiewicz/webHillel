@@ -169,6 +169,9 @@ class Page(models.Model):
     secreta = BooleanField(verbose_name="Tiene clave?", default=False)
     clave = models.CharField(verbose_name="Clave", null=True, blank=True, default="", max_length=200)
     con_preinscripcion = BooleanField(verbose_name="Tiene preinscripción?", default=False)
+    cowork = models.BooleanField(verbose_name="Es para el Cowork?", default=False)
+    cowork_day_title = models.CharField(verbose_name="Título del día para el cowork", max_length=200, blank=True)
+
 
     # objects = PagesManager()
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)

@@ -46,7 +46,7 @@ class HistorialAdmin(admin.ModelAdmin):
     readonly_fields = ('anotados',)
 
 class PageAdmin(admin.ModelAdmin):
-    list_display = ('actividadSTR', 'fecha', 'provincia', 'cupo', 'Qanotados', 'secreta', 'activa', 'horaDesde')
+    list_display = ('actividadSTR', 'fecha','cowork','cowork_day_title', 'provincia', 'cupo', 'Qanotados', 'secreta', 'activa', 'horaDesde')
     search_fields = ('title', 'fecha', 'activa', 'secreta', 'provincia__title',)
     list_filter = (ModalidadFilter, 'fecha', 'activa', 'secreta', 'horaDesde', 'cupo', 'provincia')
 
@@ -58,6 +58,30 @@ class PageAdmin(admin.ModelAdmin):
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
 
+    fields = (
+        'title',
+        'description',
+        'textoExtraMail',
+        'con_mail_personalizado',
+        'asunto_mail',
+        'cuerpo_mail',
+        'cowork',
+        'cowork_day_title',
+        'fecha',
+        'activa',
+        'horaDesde',
+        'horaHasta',
+        'flyer',
+        'cupo',
+        'modalidad',
+        'categories',
+        'provincia',
+        'con_preinscripcion',
+        'secreta',
+        'clave',
+        'responsable',
+        'colaborador',
+    )
 
 class RecurrentPageAdmin(admin.ModelAdmin):
     list_display = ('actividadSTR', 'fechaDesde', 'fechaHasta', 'provincia', 'cupo', 'secreta', 'activa', 'horaDesde')

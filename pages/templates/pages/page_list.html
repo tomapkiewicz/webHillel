@@ -96,61 +96,58 @@
 
        {% else %}
 
-       {% for fecha, online_active_pages in online_active_pages_map.items %}
+       {% for page in cowork_pages %}
        <div class="row mt-4">
-        <h5 class="mb-0 text-online">{{ fecha|date:"l d \d\e F" }}</h5>
+        <h5 class="mb-0 text-online">{{ page.cowork_day_title }}</h5>
        </div>
        <hr class="hr-online">
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        {% if page in request.user.profile.subscription %}
+                            <a class="btn btn-online btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}">
+                        {% else %}
+                            <a class="btn btn-dark btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}">
+                        {% endif %}
 
-          {% for page in online_active_pages %}
-                  <div class="row mt-3">
-                      <div class="col-md-12">
-                          {% if page in request.user.profile.subscription %}
-                              <a class="btn btn-online btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}">
-                          {% else %}
-                              <a class="btn btn-dark btn-block text-center" href="{% url 'pages:page' page.id page.title|slugify %}">
-                          {% endif %}
+                        <dl class="mb-0" style="white-space: normal;">
+                            <dt class="mb-0 text-center">
+                                {{ page.title }}
+                                {% if page.secreta %}
+                                    <i class="fas fa-lock"></i>
+                                {% endif %}
+                            </dt>
+                            <dd class="mb-0 text-center">
+                                {% if request.user.is_staff %}
+                                    <span class="text-left badge badge-pill badge-info">{{ page.Qanotados }}/{{ page.cupo }}</span>
+                                {% endif %}
 
-                          <dl class="mb-0" style="white-space: normal;">
-                              <dt class="mb-0 text-center">
-                                  {{ page.title }}
-                                  {% if page.secreta %}
-                                      <i class="fas fa-lock"></i>
-                                  {% endif %}
-                              </dt>
-                              <dd class="mb-0 text-center">
-                                  {% if request.user.is_staff %}
-                                      <span class="text-left badge badge-pill badge-info">{{ page.Qanotados }}/{{ page.cupo }}</span>
-                                  {% endif %}
+                                De {{ page.horaDesde }}
+                                {% if page.horaHasta %}
+                                    a {{ page.horaHasta }}
+                                {% endif %}
+                                HS.
 
-                                  De {{ page.horaDesde }}
-                                  {% if page.horaHasta %}
-                                      a {{ page.horaHasta }}
-                                  {% endif %}
-                                  HS.
+                                {% if page.Qanotados >= page.cupo and page.cupo != 0 and request.user.is_staff %}
+                                    <span class="badge badge-pill badge-danger">AGOTADO</span>
+                                {% endif %}
 
-                                  {% if page.Qanotados >= page.cupo and page.cupo != 0 and request.user.is_staff %}
-                                      <span class="badge badge-pill badge-danger">AGOTADO</span>
-                                  {% endif %}
+                                {% if page.nuevo %}
+                                    <span class="badge badge-pill badge-warning">NUEVO!</span>
+                                {% endif %}
+                            </dd>
+                        </dl>
+                    </a>
+                </div>
+            </div>
 
-                                  {% if page.nuevo %}
-                                      <span class="badge badge-pill badge-warning">NUEVO!</span>
-                                  {% endif %}
-                              </dd>
-                          </dl>
-                      </a>
-                  </div>
-              </div>
-
-              {% if request.user.is_staff %}
-                  <div class="row mt-1">
-                      <div class="col-md-8">
-                          <a href="{% url 'pages:update' page.id %}">Editar</a>
-                          | <a href="{% url 'pages:delete' page.id %}">Borrar</a>
-                      </div>
-                  </div>
-              {% endif %}
-        {% endfor %}
+            {% if request.user.is_staff %}
+                <div class="row mt-1">
+                    <div class="col-md-8">
+                        <a href="{% url 'pages:update' page.id %}">Editar</a>
+                        | <a href="{% url 'pages:delete' page.id %}">Borrar</a>
+                    </div>
+                </div>
+            {% endif %}
         {% endfor %}
        {% endif %}
 
