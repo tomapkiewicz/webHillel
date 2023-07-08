@@ -285,26 +285,6 @@ solid #dadce0; */
   background-color:#0739AB;
 }
 
-.contenedorBotonVirtual{
-  margin-top: 8px;
-  margin-left: 50px;
-  
-}
-
-
-.contenedorBotonPresencial{
-  margin-top: 8px;
-  margin-left: 40px;
-  
-}
-
-
-.contenedorBotonOnward{
-  margin-top: 8px;
-  margin-left: 50px;
-  
-}
-
 
 .containerBotones {
   display: flex;
