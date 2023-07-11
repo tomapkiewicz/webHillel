@@ -290,6 +290,7 @@ solid #dadce0; */
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 20px;
 }
 
 .contenedorBotonPresencial,
@@ -298,6 +299,14 @@ solid #dadce0; */
   display: flex;
   align-items: center;
 }
+
+@media (min-width: 768px) { /* Adjust the breakpoint as needed */
+  .containerBotones {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
 
 .contenedorBotonVirtual p,
 .contenedorBotonPresencial p,
