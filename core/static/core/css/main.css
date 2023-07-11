@@ -299,6 +299,14 @@ solid #dadce0; */
   align-items: center;
 }
 
+.contenedorBotonVirtual p,
+.contenedorBotonPresencial p,
+.contenedorBotonOnward p {
+  display: flex;
+  align-items: center;
+  margin: 0;
+} 
+
 .centered-content,
 .centered-text {
   flex-grow: 1;
