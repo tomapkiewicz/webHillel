@@ -120,7 +120,6 @@ class RecurrentPage(models.Model):
             if date.strftime("%A").lower() in selected_days: 
                 dates.append(date)
             date += timedelta(days=1)
-        print("dates: ", dates)
         return dates
 
     @property
@@ -138,7 +137,6 @@ class RecurrentPage(models.Model):
         super().save(*args, **kwargs)
         
         if is_new_instance:
-            print("Creando páginas")
             self.create_pages()
 
 

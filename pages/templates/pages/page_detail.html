@@ -5,7 +5,7 @@
 {% include 'pages/includes/pages_menu.html' %}
 <main role="main">
 
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
 
     {% if 'claveincorrecta' in request.GET %}
@@ -74,59 +74,109 @@
 
             {% if page.Qanotados > 0 %}
             
-
-
-    <div class="card  mx-auto border-0 w-20 mb-5" style="max-width:600px">
-      <h5 class="card-title mx-auto mt-4">
-      Anotados
-      </h5>
-      <div class="card-body">
-        {% for UserSubscripcion in page.anotados %}
-        <div class="row mt-3">
+            <div class="card mx-auto border-0" style="max-width: 600px">
+              <h5 class="card-title mx-auto mt-4">Anotados</h5>
+              <div class="card-body">
+                <ul class="nav nav-tabs mb-3">
+                  <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#orden-llegada">Orden de llegada</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#orden-alfabetico">Orden alfabético</a>
+                  </li>
+                </ul>
+            
+                <div class="tab-content">
+                  <div class="tab-pane fade show active" id="orden-llegada">
+                    {% for UserSubscripcion in page.anotados %}
+                    <div class="row mt-3">
         
-          <p class="col-6 ">
+                      <p class="col-6 ">
+            
+                     <b><a href="{% url 'profiles:detail' UserSubscripcion.user.username  %}">
+                      {{UserSubscripcion.user.profile.apellido|truncatechars:"16"}}
+                      {{UserSubscripcion.user.profile.nombre|truncatechars:"16"}}
+                      
+                    </a></b>
+                    {{UserSubscripcion.user.profile.edad}}
+                     </p>
+            
+                        {% if UserSubscripcion.user.profile.whatsapp  %}
+                          <p class="col-2 ">
+                            <a href="https://wa.me/+549{{UserSubscripcion.user.profile.whatsapp}}" 
+                            class="text-center btn btn-success btn-sm  mt-0" >
+                            <i class="fab fa-whatsapp fa-2x"></i>                     
+                            </a>
+                          </p> 
+                        {% endif %}
+                
+                       <p class="col-2 ">      
+                        <a class="btn btn-dark " href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id  %}">
+                        Observacion</a>
+                        </p>
+                          {% if UserSubscripcion.user.profile.observaciones is not none %}
+                              
+                          <p class="col-md-12 ">
+                                {{UserSubscripcion.user.profile.observaciones}}
+                          </p>
+                              {% endif %}
+                       
+            
+                  </div>
+                    {% endfor %}
+                  </div>
+            
+                  <div class="tab-pane fade" id="orden-alfabetico">
+                    {% for UserSubscripcion in page.anotados|dictsort:'user.profile.apellido' %}
+                    <div class="row mt-3">
+        
+                      <p class="col-6 ">
+            
+                     <b><a href="{% url 'profiles:detail' UserSubscripcion.user.username  %}">
+                      {{UserSubscripcion.user.profile.apellido|truncatechars:"16"}}
+                      {{UserSubscripcion.user.profile.nombre|truncatechars:"16"}}
+                      
+                    </a></b>
+                    {{UserSubscripcion.user.profile.edad}}
+                     </p>
+            
+                        {% if UserSubscripcion.user.profile.whatsapp  %}
+                          <p class="col-2 ">
+                            <a href="https://wa.me/+549{{UserSubscripcion.user.profile.whatsapp}}" 
+                            class="text-center btn btn-success btn-sm  mt-0" >
+                            <i class="fab fa-whatsapp fa-2x"></i>                     
+                            </a>
+                          </p> 
+                        {% endif %}
+                
+                       <p class="col-2 ">      
+                        <a class="btn btn-dark " href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id  %}">
+                        Observacion</a>
+                        </p>
+                          {% if UserSubscripcion.user.profile.observaciones is not none %}
+                              
+                          <p class="col-md-12 ">
+                                {{UserSubscripcion.user.profile.observaciones}}
+                          </p>
+                              {% endif %}
+                       
+            
+                  </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+      {% endif %}
 
-         <b><a href="{% url 'profiles:detail' UserSubscripcion.user.username  %}">
-          {{UserSubscripcion.user.profile.apellido|truncatechars:"16"}}
-          {{UserSubscripcion.user.profile.nombre|truncatechars:"16"}}
-          
-        </a></b>
-        {{UserSubscripcion.user.profile.edad}}
-         </p>
 
-            {% if UserSubscripcion.user.profile.whatsapp  %}
-              <p class="col-2 ">
-                <a href="https://wa.me/+549{{UserSubscripcion.user.profile.whatsapp}}" 
-                class="text-center btn btn-success btn-sm  mt-0" >
-                <i class="fab fa-whatsapp fa-2x"></i>                     
-                </a>
-              </p> 
-            {% endif %}
-    
-           <p class="col-2 ">      
-            <a class="btn btn-dark " href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id  %}">
-            Observacion</a>
-            </p>
-              {% if UserSubscripcion.user.profile.observaciones is not none %}
-                  
-              <p class="col-md-12 ">
-                    {{UserSubscripcion.user.profile.observaciones}}
-              </p>
-                  {% endif %}
-           
-
-      </div>
-        {% endfor %}
-
-            {% endif %}
-
-    </div>
-  </div>
 {% endif %}
 
           </p>
       </div>
     </div>
+
+    
   
     <!-- Modal Anotarse (a Registrarse) -->
     <div class="modal fade" id="ModalConfirmarRegistrarse">

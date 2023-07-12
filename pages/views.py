@@ -330,8 +330,7 @@ def Register(request, pk):
 
         subscription = Subscription.objects.find_or_create(request.user)
 
-        
-        print("recurrent_page: " + str(page.recurrent_page))
+
         if page.recurrent_page:
             new_pages = page.recurrent_page.pages.all()
         else:

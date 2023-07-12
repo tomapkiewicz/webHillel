@@ -54,7 +54,6 @@ class Subscription(models.Model):
         ordering = ['-updated']
 
     def __str__(self):
-        print(self.user)
         if self.user is None:
             return 'Sin datos'
         return self.user.username
