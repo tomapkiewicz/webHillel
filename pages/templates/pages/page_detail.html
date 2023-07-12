@@ -36,6 +36,7 @@
 
   
 
+    {% if page.activa %}
 
           <h5 class="card-title">{{page.title}} {% if page.modalidad  %}<b> Online</b>{% else %} <b> Presencial</b> {% endif %}</h5>
         
@@ -168,8 +169,12 @@
               </div>
             </div>
       {% endif %}
+      {% endif %}
 
-
+{% else %}
+ <h5 class="card-title">Esta página no se encuentra activa. Por cualquier consulta comunicate con el staff.  <a href="https://wa.me/+549{{whatsappHillel}}" class="btn btn-success btn-sm" >
+  <i class="fab fa-whatsapp"></i>
+  </a> </h5>
 {% endif %}
 
           </p>
