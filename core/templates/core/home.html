@@ -98,24 +98,20 @@
                         <a class="mt-5 btn badge-presencial btn-home" href="{% url 'pages:pages' 0 %}">
                           <div class="contenedorBotonPresencial">
                             <div class="centered-content">
-                              <img class="btnCasita float-left" src="{% static 'core/img/icono-presencial.png' %}" alt="">
+                              <img class="btnCasita float-left" src="{% static 'core/img/icono-actividades.png' %}" alt="" height="40px">
+                                <p class="py-3"><b>ACTIVIDADES</b></p>
+                              </div>
                             </div>
-                            <div class="centered-text">
-                              <p class="py-3"><b>ACTIVIDADES</b></p>
-                            </div>
-                          </div>
                         </a>
                         <a class="mt-5 btn badge-online btn-home" href="{% url 'pages:pages' 1 %}">
                           <div class="contenedorBotonVirtual">
                             <div class="centered-content">
-                              <img class="btnCasita mt-1 float-left" src="{% static 'core/img/icono-virtual.png' %}" alt="">
-                            </div>
-                            <div class="centered-text">
+                              <img class="btnCasita mt-1 float-left" src="{% static 'core/img/icono-cowork.png' %}" alt="" height="38px">
                               <p class="py-3"><b>COWORK</b></p>
                             </div>
                           </div>
                         </a>
-                        {% if temporadaOnward %}
+                        <!-- {% if temporadaOnward %}
                         <a class="mt-5 mt-md-2 btn badge-onward btn-home" href="{% url 'pages:onward' %}">
                           <div class="contenedorBotonOnward">
                             <div class="centered-content">
@@ -126,7 +122,7 @@
                             </div>
                           </div>
                         </a>
-                        {% endif %}
+                        {% endif %} -->
                       </div>
                       
 
