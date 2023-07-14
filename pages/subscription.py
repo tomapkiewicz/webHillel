@@ -34,7 +34,7 @@ class SubscriptionManager(models.Manager):
         return subscription
 
     def find_page(self, page):
-        queryset = self.filter(pages=page)
+        queryset = self.filter(pages=page).order_by('-created')
         if len(queryset) > 0:
             return queryset
         return None

@@ -13,5 +13,9 @@
     "python.linting.pylintArgs": [
         "--load-plugins=pylint_django",
         "--disable=django-not-configured,missing-module-docstring,missing-class-docstring"
-    ]
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "python.formatting.provider": "none"
 }
