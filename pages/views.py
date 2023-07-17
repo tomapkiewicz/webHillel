@@ -24,30 +24,39 @@ import csv
 from social.models import MailContacto
 import pytz
 from datetime import date
+from django.db.models import Q
 
 
 def CuposAgotados(request, pk):
     page = get_object_or_404(Page, pk=pk)
-    usu = request.user.profile.nombre + '  ' + request.user.profile.apellido if request.user.profile.nombre is not None else request.user
+    usu = (
+        request.user.profile.nombre + "  " + request.user.profile.apellido
+        if request.user.profile.nombre is not None
+        else request.user
+    )
 
     asunto = "Cupos agotados - " + page.title
     html_message = loader.render_to_string(
-        'mail_body.html',
+        "mail_body.html",
         {
-            'user_name': usu + ' quedó afuera!',
-            'subject': 'Se quiso anotar en ' + page.title + ' a las ' + str(page.horaDesde) + 'HS  ' + ' pero los cupos estaban agotados.',
-            'description': ' Comunicate con él haciendo click acá: https://wa.me/+549' + str(request.user.profile.whatsapp),
-        }
+            "user_name": usu + " quedó afuera!",
+            "subject": "Se quiso anotar en "
+            + page.title
+            + " a las "
+            + str(page.horaDesde)
+            + "HS  "
+            + " pero los cupos estaban agotados.",
+            "description": " Comunicate con él haciendo click acá: https://wa.me/+549"
+            + str(request.user.profile.whatsapp),
+        },
     )
     mailContacto = MailContacto.objects.first()
     to_mail = (mailContacto,)
-    from_mail = 'Hillel Argentina'
+    from_mail = "Hillel Argentina"
 
     rta = send_html_mail(asunto, html_message, to_mail, from_mail)
 
-    response = {
-        'is_taken': rta
-    }
+    response = {"is_taken": rta}
     return JsonResponse(response)
 
 
@@ -62,32 +71,41 @@ class EmailThread(threading.Thread):
 
     def run(self):
         print("enviando mail")
-        mail = send_mail(self.subject, self.html_content, self.mail_from, self.recipient_list,
-                         fail_silently=True, html_message=self.html_content)
+        mail = send_mail(
+            self.subject,
+            self.html_content,
+            self.mail_from,
+            self.recipient_list,
+            fail_silently=True,
+            html_message=self.html_content,
+        )
         print(mail)
 
 
 def send_html_mail(subject, html_content, recipient_list, mail_from):
     # EmailThread(subject, html_content, recipient_list, mail_from).start()
     print("enviando mail")
-    mail = send_mail(subject, html_content, mail_from, recipient_list,
-                     fail_silently=True, html_message=html_content)
+    mail = send_mail(
+        subject,
+        html_content,
+        mail_from,
+        recipient_list,
+        fail_silently=True,
+        html_message=html_content,
+    )
 
 
 class StaffRequiredMixin(object):
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(StaffRequiredMixin,
-                     self).dispatch(request, *args, **kwargs)
+        return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
 # Create your views here.
 
 
 def Onward(request):
-    
-    return render(request, 'pages/onward.html')
-
+    return render(request, "pages/onward.html")
 
 
 class PageList(ListView):
@@ -105,10 +123,16 @@ class PageList(ListView):
             else:
                 provincia = self.request.user.profile.provincia
 
-        context['provincia'] = provincia
+        context["provincia"] = provincia
+        local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
+        today = datetime.now(local_tz).date()
 
-        today = date.today()
-        active_pages = Page.objects.filter(activa=True, cowork=False, fecha__gte=today).order_by('fecha', 'horaDesde', '-title')
+        active_pages = Page.objects.filter(
+            Q(modalidad=True) | Q(provincia=provincia),
+            activa=True,
+            cowork=False,
+            fecha__gte=today,
+        ).order_by("fecha", "horaDesde", "-title")
 
         active_pages_map = {}
         recurrent_pages_map = {}
@@ -119,28 +143,29 @@ class PageList(ListView):
                     active_pages_map[page.fecha] = []
                 active_pages_map[page.fecha].append(page)
             else:
-                recurrent_page_id = page.recurrent_page.id  # Get the id of the recurrent_page
+                recurrent_page_id = (
+                    page.recurrent_page.id
+                )  # Get the id of the recurrent_page
                 if recurrent_page_id not in recurrent_pages_map:
                     if page.fecha not in active_pages_map:
                         active_pages_map[page.fecha] = []
                     active_pages_map[page.fecha].append(page)
                     recurrent_pages_map[recurrent_page_id] = True
 
+        cowork_pages = Page.objects.filter(activa=True, cowork=True).order_by(
+            "horaDesde", "-title"
+        )
+        context["cowork_pages"] = cowork_pages
+        context["active_pages_map"] = active_pages_map
+        context["cowork_pages"] = cowork_pages
 
-        cowork_pages = Page.objects.filter(activa=True, cowork=True).order_by('horaDesde', '-title')
-        context['cowork_pages'] = cowork_pages
-        context['active_pages_map'] = active_pages_map
-        context['cowork_pages'] = cowork_pages
-
-        
         if len(self.kwargs) > 0:
-            context['cowork'] = self.kwargs['modalidad']
+            context["cowork"] = self.kwargs["modalidad"]
         else:
-            context['cowork'] = 0
-        context['coworkStr'] = 'calendario' if context['cowork'] == 0 else 'cowork'
+            context["cowork"] = 0
+        context["coworkStr"] = "calendario" if context["cowork"] == 0 else "cowork"
 
         return context
-
 
 
 class PageDetail(DetailView):
@@ -148,22 +173,24 @@ class PageDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['now'] = timezone.now()
+        context["now"] = timezone.now()
 
         cuestionario = Cuestionario.objects.find_or_create(page=self.object)
         if cuestionario is not None:
-            context['cuestionario'] = cuestionario
-            print(context['cuestionario'])
+            context["cuestionario"] = cuestionario
+            print(context["cuestionario"])
 
         if self.request.user.is_anonymous:
             return context
         subscribers = Subscription.objects.find_page(self.object)
         overlaps = Subscription.objects.overlaps(self.request.user, self.object)
 
-        context['subscribers'] = subscribers
-        context['overlaps'] = overlaps
+        context["subscribers"] = subscribers
+        context["overlaps"] = overlaps
         if subscribers is not None:
-            context['usuarioAnotado'] = subscribers.filter(user=self.request.user).exists()
+            context["usuarioAnotado"] = subscribers.filter(
+                user=self.request.user
+            ).exists()
         return context
 
 
@@ -178,18 +205,17 @@ class PageCreate(CreateView):
     # success_url = reverse_lazy('pages:pages')
 
     def get_success_url(self):
-        return reverse_lazy('pages:pages')+'?created'
+        return reverse_lazy("pages:pages") + "?created"
 
 
 @method_decorator(staff_member_required, name="dispatch")
 class PageUpdate(UpdateView):
     model = Page
     form_class = PageForm
-    template_name_suffix = '_update_form'
+    template_name_suffix = "_update_form"
 
     def get_success_url(self):
-        return reverse_lazy('pages:update', args=[self.object.id])+'?ok'
-    
+        return reverse_lazy("pages:update", args=[self.object.id]) + "?ok"
 
     def form_valid(self, form):
         self.object = form.save()
@@ -218,11 +244,10 @@ class PageUpdate(UpdateView):
         return super().form_valid(form)
 
 
-
 @method_decorator(staff_member_required, name="dispatch")
 class PageDelete(DeleteView):
     model = Page
-    success_url = reverse_lazy('pages:pages')
+    success_url = reverse_lazy("pages:pages")
 
 
 def Register(request, pk):
@@ -230,106 +255,123 @@ def Register(request, pk):
         page = get_object_or_404(Page, pk=pk)
         cuestionario = Cuestionario.objects.get(page=page)
         if cuestionario is not None:
+            cuestionarioRespuesta = CuestionarioRespuesta.objects.find_or_create(
+                user=request.user, page=page
+            )
 
-            cuestionarioRespuesta = CuestionarioRespuesta.objects.find_or_create(user=request.user, page=page)
-
-            if request.POST.get('respuesta1', None) is not None:
+            if request.POST.get("respuesta1", None) is not None:
                 cuestionarioRespuesta.pregunta1 = cuestionario.pregunta1
-                cuestionarioRespuesta.respuesta1 = request.POST['respuesta1']
+                cuestionarioRespuesta.respuesta1 = request.POST["respuesta1"]
 
-            if request.POST.get('respuesta2', None) is not None:
+            if request.POST.get("respuesta2", None) is not None:
                 cuestionarioRespuesta.pregunta2 = cuestionario.pregunta2
-                cuestionarioRespuesta.respuesta2 = request.POST['respuesta2']
+                cuestionarioRespuesta.respuesta2 = request.POST["respuesta2"]
 
-            if request.POST.get('respuesta3', None) is not None:
+            if request.POST.get("respuesta3", None) is not None:
                 cuestionarioRespuesta.pregunta3 = cuestionario.pregunta3
-                cuestionarioRespuesta.respuesta3 = request.POST['respuesta3']
+                cuestionarioRespuesta.respuesta3 = request.POST["respuesta3"]
 
-            if request.POST.get('respuesta4', None) is not None:
+            if request.POST.get("respuesta4", None) is not None:
                 cuestionarioRespuesta.pregunta4 = cuestionario.pregunta4
-                cuestionarioRespuesta.respuesta4 = request.POST['respuesta4']
+                cuestionarioRespuesta.respuesta4 = request.POST["respuesta4"]
 
-            if request.POST.get('respuesta5', None) is not None:
+            if request.POST.get("respuesta5", None) is not None:
                 cuestionarioRespuesta.pregunta5 = cuestionario.pregunta5
-                cuestionarioRespuesta.respuesta5 = request.POST['respuesta5']
+                cuestionarioRespuesta.respuesta5 = request.POST["respuesta5"]
 
-            if request.POST.get('respuesta6', None) is not None:
+            if request.POST.get("respuesta6", None) is not None:
                 cuestionarioRespuesta.pregunta6 = cuestionario.pregunta6
-                cuestionarioRespuesta.respuesta6 = request.POST['respuesta6']
+                cuestionarioRespuesta.respuesta6 = request.POST["respuesta6"]
 
-            if request.POST.get('respuesta7', None) is not None:
+            if request.POST.get("respuesta7", None) is not None:
                 cuestionarioRespuesta.pregunta7 = cuestionario.pregunta7
-                cuestionarioRespuesta.respuesta7 = request.POST['respuesta7']
+                cuestionarioRespuesta.respuesta7 = request.POST["respuesta7"]
 
-            if request.POST.get('respuesta8', None) is not None:
+            if request.POST.get("respuesta8", None) is not None:
                 cuestionarioRespuesta.pregunta8 = cuestionario.pregunta8
-                cuestionarioRespuesta.respuesta8 = request.POST['respuesta8']
+                cuestionarioRespuesta.respuesta8 = request.POST["respuesta8"]
 
-            if request.POST.get('respuesta9', None) is not None:
+            if request.POST.get("respuesta9", None) is not None:
                 cuestionarioRespuesta.pregunta9 = cuestionario.pregunta9
-                cuestionarioRespuesta.respuesta9 = request.POST['respuesta9']
+                cuestionarioRespuesta.respuesta9 = request.POST["respuesta9"]
 
-            if request.POST.get('respuesta10', None) is not None:
+            if request.POST.get("respuesta10", None) is not None:
                 cuestionarioRespuesta.pregunta10 = cuestionario.pregunta10
-                cuestionarioRespuesta.respuesta10 = request.POST['respuesta10']
+                cuestionarioRespuesta.respuesta10 = request.POST["respuesta10"]
 
-            if request.POST.get('respuesta11', None) is not None:
+            if request.POST.get("respuesta11", None) is not None:
                 cuestionarioRespuesta.pregunta11 = cuestionario.pregunta11
-                cuestionarioRespuesta.respuesta11 = request.POST['respuesta11']
+                cuestionarioRespuesta.respuesta11 = request.POST["respuesta11"]
 
-            if request.POST.get('respuesta12', None) is not None:
+            if request.POST.get("respuesta12", None) is not None:
                 cuestionarioRespuesta.pregunta12 = cuestionario.pregunta12
-                cuestionarioRespuesta.respuesta12 = request.POST['respuesta12']
+                cuestionarioRespuesta.respuesta12 = request.POST["respuesta12"]
 
-            if request.POST.get('respuesta13', None) is not None:
+            if request.POST.get("respuesta13", None) is not None:
                 cuestionarioRespuesta.pregunta13 = cuestionario.pregunta13
-                cuestionarioRespuesta.respuesta13 = request.POST['respuesta13']
+                cuestionarioRespuesta.respuesta13 = request.POST["respuesta13"]
 
-            if request.POST.get('respuesta14', None) is not None:
+            if request.POST.get("respuesta14", None) is not None:
                 cuestionarioRespuesta.pregunta14 = cuestionario.pregunta14
-                cuestionarioRespuesta.respuesta14 = request.POST['respuesta14']
+                cuestionarioRespuesta.respuesta14 = request.POST["respuesta14"]
 
-            if request.POST.get('respuesta15', None) is not None:
+            if request.POST.get("respuesta15", None) is not None:
                 cuestionarioRespuesta.pregunta15 = cuestionario.pregunta15
-                cuestionarioRespuesta.respuesta15 = request.POST['respuesta15']
+                cuestionarioRespuesta.respuesta15 = request.POST["respuesta15"]
 
-            if request.POST.get('respuesta16', None) is not None:
+            if request.POST.get("respuesta16", None) is not None:
                 cuestionarioRespuesta.pregunta16 = cuestionario.pregunta16
-                cuestionarioRespuesta.respuesta16 = request.POST['respuesta16']
+                cuestionarioRespuesta.respuesta16 = request.POST["respuesta16"]
 
-            if request.POST.get('respuesta17', None) is not None:
+            if request.POST.get("respuesta17", None) is not None:
                 cuestionarioRespuesta.pregunta17 = cuestionario.pregunta17
-                cuestionarioRespuesta.respuesta17 = request.POST['respuesta17']
+                cuestionarioRespuesta.respuesta17 = request.POST["respuesta17"]
 
-            if request.POST.get('respuesta18', None) is not None:
+            if request.POST.get("respuesta18", None) is not None:
                 cuestionarioRespuesta.pregunta18 = cuestionario.pregunta18
-                cuestionarioRespuesta.respuesta18 = request.POST['respuesta18']
+                cuestionarioRespuesta.respuesta18 = request.POST["respuesta18"]
 
-            if request.POST.get('respuesta19', None) is not None:
+            if request.POST.get("respuesta19", None) is not None:
                 cuestionarioRespuesta.pregunta19 = cuestionario.pregunta19
-                cuestionarioRespuesta.respuesta19 = request.POST['respuesta19']
+                cuestionarioRespuesta.respuesta19 = request.POST["respuesta19"]
 
-            if request.POST.get('respuesta20', None) is not None:
+            if request.POST.get("respuesta20", None) is not None:
                 cuestionarioRespuesta.pregunta20 = cuestionario.pregunta20
-                cuestionarioRespuesta.respuesta20 = request.POST['respuesta20']
+                cuestionarioRespuesta.respuesta20 = request.POST["respuesta20"]
 
             cuestionarioRespuesta.save()
 
         # Si la page es secreta validar la clave
         if page.secreta:
-            if request.POST['password'] != page.clave:
-                return redirect(reverse_lazy('pages:page', args=[page.id, ]) + '?claveincorrecta')
+            if request.POST["password"] != page.clave:
+                return redirect(
+                    reverse_lazy(
+                        "pages:page",
+                        args=[
+                            page.id,
+                        ],
+                    )
+                    + "?claveincorrecta"
+                )
 
         # Chequear que haya cupos disponibles (No debería llegar acá)
         if page.Qanotados >= page.cupo and page.cupo != 0:
-            return redirect(reverse_lazy('pages:pages') + '?agotado')
+            return redirect(reverse_lazy("pages:pages") + "?agotado")
 
         # chequear que el perfil esté completo
         if request.user.profile.validado is not True:
-            return redirect(reverse_lazy('profile', args=[page.id, ]) + '?completar=si&pk='+str(pk))
+            return redirect(
+                reverse_lazy(
+                    "profile",
+                    args=[
+                        page.id,
+                    ],
+                )
+                + "?completar=si&pk="
+                + str(pk)
+            )
 
         subscription = Subscription.objects.find_or_create(request.user)
-
 
         if page.recurrent_page:
             new_pages = page.recurrent_page.pages.all()
@@ -337,37 +379,50 @@ def Register(request, pk):
             new_pages = [page]
         subscription.pages.add(*new_pages)
 
-
-
     else:
         raise Http404("Usuario no está autenticado")
 
     # Mail automático
     modalidad = " Online" if page.modalidad else " Presencial"
-    asunto = "Te esperamos en " + page.title + modalidad + "!" if not page.con_mail_personalizado else page.asunto_mail
+    asunto = (
+        "Te esperamos en " + page.title + modalidad + "!"
+        if not page.con_mail_personalizado
+        else page.asunto_mail
+    )
     to_mail = [request.user.email]
-    from_mail = 'Hillel Argentina <no_responder@domain.com>'
+    from_mail = "Hillel Argentina <no_responder@domain.com>"
     host = request.get_host()
     host = host if "127.0.0.1" in host else "https://" + host
-    textoExtraMail = page.textoExtraMail if page.textoExtraMail is not None else page.description
+    textoExtraMail = (
+        page.textoExtraMail if page.textoExtraMail is not None else page.description
+    )
     if page.con_mail_personalizado:
         html_message = loader.render_to_string(
-            'custom_mail_body.html',
+            "custom_mail_body.html",
             {
-                'mail_body': page.cuerpo_mail,
-            }
+                "mail_body": page.cuerpo_mail,
+            },
         )
     else:
         html_message = loader.render_to_string(
-            'mail_body.html',
+            "mail_body.html",
             {
-                'user_name': 'Hola ' + request.user.username + '!',
-                'subject': 'Te anotaste en ' + page.title + modalidad + ' a las ' + str(page.horaDesde) + 'HS.' + ' Podés darte de baja acá: '+host+'/pages/'+str(page.id),
-                'description': textoExtraMail,
-            }
+                "user_name": "Hola " + request.user.username + "!",
+                "subject": "Te anotaste en "
+                + page.title
+                + modalidad
+                + " a las "
+                + str(page.horaDesde)
+                + "HS."
+                + " Podés darte de baja acá: "
+                + host
+                + "/pages/"
+                + str(page.id),
+                "description": textoExtraMail,
+            },
         )
     send_html_mail(asunto, html_message, to_mail, from_mail)
-    return redirect(reverse_lazy('home') + '?ok')
+    return redirect(reverse_lazy("home") + "?ok")
 
 
 def Unregister(request, pk):
@@ -377,47 +432,60 @@ def Unregister(request, pk):
         subscription.pages.remove(page)
     else:
         raise Http404("Usuario no está autenticado")
-    return redirect(reverse_lazy('home')+'?remove')
+    return redirect(reverse_lazy("home") + "?remove")
 
 
 def Asistencia(request, modalidad):
     if request.user.is_authenticated:
-        if request.user.groups.filter(name='BITAJON').exists() or request.user.is_staff:
-            local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+        if request.user.groups.filter(name="BITAJON").exists() or request.user.is_staff:
+            local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
             dia = datetime.now(local_tz).weekday() + 1
             pages = Page.objects.filter(activa=True, modalidad=modalidad)
-            
-            # Get the unique dates of the pages and order them
-            unique_dates = pages.values_list('fecha', flat=True).distinct().order_by('fecha')
-            
-            # Fetch pages for each unique date and annotate with the date itself
-            annotated_pages = pages.annotate(date=F('fecha'))
-            
-            return render(request, 'pages/asistencia.html', {'pages': annotated_pages, 'dia': dia, 'modalidad': modalidad, 'unique_dates': unique_dates})
-        
-        raise Http404("Usuario no es bitajon/staff")
-    
-    raise Http404("Usuario no está autenticado")
 
+            # Get the unique dates of the pages and order them
+            unique_dates = (
+                pages.values_list("fecha", flat=True).distinct().order_by("fecha")
+            )
+
+            # Fetch pages for each unique date and annotate with the date itself
+            annotated_pages = pages.annotate(date=F("fecha"))
+
+            return render(
+                request,
+                "pages/asistencia.html",
+                {
+                    "pages": annotated_pages,
+                    "dia": dia,
+                    "modalidad": modalidad,
+                    "unique_dates": unique_dates,
+                },
+            )
+
+        raise Http404("Usuario no es bitajon/staff")
+
+    raise Http404("Usuario no está autenticado")
 
 
 def AsistenciaDetail(request, pk, slug):
     if request.user.is_authenticated:
         page = get_object_or_404(Page, pk=pk)
         subscribers = Subscription.objects.find_page(page)
-        return render(request, 'pages/asistencia_detail.html',
-                      {'page': page, 'subscribers': subscribers})
+        return render(
+            request,
+            "pages/asistencia_detail.html",
+            {"page": page, "subscribers": subscribers},
+        )
     raise Http404("Usuario no está autenticado")
 
 
 def AsistenciaAdd(request, pk):
-    json_response = {'created': False}
+    json_response = {"created": False}
     if request.user.is_authenticated:
-        username = request.GET.get('user', None)
+        username = request.GET.get("user", None)
         user = User.objects.get(username=username)
         if username:
             page = get_object_or_404(Page, pk=pk)
-            local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+            local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
             hoy = datetime.now(local_tz)
             historial = Historial.objects.find_or_create(page, hoy)
             historial.asistentes.add(user)
@@ -427,27 +495,27 @@ def AsistenciaAdd(request, pk):
             for subscripcion in subscribers:
                 historial.anotados.add(subscripcion.user)
 
-            json_response['created'] = True
-            json_response['hoy'] = hoy
+            json_response["created"] = True
+            json_response["hoy"] = hoy
 
             return JsonResponse(json_response)
     raise Http404("Usuario no está autenticado")
 
 
 def AsistenciaRemove(request, pk):
-    json_response = {'created': False}
+    json_response = {"created": False}
     if request.user.is_authenticated:
-        username = request.GET.get('user', None)
+        username = request.GET.get("user", None)
         user = User.objects.get(username=username)
         if username:
             page = get_object_or_404(Page, pk=pk)
-            local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+            local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
             hoy = datetime.now(local_tz)
             historial = Historial.objects.find_or_create(page, hoy)
             historial.asistentes.remove(user)
 
-            json_response['created'] = True
-            json_response['hoy'] = hoy
+            json_response["created"] = True
+            json_response["hoy"] = hoy
 
             return JsonResponse(json_response)
     raise Http404("Usuario no está autenticado")
@@ -462,26 +530,56 @@ def WriteRowAsistencias(h, writer):
         return Http404("Historial sin asistentes")
 
     for anotado in h.anotados.all():
-        asistio = "Si"if anotado in h.asistentes.all() else "No"
+        asistio = "Si" if anotado in h.asistentes.all() else "No"
         asis = 1 if asistio == "Si" else 0
 
         Profile.objects.get_or_create(user=anotado)
-        
-        writer.writerow([h.page.titleSTR, h.page.fecha, h.page.horaDesde,
-                         anotado, anotado.profile.nombre,
-                        anotado.profile.apellido,anotado.profile.whatsapp,anotado.email , asistio, asis])
+
+        writer.writerow(
+            [
+                h.page.titleSTR,
+                h.page.fecha,
+                h.page.horaDesde,
+                anotado,
+                anotado.profile.nombre,
+                anotado.profile.apellido,
+                anotado.profile.whatsapp,
+                anotado.email,
+                asistio,
+                asis,
+            ]
+        )
 
 
 def DescargarAsistencias(request, pk):
     page = get_object_or_404(Page, pk=pk)
 
-    response = HttpResponse(content='')
-    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
-    response['Content-Disposition'] = 'attachment; filename=asistencias-' + \
-        page.titleSTR + '-' + str(datetime.now(local_tz)) + '.csv'
-    response.write(u'\ufeff'.encode('utf8'))
-    writer = csv.writer(response, dialect='excel')
-    writer.writerow(['Actividad', 'Dia', 'Hora Desde', 'Fecha', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular','Mail', 'Asistio?', 'Asis'])
+    response = HttpResponse(content="")
+    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
+    response["Content-Disposition"] = (
+        "attachment; filename=asistencias-"
+        + page.titleSTR
+        + "-"
+        + str(datetime.now(local_tz))
+        + ".csv"
+    )
+    response.write("\ufeff".encode("utf8"))
+    writer = csv.writer(response, dialect="excel")
+    writer.writerow(
+        [
+            "Actividad",
+            "Dia",
+            "Hora Desde",
+            "Fecha",
+            "Usuario anotado",
+            "Nombre",
+            "Apellido",
+            "Celular",
+            "Mail",
+            "Asistio?",
+            "Asis",
+        ]
+    )
 
     h = Page.historialHoy(page)
 
@@ -490,13 +588,30 @@ def DescargarAsistencias(request, pk):
 
 
 def DescargarHistoricoAsistenciasALLDetail(request):
-    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
-    response = HttpResponse(content='')
-    response['Content-Disposition'] = 'attachment; filename=asistenciasDETALLE-' + \
-        'historico-' + str(datetime.now(local_tz)) + '.csv'
-    response.write(u'\ufeff'.encode('utf8'))
-    writer = csv.writer(response, dialect='excel')
-    writer.writerow(['Actividad', 'Fecha', 'Hora Desde', 'Usuario anotado','Nombre', 'Apellido', 'Celular','Mail', 'Asistio?', 'Asis'])
+    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
+    response = HttpResponse(content="")
+    response["Content-Disposition"] = (
+        "attachment; filename=asistenciasDETALLE-"
+        + "historico-"
+        + str(datetime.now(local_tz))
+        + ".csv"
+    )
+    response.write("\ufeff".encode("utf8"))
+    writer = csv.writer(response, dialect="excel")
+    writer.writerow(
+        [
+            "Actividad",
+            "Fecha",
+            "Hora Desde",
+            "Usuario anotado",
+            "Nombre",
+            "Apellido",
+            "Celular",
+            "Mail",
+            "Asistio?",
+            "Asis",
+        ]
+    )
 
     historiales = Historial.objects.all()
     for h in historiales:
@@ -506,31 +621,60 @@ def DescargarHistoricoAsistenciasALLDetail(request):
 
 
 def DescargarHistoricoAsistenciasALLItem(request):
-    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
     # Genera un archivo por actividad-fecha y otro por actividad-fecha-asistente
-    responseB = HttpResponse(content='')
-    responseB['Content-Disposition'] = 'attachment; filename=asistenciasITEM-' + \
-        'historico-' + str(datetime.now(local_tz)) + '.csv'
-    responseB.write(u'\ufeff'.encode('utf8'))
-    writerB = csv.writer(responseB, dialect='excel')
-    writerB.writerow(['Actividad', 'Fecha', 'Hora Desde', 'Qanotados', 'Qasistentes'])
+    responseB = HttpResponse(content="")
+    responseB["Content-Disposition"] = (
+        "attachment; filename=asistenciasITEM-"
+        + "historico-"
+        + str(datetime.now(local_tz))
+        + ".csv"
+    )
+    responseB.write("\ufeff".encode("utf8"))
+    writerB = csv.writer(responseB, dialect="excel")
+    writerB.writerow(["Actividad", "Fecha", "Hora Desde", "Qanotados", "Qasistentes"])
 
     historiales = Historial.objects.all()
     for h in historiales:
-        writerB.writerow([h.page.titleSTR, h.page.fecha, h.page.horaDesde, h.Qanotados, h.Qasistentes])
+        writerB.writerow(
+            [
+                h.page.titleSTR,
+                h.page.fecha,
+                h.page.horaDesde,
+                h.Qanotados,
+                h.Qasistentes,
+            ]
+        )
 
     return responseB
 
 
 def DescargarHistoricoAsistencias(request, pk):
     page = get_object_or_404(Page, pk=pk)
-    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
-    response = HttpResponse(content='')
-    response['Content-Disposition'] = 'attachment; filename=asistencias-' + \
-        page.titleSTR + '-all-' + str(datetime.now(local_tz)) + '.csv'
-    response.write(u'\ufeff'.encode('utf8'))
-    writer = csv.writer(response, dialect='excel')
-    writer.writerow(['Actividad', 'Fecha', 'Hora Desde', 'Usuario anotado', 'Nombre', 'Apellido', 'Celular', 'Asistio?', 'Asis'])
+    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
+    response = HttpResponse(content="")
+    response["Content-Disposition"] = (
+        "attachment; filename=asistencias-"
+        + page.titleSTR
+        + "-all-"
+        + str(datetime.now(local_tz))
+        + ".csv"
+    )
+    response.write("\ufeff".encode("utf8"))
+    writer = csv.writer(response, dialect="excel")
+    writer.writerow(
+        [
+            "Actividad",
+            "Fecha",
+            "Hora Desde",
+            "Usuario anotado",
+            "Nombre",
+            "Apellido",
+            "Celular",
+            "Asistio?",
+            "Asis",
+        ]
+    )
 
     hs = Historial.objects.find_page(page=page)
     if hs is None:
@@ -542,18 +686,34 @@ def DescargarHistoricoAsistencias(request, pk):
 
 
 def DescargarActividades(request):
-    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
-    response = HttpResponse(content='')
-    response['Content-Disposition'] = 'attachment; filename=actividades-' + \
-        str(datetime.now(local_tz)) + '.csv'
+    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
+    response = HttpResponse(content="")
+    response["Content-Disposition"] = (
+        "attachment; filename=actividades-" + str(datetime.now(local_tz)) + ".csv"
+    )
 
-    response.write(u'\ufeff'.encode('utf8'))
+    response.write("\ufeff".encode("utf8"))
 
-    writer = csv.writer(response, dialect='excel')
+    writer = csv.writer(response, dialect="excel")
 
-    writer.writerow(['Titulo', 'Fecha', 'Hora Desde', 'Hora Hasta',
-                    'Cupo', 'Modalidad', 'Nuevo', 'Activa', 'Qanotados',
-                     'Categorias', 'responsable', 'colaborador', 'secreta', 'clave', ])
+    writer.writerow(
+        [
+            "Titulo",
+            "Fecha",
+            "Hora Desde",
+            "Hora Hasta",
+            "Cupo",
+            "Modalidad",
+            "Nuevo",
+            "Activa",
+            "Qanotados",
+            "Categorias",
+            "responsable",
+            "colaborador",
+            "secreta",
+            "clave",
+        ]
+    )
 
     pages = Page.objects.all()
 
@@ -561,22 +721,55 @@ def DescargarActividades(request):
         if p is None:
             return Http404("Actividad no encontrada")
 
-        writer.writerow([p.titleSTR, p.fecha, p.horaDesde, p.horaHasta, p.cupo,
-                         p.modalidadSTR, p.nuevo, p.activa, p.Qanotados, p.categoriesSTR,
-                         p.responsable, p.colaborador, p.secreta, p.clave, ])
+        writer.writerow(
+            [
+                p.titleSTR,
+                p.fecha,
+                p.horaDesde,
+                p.horaHasta,
+                p.cupo,
+                p.modalidadSTR,
+                p.nuevo,
+                p.activa,
+                p.Qanotados,
+                p.categoriesSTR,
+                p.responsable,
+                p.colaborador,
+                p.secreta,
+                p.clave,
+            ]
+        )
 
     return response
 
 
 def DescargarPerfiles(request):
-    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
-    response = HttpResponse(content='')
-    response['Content-Disposition'] = 'attachment; filename=perfiles-' + \
-        str(datetime.now(local_tz)) + '.csv'
-    writer = csv.writer(response, dialect='excel')
-    response.write(u'\ufeff'.encode('utf8'))
-    writer.writerow(['Usuario','Mail', 'Nombre', 'Apellido', 'Fecha de nacimiento', 'Edad', 'Celular', 'Instagram',
-                     'Onward', 'Taglit', 'Cómo conoció Hillel', 'Estudios', 'Experiencia comunitaria', 'tematicasInteres', 'propuestasInteres'])
+    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
+    response = HttpResponse(content="")
+    response["Content-Disposition"] = (
+        "attachment; filename=perfiles-" + str(datetime.now(local_tz)) + ".csv"
+    )
+    writer = csv.writer(response, dialect="excel")
+    response.write("\ufeff".encode("utf8"))
+    writer.writerow(
+        [
+            "Usuario",
+            "Mail",
+            "Nombre",
+            "Apellido",
+            "Fecha de nacimiento",
+            "Edad",
+            "Celular",
+            "Instagram",
+            "Onward",
+            "Taglit",
+            "Cómo conoció Hillel",
+            "Estudios",
+            "Experiencia comunitaria",
+            "tematicasInteres",
+            "propuestasInteres",
+        ]
+    )
 
     profiles = Profile.objects.all()
 
@@ -584,69 +777,209 @@ def DescargarPerfiles(request):
         if p is None:
             return Http404("Perfil no encontrado")
         if p.validado:
-            writer.writerow([p,p.user.email ,p.nombre, p.apellido, p.fechaNacimiento, p.edad, p.whatsapp, p.instagram,
-                             p.onward, p.taglit, p.comoConociste, p.estudios, p.experienciaComunitaria, p.tematicasInteresSTR, p.propuestasInteresSTR])
+            writer.writerow(
+                [
+                    p,
+                    p.user.email,
+                    p.nombre,
+                    p.apellido,
+                    p.fechaNacimiento,
+                    p.edad,
+                    p.whatsapp,
+                    p.instagram,
+                    p.onward,
+                    p.taglit,
+                    p.comoConociste,
+                    p.estudios,
+                    p.experienciaComunitaria,
+                    p.tematicasInteresSTR,
+                    p.propuestasInteresSTR,
+                ]
+            )
     return response
 
 
 def DescargarCuestionarios(request):
-    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
-    response = HttpResponse(content='')
-    response['Content-Disposition'] = 'attachment; filename=Cuestionarios-' + \
-        str(datetime.now(local_tz)) + '.csv'
-    writer = csv.writer(response, dialect='excel')
-    response.write(u'\ufeff'.encode('utf8'))
-    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4',
-                     'Pregunta5', 'Pregunta6', 'Pregunta7', 'Pregunta8', 'Pregunta9', 'Pregunta10', 'Pregunta11',
-                     'Pregunta12', 'Pregunta13', 'Pregunta14', 'Pregunta15', 'Pregunta16', 'Pregunta17', 'Pregunta18',
-                     'Pregunta19', 'Pregunta20', ])
+    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
+    response = HttpResponse(content="")
+    response["Content-Disposition"] = (
+        "attachment; filename=Cuestionarios-" + str(datetime.now(local_tz)) + ".csv"
+    )
+    writer = csv.writer(response, dialect="excel")
+    response.write("\ufeff".encode("utf8"))
+    writer.writerow(
+        [
+            "Actividad",
+            "Pregunta1",
+            "Pregunta2",
+            "Pregunta3",
+            "Pregunta4",
+            "Pregunta5",
+            "Pregunta6",
+            "Pregunta7",
+            "Pregunta8",
+            "Pregunta9",
+            "Pregunta10",
+            "Pregunta11",
+            "Pregunta12",
+            "Pregunta13",
+            "Pregunta14",
+            "Pregunta15",
+            "Pregunta16",
+            "Pregunta17",
+            "Pregunta18",
+            "Pregunta19",
+            "Pregunta20",
+        ]
+    )
 
     cuestionarios = Cuestionario.objects.all()
 
     for c in cuestionarios:
         if c is None:
             return Http404("Cuestionario no encontrado")
-        writer.writerow([c.page.titleSTR, c.pregunta1, c.pregunta2, c.pregunta3, c.pregunta4, c.pregunta5,
-                         c.pregunta6, c.pregunta7, c.pregunta8, c.pregunta9, c.pregunta10,
-                         c.pregunta11, c.pregunta12, c.pregunta13, c.pregunta14, c.pregunta15,
-                         c.pregunta16, c.pregunta17, c.pregunta18, c.pregunta19, c.pregunta20, ])
+        writer.writerow(
+            [
+                c.page.titleSTR,
+                c.pregunta1,
+                c.pregunta2,
+                c.pregunta3,
+                c.pregunta4,
+                c.pregunta5,
+                c.pregunta6,
+                c.pregunta7,
+                c.pregunta8,
+                c.pregunta9,
+                c.pregunta10,
+                c.pregunta11,
+                c.pregunta12,
+                c.pregunta13,
+                c.pregunta14,
+                c.pregunta15,
+                c.pregunta16,
+                c.pregunta17,
+                c.pregunta18,
+                c.pregunta19,
+                c.pregunta20,
+            ]
+        )
     return response
 
 
 def DescargarCuestionariosRespuestas(request):
-    local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
-    response = HttpResponse(content='')
-    response['Content-Disposition'] = 'attachment; filename=Cuestionarios-Respuestas-' + \
-        str(datetime.now(local_tz)) + '.csv'
-    writer = csv.writer(response, dialect='excel')
-    response.write(u'\ufeff'.encode('utf8'))
-    writer.writerow(['Actividad', 'Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4', 'Pregunta5',
-                     'Pregunta6', 'Pregunta7', 'Pregunta8', 'Pregunta9', 'Pregunta10',
-                     'Pregunta11', 'Pregunta12', 'Pregunta13', 'Pregunta14', 'Pregunta15',
-                     'Pregunta16', 'Pregunta17', 'Pregunta18', 'Pregunta19', 'Pregunta20',
-                     'Usuario', 'Respuesta1', 'Respuesta2', 'Respuesta3', 'Respuesta4', 'Respuesta5',
-                     'Respuesta6', 'Respuesta7', 'Respuesta8', 'Respuesta9', 'Respuesta10',
-                     'Respuesta11', 'Respuesta12', 'Respuesta13', 'Respuesta14', 'Respuesta15',
-                     'Respuesta16', 'Respuesta17', 'Respuesta18', 'Respuesta19', 'Respuesta20',
-                    'Fecha de compleción'])
+    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
+    response = HttpResponse(content="")
+    response["Content-Disposition"] = (
+        "attachment; filename=Cuestionarios-Respuestas-"
+        + str(datetime.now(local_tz))
+        + ".csv"
+    )
+    writer = csv.writer(response, dialect="excel")
+    response.write("\ufeff".encode("utf8"))
+    writer.writerow(
+        [
+            "Actividad",
+            "Pregunta1",
+            "Pregunta2",
+            "Pregunta3",
+            "Pregunta4",
+            "Pregunta5",
+            "Pregunta6",
+            "Pregunta7",
+            "Pregunta8",
+            "Pregunta9",
+            "Pregunta10",
+            "Pregunta11",
+            "Pregunta12",
+            "Pregunta13",
+            "Pregunta14",
+            "Pregunta15",
+            "Pregunta16",
+            "Pregunta17",
+            "Pregunta18",
+            "Pregunta19",
+            "Pregunta20",
+            "Usuario",
+            "Respuesta1",
+            "Respuesta2",
+            "Respuesta3",
+            "Respuesta4",
+            "Respuesta5",
+            "Respuesta6",
+            "Respuesta7",
+            "Respuesta8",
+            "Respuesta9",
+            "Respuesta10",
+            "Respuesta11",
+            "Respuesta12",
+            "Respuesta13",
+            "Respuesta14",
+            "Respuesta15",
+            "Respuesta16",
+            "Respuesta17",
+            "Respuesta18",
+            "Respuesta19",
+            "Respuesta20",
+            "Fecha de compleción",
+        ]
+    )
 
     cuestionariosRespuesta = CuestionarioRespuesta.objects.all()
 
     for c in cuestionariosRespuesta:
         if c is None:
             return Http404("Cuestionario no encontrado")
-        writer.writerow([c.page.titleSTR, c.pregunta1, c.pregunta2, c.pregunta3, c.pregunta4, c.pregunta5,
-                         c.pregunta6, c.pregunta7, c.pregunta8, c.pregunta9, c.pregunta10,
-                         c.pregunta11, c.pregunta12, c.pregunta13, c.pregunta14, c.pregunta15,
-                         c.pregunta16, c.pregunta17, c.pregunta18, c.pregunta19, c.pregunta20,
-                        c.user.username, c.respuesta1, c.respuesta2, c.respuesta3, c.respuesta4, c.respuesta5,
-                        c.respuesta6, c.respuesta7, c.respuesta8, c.respuesta9, c.respuesta10,
-                        c.respuesta11, c.respuesta12, c.respuesta13, c.respuesta14, c.respuesta15,
-                        c.respuesta16, c.respuesta17, c.respuesta18, c.respuesta19, c.respuesta20, c.updated])
+        writer.writerow(
+            [
+                c.page.titleSTR,
+                c.pregunta1,
+                c.pregunta2,
+                c.pregunta3,
+                c.pregunta4,
+                c.pregunta5,
+                c.pregunta6,
+                c.pregunta7,
+                c.pregunta8,
+                c.pregunta9,
+                c.pregunta10,
+                c.pregunta11,
+                c.pregunta12,
+                c.pregunta13,
+                c.pregunta14,
+                c.pregunta15,
+                c.pregunta16,
+                c.pregunta17,
+                c.pregunta18,
+                c.pregunta19,
+                c.pregunta20,
+                c.user.username,
+                c.respuesta1,
+                c.respuesta2,
+                c.respuesta3,
+                c.respuesta4,
+                c.respuesta5,
+                c.respuesta6,
+                c.respuesta7,
+                c.respuesta8,
+                c.respuesta9,
+                c.respuesta10,
+                c.respuesta11,
+                c.respuesta12,
+                c.respuesta13,
+                c.respuesta14,
+                c.respuesta15,
+                c.respuesta16,
+                c.respuesta17,
+                c.respuesta18,
+                c.respuesta19,
+                c.respuesta20,
+                c.updated,
+            ]
+        )
     return response
 
 
 def Exportar(request):
     if request.user.is_authenticated:
-        return render(request, 'pages/exportar.html')
+        return render(request, "pages/exportar.html")
     raise Http404("Usuario no está autenticado")
