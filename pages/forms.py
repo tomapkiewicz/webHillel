@@ -144,8 +144,10 @@ class PageForm(forms.ModelForm):
         hora_desde = cleaned_data.get("horaDesde")
         hora_hasta = cleaned_data.get("horaHasta")
         secreta = cleaned_data.get("secreta")
-        clave = cleaned_data.get("clave")
+        provincia = cleaned_data.get("provincia")
 
+        clave = cleaned_data.get("clave")
+        print("provincia", provincia)
         if hora_desde and hora_hasta and hora_desde >= hora_hasta:
             self.add_error(
                 "horaDesde", _("La hora desde debe ser antes que la hora hasta.")
@@ -157,11 +159,14 @@ class PageForm(forms.ModelForm):
         if secreta and not clave:
             self.add_error("clave", _("Si la página es secreta, debe tener una clave."))
 
+        if not provincia:
+            self.add_error("provincia", _("Debe seleccionar una provincia."))
+
         return cleaned_data
 
     def non_field_errors(self):
         errors = super().non_field_errors()
-        for field in ["horaDesde", "horaHasta", "clave"]:
+        for field in ["horaDesde", "horaHasta", "clave", "provincia"]:
             if field in self.errors:
                 errors.extend(self.errors[field])
         return errors
