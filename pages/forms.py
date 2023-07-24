@@ -147,7 +147,6 @@ class PageForm(forms.ModelForm):
         provincia = cleaned_data.get("provincia")
 
         clave = cleaned_data.get("clave")
-        print("provincia", provincia)
         if hora_desde and hora_hasta and hora_desde >= hora_hasta:
             self.add_error(
                 "horaDesde", _("La hora desde debe ser antes que la hora hasta.")
