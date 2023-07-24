@@ -127,12 +127,19 @@ class PageList(ListView):
         local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
         today = datetime.now(local_tz).date()
 
-        active_pages = Page.objects.filter(
-            Q(modalidad=True) | Q(provincia=provincia),
-            activa=True,
-            cowork=False,
-            fecha__gte=today,
-        ).order_by("fecha", "horaDesde", "-title")
+        if provincia is not None:
+            active_pages = Page.objects.filter(
+                Q(modalidad=True) | Q(provincia=provincia),
+                activa=True,
+                cowork=False,
+                fecha__gte=today,
+            ).order_by("fecha", "horaDesde", "-title")
+        else:
+            active_pages = Page.objects.filter(
+                activa=True,
+                cowork=False,
+                fecha__gte=today,
+            ).order_by("fecha", "horaDesde", "-title")
 
         active_pages_map = {}
         recurrent_pages_map = {}
