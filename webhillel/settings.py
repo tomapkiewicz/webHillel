@@ -20,79 +20,79 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '+k!@)$demq7!z@dlf4hk0jiy=z3l3_d)&cx4hxhtc^u85ps_rj'
+SECRET_KEY = "+k!@)$demq7!z@dlf4hk0jiy=z3l3_d)&cx4hxhtc^u85ps_rj"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'www.hillelargentina.org.ar']
+ALLOWED_HOSTS = ["127.0.0.1", "www.hillelargentina.org.ar"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'registration.apps.RegistrationConfig',
-    'location.apps.LocationConfig',
-    'profiles.apps.ProfilesConfig',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'ckeditor',
-    'core',
-    'pages.apps.PagesConfig',
-    'social.apps.SocialConfig',
+    "registration.apps.RegistrationConfig",
+    "location.apps.LocationConfig",
+    "profiles.apps.ProfilesConfig",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "ckeditor",
+    "core",
+    "pages.apps.PagesConfig",
+    "social.apps.SocialConfig",
 ]
 
 
-DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
-DBBACKUP_STORAGE_OPTIONS = {'location': BASE_DIR / 'backup'}
+DBBACKUP_STORAGE = "django.core.files.storage.FileSystemStorage"
+DBBACKUP_STORAGE_OPTIONS = {"location": BASE_DIR / "backup"}
 
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.gzip.GZipMiddleware',  # gzip
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.gzip.GZipMiddleware",  # gzip
 ]
 
-ROOT_URLCONF = 'webhillel.urls'
+ROOT_URLCONF = "webhillel.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'registration.processors.ctx_dict',
-                'social.processors.ctx_dict',
-                'profiles.processors.ctx_dict',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "registration.processors.ctx_dict",
+                "social.processors.ctx_dict",
+                "profiles.processors.ctx_dict",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'webhillel.wsgi.application'
+WSGI_APPLICATION = "webhillel.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -101,17 +101,16 @@ DATABASES = {
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME':
-        'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -119,9 +118,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'es'
+LANGUAGE_CODE = "es"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -129,30 +128,30 @@ USE_L10N = True
 
 USE_TZ = False
 
-DATE_FORMAT = 'd-m-Y'
+DATE_FORMAT = "d-m-Y"
 
 
 # Login Redirect
-LOGIN_REDIRECT_URL = 'home'  # 'pages:pages'
-LOGOUT_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = "home"  # 'pages:pages'
+LOGOUT_REDIRECT_URL = "home"
 
 
 # emails
 if DEBUG:
-    EMAIL_FILE_PATH = BASE_DIR / 'send_emails'
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_HOST_USER = 'tomapkiewicz@gmail.com'
-    EMAIL_HOST_PASSWORD = 'lrmprsejwdkgaaho'
+    EMAIL_FILE_PATH = BASE_DIR / "send_emails"
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp.gmail.com"
+    EMAIL_HOST_USER = "tomapkiewicz@gmail.com"
+    EMAIL_HOST_PASSWORD = "lrmprsejwdkgaaho"
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
 else:
     # Aqui hay que configurar un email real para producción
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_FILE_PATH = BASE_DIR / 'send_emails'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_HOST_USER = 'infohillel@gmail.com'
-    EMAIL_HOST_PASSWORD = 'zftsqbzhgeuqmzrz'
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_FILE_PATH = BASE_DIR / "send_emails"
+    EMAIL_HOST = "smtp.gmail.com"
+    EMAIL_HOST_USER = "infohillel@gmail.com"
+    EMAIL_HOST_PASSWORD = "zftsqbzhgeuqmzrz"
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
 
@@ -162,9 +161,9 @@ else:
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "static"
 
 # Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

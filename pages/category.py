@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=200, verbose_name='titulo')
+    name = models.CharField(max_length=200, verbose_name="titulo")
     updated = models.DateTimeField(auto_now_add=True, verbose_name="modificado")
     created = models.DateTimeField(auto_now=True, verbose_name="creado")
 

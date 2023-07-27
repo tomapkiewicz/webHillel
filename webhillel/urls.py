@@ -20,16 +20,16 @@ from profiles.urls import ProfilesPatterns
 from django.conf import settings
 
 urlpatterns = [
-    path('', include('core.urls')),
-    path('pages/', include(PagesPatterns)),
-    path('profiles/', include(ProfilesPatterns)),
-    path('admin/', admin.site.urls),
+    path("", include("core.urls")),
+    path("pages/", include(PagesPatterns)),
+    path("profiles/", include(ProfilesPatterns)),
+    path("admin/", admin.site.urls),
     # paths de Auth
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('accounts/', include('registration.urls')),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("accounts/", include("registration.urls")),
 ]
 
 if settings.DEBUG:
     from django.conf.urls.static import static
-    urlpatterns += static(settings.MEDIA_URL,
-                          document_root=settings.MEDIA_ROOT)
+
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

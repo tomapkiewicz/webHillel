@@ -7,6 +7,6 @@ def ctx_dict(request):
     for link in links:
         ctx[link.key] = link.url
     whatsapp = Whatsapp.objects.all().first()
-    ctx['whatsappHillel'] = whatsapp
+    ctx["whatsappHillel"] = whatsapp
 
     return ctx

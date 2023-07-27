@@ -11,15 +11,15 @@ class PageTestCase(TestCase):
     def setUp(self):
         self.page = Page.objects.create(title="Entrenamiento Funcional")
 
-        self.user1 = User.objects.create(username='user1', password='1234')
-        self.user2 = User.objects.create(username='user2', password='1234')
-        self.user3 = User.objects.create(username='user3', password='1234')
+        self.user1 = User.objects.create(username="user1", password="1234")
+        self.user2 = User.objects.create(username="user2", password="1234")
+        self.user3 = User.objects.create(username="user3", password="1234")
 
     def test_add_users_to_subscription(self):
         # self.subscripcion = Subscription.objects.create(user=self.user1) Esto pinchó por metodo get de find
         self.subscripcion = Subscription.objects.find_or_create(self.user2)
         self.subscripcion.pages.add(self.page.pk)
-        local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+        local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
         fecha = datetime.datetime.now(local_tz)
         self.assertEqual(self.page.Qanotados, 1)
 
@@ -27,7 +27,7 @@ class PageTestCase(TestCase):
         # self.subscripcion = Subscription.objects.create(user=self.user1) Esto pinchó por metodo get de find
         self.subscripcion = Subscription.objects.find_or_create(self.user2)
         self.subscripcion.pages.add(self.page.pk)
-        local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+        local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
         fecha = datetime.datetime.now(local_tz)
         self.historial = Historial.objects.create(fecha=fecha, page=self.page)
         self.historial.asistentes.add(self.user1.pk)
@@ -37,7 +37,7 @@ class PageTestCase(TestCase):
         # self.subscripcion = Subscription.objects.create(user=self.user1) Esto pinchó por metodo get de find
         self.subscripcion = Subscription.objects.find_or_create(self.user2)
         self.subscripcion.pages.add(self.page.pk)
-        local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+        local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
         fecha = datetime.datetime.now(local_tz)
         self.historial = Historial.objects.create(fecha=fecha, page=self.page)
         self.historial.asistentes.add(self.user1.pk)
@@ -49,7 +49,7 @@ class PageTestCase(TestCase):
         # self.subscripcion = Subscription.objects.create(user=self.user1) Esto pinchó por metodo get de find
         self.subscripcion = Subscription.objects.find_or_create(self.user2)
         self.subscripcion.pages.add(self.page.pk)
-        local_tz = pytz.timezone('America/Argentina/Buenos_Aires')
+        local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
         fecha = datetime.datetime.now(local_tz)
         self.historial = Historial.objects.create(fecha=fecha, page=self.page)
         self.historial.asistentes.add(self.user1.pk)

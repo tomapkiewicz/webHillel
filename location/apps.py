@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class LocationConfig(AppConfig):
-    name = 'location'
-    verbose_name ='locacion'
+    name = "location"
+    verbose_name = "locacion"

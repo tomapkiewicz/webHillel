@@ -46,6 +46,7 @@ pages/__pycache__/views.cpython-39.pyc
 pages/migrations/__pycache__/0057_auto_20210809_2322.cpython-39.pyc
 pages/migrations/__pycache__/0058_auto_20210809_2329.cpython-39.pyc
 pages/migrations/__pycache__/0059_auto_20210809_2329.cpython-39.pyc
+pages/migratins/*
 db.sqlite3
 media/*
 .prettierignore
