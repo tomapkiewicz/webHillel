@@ -25,7 +25,7 @@ SECRET_KEY = "+k!@)$demq7!z@dlf4hk0jiy=z3l3_d)&cx4hxhtc^u85ps_rj"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1", "www.hillelargentina.org.ar"]
+ALLOWED_HOSTS = ["www.hillelargentina.org.ar", "127.0.0.1"]
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
+    "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "ckeditor",
@@ -45,7 +46,15 @@ INSTALLED_APPS = [
     "pages.apps.PagesConfig",
     "social.apps.SocialConfig",
 ]
+AUTHENTICATION_BACKENDS = [
+    "registration.backends.EmailVerifiedBackend",
+]
 
+
+if DEBUG:
+    SITE_ID = 2
+else:
+    SITE_ID = 3
 
 DBBACKUP_STORAGE = "django.core.files.storage.FileSystemStorage"
 DBBACKUP_STORAGE_OPTIONS = {"location": BASE_DIR / "backup"}
@@ -138,11 +147,11 @@ LOGOUT_REDIRECT_URL = "home"
 
 # emails
 if DEBUG:
-    EMAIL_FILE_PATH = BASE_DIR / "send_emails"
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_FILE_PATH = BASE_DIR / "send_emails"
     EMAIL_HOST = "smtp.gmail.com"
-    EMAIL_HOST_USER = "tomapkiewicz@gmail.com"
-    EMAIL_HOST_PASSWORD = "lrmprsejwdkgaaho"
+    EMAIL_HOST_USER = "infohillel@gmail.com"
+    EMAIL_HOST_PASSWORD = "zftsqbzhgeuqmzrz"
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
 else:

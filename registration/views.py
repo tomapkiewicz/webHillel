@@ -1,14 +1,59 @@
-from .forms import UserCreationFormWithEmail, ProfileForm, EmailForm
-from django.views.generic import CreateView
+from .forms import (
+    UserCreationFormWithEmail,
+    ProfileForm,
+    EmailForm,
+)
+from django.views.generic import CreateView, TemplateView, View
+from django.contrib.auth.views import LoginView
 from django.views.generic.edit import UpdateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django import forms
 from .models import Profile
+from django.contrib.auth.models import User
+from django.shortcuts import redirect
+from django.contrib import messages
+from .utils import send_email_token
+from django.contrib.auth import login, logout
+from django.shortcuts import redirect
+from django.contrib.auth import get_user_model
+from .backends import EmailVerifiedBackend
+
+User = get_user_model()
 
 
-# Create your views here.
+class CustomLoginView(LoginView):
+    template_name = "registration/login.html"
+    authentication_backend = EmailVerifiedBackend
+
+
+class VerifyEmailView(View):
+    def get(self, request, pk, email):
+        try:
+            user = User.objects.get(pk=pk, email=email)
+            user.is_active = True  # Set the user as active (verified)
+            user.save()
+
+            user.profile.email_verificado = True
+            user.profile.save()
+            login(request, user)  # Log in the user
+            messages.success(
+                request, "Tu email ha sido verificado, ya puedes ingresar."
+            )
+            logout(request)
+        except User.DoesNotExist:
+            messages.error(
+                request,
+                "El enlace de verificación no es válido. Por favor, intenta nuevamente.",
+            )
+        return redirect(
+            reverse_lazy("login") + "?register"
+        )  # Redirect to the login page with the query parameter
+
+
+class RegisterSuccess(TemplateView):
+    template_name = "registration/register_success.html"
 
 
 class SignUpView(CreateView):
@@ -16,7 +61,7 @@ class SignUpView(CreateView):
     template_name = "registration/signup.html"
 
     def get_success_url(self):
-        return reverse_lazy("login") + "?register"
+        return reverse_lazy("register_success")
 
     def get_form(self, form_class=None):
         form = super(SignUpView, self).get_form()
@@ -38,6 +83,15 @@ class SignUpView(CreateView):
         )
 
         return form
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = form.save()
+
+        # Send email verification link
+        send_email_token(user.email, user.pk)
+
+        return response
 
 
 @method_decorator(login_required, name="dispatch")

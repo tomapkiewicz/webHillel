@@ -174,6 +174,9 @@ class Profile(models.Model):
     updated = models.DateTimeField(
         auto_now=True, verbose_name="Fecha de edición", blank=True, null=True
     )
+    email_verificado = models.BooleanField(
+        default=False, verbose_name="Email verificado"
+    )
 
     class Meta:
         verbose_name = "Perfil"
@@ -254,6 +257,11 @@ class Profile(models.Model):
         return ", ".join(str(c) for c in self.propuestasInteres.all())
 
     def save(self, *args, **kwargs):
+        if not self.pk and self.user_id:
+            # Check if a profile already exists for the user before creating a new one
+            existing_profile = Profile.objects.filter(user=self.user)
+            if existing_profile.exists():
+                return  # Don't create a new profile if one already exists
         if self.fechaNacimiento is not None:
             if self.fechaNacimiento > datetime.date.today():
                 raise ValidationError(
@@ -267,3 +275,9 @@ def ensure_profile_exists(sender, instance, **kwargs):
     if kwargs.get("created", False):
         Profile.objects.get_or_create(user=instance)
         # print("Se acaba de crear un usuario y su perfil enlazado")
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
