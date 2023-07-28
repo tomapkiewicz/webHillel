@@ -13,7 +13,7 @@ def send_email_token(email, user_id):
         current_site = Site.objects.get_current()
         domain = current_site.domain if current_site else settings.ALLOWED_HOSTS[0]
         verification_url = reverse("verify_email", args=[user_id, email])
-        verification_url = f"https://{current_site.domain}{verification_url}"
+        verification_url = f"{current_site.domain}{verification_url}"
         subject = "Verificación de email"
         message = f"Haz click en el siguiente link para verificar tu correo: {verification_url}"
         email_from = settings.EMAIL_HOST_USER
