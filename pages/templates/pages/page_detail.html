@@ -113,12 +113,12 @@
                 
                        <p class="col-2 ">      
                         <a class="btn btn-dark " href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id  %}">
-                        Observacion</a>
+                        Perfil ok?</a>
                         </p>
-                          {% if UserSubscripcion.user.profile.observaciones is not none %}
+                          {% if UserSubscripcion.user.profile.perfil_ok is not none %}
                               
                           <p class="col-md-12 ">
-                                {{UserSubscripcion.user.profile.observaciones}}
+                                {{UserSubscripcion.user.profile.perfil_ok}}
                           </p>
                               {% endif %}
                        
@@ -152,12 +152,12 @@
                 
                        <p class="col-2 ">      
                         <a class="btn btn-dark " href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id  %}">
-                        Observacion</a>
+                        Perfil ok?</a>
                         </p>
-                          {% if UserSubscripcion.user.profile.observaciones is not none %}
+                          {% if UserSubscripcion.user.profile.perfil_ok is not none %}
                               
                           <p class="col-md-12 ">
-                                {{UserSubscripcion.user.profile.observaciones}}
+                                {{UserSubscripcion.user.profile.perfil_ok}}
                           </p>
                               {% endif %}
                        
