@@ -122,6 +122,7 @@ class Profile(models.Model):
     )  # ,related_name='get_user_profile'
     avatar = models.ImageField(upload_to=custom_upload_to, null=True, blank=True)
     perfil_ok = models.CharField(null=True, blank=True, max_length=999)
+    observaciones = models.CharField(null=True, blank=True, max_length=999)
     apellido = models.CharField(null=True, blank=True, max_length=100)
     nombre = models.CharField(null=True, blank=True, max_length=100)
     whatsapp = models.CharField(
