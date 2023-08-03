@@ -775,6 +775,8 @@ def DescargarPerfiles(request):
             "Experiencia comunitaria",
             "tematicasInteres",
             "propuestasInteres",
+            "observaciones",
+            "Perfil Ok?",
         ]
     )
 
@@ -801,6 +803,8 @@ def DescargarPerfiles(request):
                     p.experienciaComunitaria,
                     p.tematicasInteresSTR,
                     p.propuestasInteresSTR,
+                    p.observaciones,
+                    p.perfil_ok,
                 ]
             )
     return response
