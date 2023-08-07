@@ -23,6 +23,7 @@ from django.http import HttpResponse
 import csv
 from social.models import MailContacto
 import pytz
+from django.template.defaultfilters import date as date_format
 from datetime import date
 from django.db.models import Q
 
@@ -35,19 +36,26 @@ def CuposAgotados(request, pk):
         else request.user
     )
 
+    formatted_fecha = date_format(page.fecha, "l d \d\e F")
+
     asunto = "Cupos agotados - " + page.title
     html_message = loader.render_to_string(
         "mail_body.html",
         {
-            "user_name": usu + " quedó afuera!",
+            "user_name": usu
+            + " https://wa.me/+549"
+            + str(request.user.profile.whatsapp)
+            + " "
+            + request.user.profile.perfil_ok
+            if request.user.profile.perfil_ok is not None
+            else "",
             "subject": "Se quiso anotar en "
             + page.title
             + " a las "
             + str(page.horaDesde)
-            + "HS  "
+            + "HS  el día "
+            + formatted_fecha
             + " pero los cupos estaban agotados.",
-            "description": " Comunicate con él haciendo click acá: https://wa.me/+549"
-            + str(request.user.profile.whatsapp),
         },
     )
     mailContacto = MailContacto.objects.first()
@@ -55,7 +63,6 @@ def CuposAgotados(request, pk):
     from_mail = "Hillel Argentina"
 
     rta = send_html_mail(asunto, html_message, to_mail, from_mail)
-
     response = {"is_taken": rta}
     return JsonResponse(response)
 
