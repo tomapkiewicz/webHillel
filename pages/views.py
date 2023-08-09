@@ -185,6 +185,17 @@ class PageList(ListView):
 class PageDetail(DetailView):
     model = Page
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset=queryset)
+        local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
+        current_date = datetime.now(local_tz)
+
+        if obj.fecha < current_date.date():
+            obj.activa = False
+            obj.save()
+
+        return obj
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["now"] = timezone.now()
