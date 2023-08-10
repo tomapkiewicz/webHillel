@@ -46,22 +46,22 @@ def CuposAgotados(request, pk):
             + " https://wa.me/+549"
             + str(request.user.profile.whatsapp)
             + " "
-            + request.user.profile.perfil_ok
-            if request.user.profile.perfil_ok is not None
-            else "",
+            + (
+                request.user.profile.perfil_ok
+                if request.user.profile.perfil_ok is not None
+                else ""
+            ),
             "subject": "Se quiso anotar en "
             + page.title
             + " a las "
             + str(page.horaDesde)
-            + "HS  el día "
-            + formatted_fecha
+            + ("HS  el día " + formatted_fecha if page.fecha is not None else "")
             + " pero los cupos estaban agotados.",
         },
     )
     mailContacto = MailContacto.objects.first()
     to_mail = (mailContacto,)
     from_mail = "Hillel Argentina"
-
     rta = send_html_mail(asunto, html_message, to_mail, from_mail)
     response = {"is_taken": rta}
     return JsonResponse(response)
