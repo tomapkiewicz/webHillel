@@ -22,6 +22,7 @@ from .views import (
     DescargarCuestionarios,
     DescargarCuestionariosRespuestas,
     Onward,
+    validate_qr,  # ✅ Added QR validation view
 )
 
 PagesPatterns = (
@@ -80,6 +81,9 @@ PagesPatterns = (
         path("exportar/", Exportar, name="exportar"),
         path("onward/", Onward, name="onward"),
         path("cuposAgotados/<int:pk>", CuposAgotados, name="cuposAgotados"),
+
+        # ✅ QR Validation Endpoint
+        path("validate_qr/<int:page_id>/<int:user_id>/", validate_qr, name="validate_qr"),
     ],
     "pages",
 )

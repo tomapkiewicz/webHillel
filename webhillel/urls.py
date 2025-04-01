@@ -25,11 +25,15 @@ urlpatterns = [
     path("profiles/", include(ProfilesPatterns)),
     path("admin/", admin.site.urls),
     # paths de Auth
-    path("accounts/", include("django.contrib.auth.urls")),
-    path("accounts/", include("registration.urls")),
+
+    path("accounts/", include("django.contrib.auth.urls")),  # ✅ Re-add this
+    path("accounts/", include("allauth.urls")),  # ✅ Keep allauth
+    path("accounts/", include("registration.urls")),  # ✅ Keep registration
+
+
 ]
 
+# ✅ Serve media files in DEBUG mode
 if settings.DEBUG:
     from django.conf.urls.static import static
-
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

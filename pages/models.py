@@ -50,6 +50,7 @@ class RecurrentPage(models.Model):
     modalidad = BooleanField(verbose_name="Online", default=False)
     nuevo = BooleanField(verbose_name="Nuevo", default=False)
     activa = BooleanField(verbose_name="Activa", default=True)
+    oculta = BooleanField(verbose_name="Oculta", default=False)
     categories = models.ManyToManyField(
         Category,
         verbose_name="Categorias",
@@ -112,6 +113,7 @@ class RecurrentPage(models.Model):
                 modalidad=self.modalidad,
                 nuevo=self.nuevo,
                 activa=self.activa,
+                oculta=self.oculta,
                 provincia=self.provincia,
                 responsable=self.responsable,
                 colaborador=self.colaborador,
@@ -168,6 +170,9 @@ class RecurrentPage(models.Model):
 
 class Page(models.Model):
     title = models.CharField(verbose_name="Título", max_length=200)
+
+    alerta = models.TextField(verbose_name="Alerta", null=True, blank=True)
+
     horaDesde = models.TimeField(
         verbose_name="Hora desde",
         null=True,
@@ -204,6 +209,7 @@ class Page(models.Model):
     modalidad = BooleanField(verbose_name="Online", default=False)
     nuevo = BooleanField(verbose_name="Nuevo", default=False)
     activa = BooleanField(verbose_name="Activa", default=True)
+    oculta = BooleanField(verbose_name="Oculta", default=False)
     categories = models.ManyToManyField(
         Category, verbose_name="categorias", related_name="get_pages", blank=True
     )

@@ -11,9 +11,9 @@
           <h3  class="text-center font-weight-bold">ASISTENCIA</h3>
           <h3 class="text-center">
             {% if modalidad  %}
-              <a href="{% url 'pages:asistencia' 0 %}" class="text-center badge badge-pill badge-online text-white">ONLINE</a> 
+              <a href="{% url 'pages:asistencia' 0 %}" class="text-center badge badge-pill badge-online text-white">COWORK</a> 
             {% else %}
-              <a href="{% url 'pages:asistencia' 1 %}" class="text-center badge badge-pill badge-presencial text-white">PRESENCIAL</a>
+              <a href="{% url 'pages:asistencia' 1 %}" class="text-center badge badge-pill badge-presencial text-white">ACTIVIDADES</a>
               <h4 class="text-center">{{request.user.profile.provincia}}</h4>
               {% endif %}
           </h3>

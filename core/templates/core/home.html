@@ -69,26 +69,30 @@
                
 
                   {% else %}
-                    
-                    
-                    {% if request.user.profile.active_subscription  %}
-                      <h2 class="lead mt-4">Te esperamos en:</h2>
-                      <dl class="row mt-5">
-                        {% for page in request.user.profile.active_subscription %}                         
-                          <dt class="col-sm-6 text-center"><a class="text-dark" href="{% url 'pages:page' page.id page.title|slugify %}">{{page}} </a></dt>
-                          <dd class="col-sm-6 text-center">
-                            {% if page.recurrent_page %}
-                              Los {{ page.fecha|weekday_name }} de {{ page.horaDesde }} a {{ page.horaHasta }} Hs.
-                            {% else %}
-                            {{ page.fecha|date:"l d \d\e F" }} de {{ page.horaDesde }} a {{ page.horaHasta }} Hs.
-                            {% endif %}
-                            {% if page.modalidad %}
-                              <b>Online</b>
-                            {% else %}
-                              <b>Presencial</b>
-                            {% endif %}
-                          </dd>
-                        {% endfor %}             
+
+                  {% if request.user.profile.active_subscription %}
+                  <h2 class="lead mt-4">Te esperamos en:</h2>
+                  <dl class="row mt-5">
+                    {% for page in request.user.profile.active_subscription %}
+                      <dt class="col-sm-6 text-center">
+                        <a class="text-dark" href="{% url 'pages:page' page.id page.title|slugify %}">{{ page }}</a>
+                      </dt>
+                      <dd class="col-sm-6 text-center">
+                        {% if page.recurrent_page %}
+                          Los {{ page.fecha|date:"l" }} de {{ page.horaDesde }} a {{ page.horaHasta }} Hs.
+                        {% else %}
+                          {{ page.fecha|date:"l d \d\e F" }} de {{ page.horaDesde }} a {{ page.horaHasta }} Hs.
+                        {% endif %}
+                        {% if page.modalidad %}
+                          <b>Online</b>
+                        {% else %}
+                          <b>Presencial</b>
+                        {% endif %}
+                      </dd>
+                    {% endfor %}   
+                  
+             
+
                       </dl>
                     {%else%}
                       <h2 class="lead mt-4">No estás anotadx en ninguna actividad</h2>  

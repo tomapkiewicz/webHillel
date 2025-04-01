@@ -3,7 +3,7 @@ from .models import Page
 from .models import RecurrentPage
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 class PageForm(forms.ModelForm):
@@ -28,7 +28,9 @@ class PageForm(forms.ModelForm):
             "provincia",
             "con_preinscripcion",
             "secreta",
+            "oculta",
             "clave",
+            "alerta",
             "responsable",
             "colaborador",
         ]
@@ -58,7 +60,7 @@ class PageForm(forms.ModelForm):
                 format="%H:%M", attrs={"type": "time", "required": True}
             ),
             "flyer": forms.ClearableFileInput(
-                attrs={"class": "form-control", "placeholder": "Flyer"}
+                attrs={"class": "form-control", "placeholder": "Flyer", "required": False}
             ),
             "cupo": forms.NumberInput(
                 attrs={"class": "form-control", "placeholder": ""}
@@ -94,6 +96,14 @@ class PageForm(forms.ModelForm):
                     "default": 0,
                 }
             ),
+               "oculta": forms.CheckboxInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Es oculta?",
+                    "initial": 0,
+                    "default": 0,
+                }
+            ),
             "clave": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": ""}
             ),
@@ -123,6 +133,7 @@ class PageForm(forms.ModelForm):
                     "style": "width: 50%;",
                 }
             ),
+            "alerta": forms.Textarea(attrs={"class": "form-control", "placeholder": "Texto de alerta (opcional)"}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -137,6 +148,7 @@ class PageForm(forms.ModelForm):
         else:
             kwargs.setdefault("initial", {})["modalidad"] = False
             kwargs.setdefault("initial", {})["secreta"] = False
+            kwargs.setdefault("initial", {})["oculta"] = False
         super(PageForm, self).__init__(*args, **kwargs)
 
     def clean(self):
@@ -197,6 +209,7 @@ class RecurrentPageForm(forms.ModelForm):
             "modalidad",
             "nuevo",
             "activa",
+            "oculta",
             "categories",
             "provincia",
             "responsable",
@@ -259,6 +272,7 @@ class RecurrentPageForm(forms.ModelForm):
             "modalidad": forms.CheckboxInput(attrs={"class": "form-control"}),
             "nuevo": forms.CheckboxInput(attrs={"class": "form-control"}),
             "activa": forms.CheckboxInput(attrs={"class": "form-control"}),
+            "oculta": forms.CheckboxInput(attrs={"class": "form-control"}),
             "categories": forms.SelectMultiple(attrs={"class": "form-control"}),
             "provincia": forms.Select(attrs={"class": "form-control"}),
             "responsable": forms.Select(attrs={"class": "form-control"}),
@@ -285,6 +299,7 @@ class RecurrentPageForm(forms.ModelForm):
             "modalidad": "Es Online?",
             "nuevo": "Nuevo",
             "activa": "Activa",
+            "oculta": "Oculta",
             "categories": "Categorías",
             "provincia": "Provincia",
             "dias": "Días",

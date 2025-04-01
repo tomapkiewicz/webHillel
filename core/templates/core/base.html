@@ -22,6 +22,7 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
           font-family: 'Raleway';
           font-weight: 400;
           font-style: normal;
+          font-display: swap;
           src: url('../../static/core/fonts/Raleway-Regular.ttf') format('truetype');
       }
       
@@ -29,6 +30,7 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
           font-family: 'Raleway';
           font-weight: 700;
           font-style: normal;
+          font-display: swap;
           src: url('../../static/core/fonts/Raleway-Bold.ttf') format('truetype');
       }
       
@@ -36,6 +38,7 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
           font-family: 'Lora';
           font-weight: 400;
           font-style: normal;
+          font-display: swap;
           src: url('../../static/core/fonts/Lora-Regular.ttf') format('truetype');
       }
       
@@ -43,14 +46,15 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
           font-family: 'Lora';
           font-weight: 700;
           font-style: normal;
+          font-display: swap;
           src: url('../../static/core/fonts/Lora-Bold.ttf') format('truetype');
       }
   </style>
 
 
     <!-- Estilos -->
-    <link href="{% static 'core/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-    <script defer src="{% static 'core/vendor/font-awesome/js/all.js' %}"></script> <!--load all styles -->
+    <link href="{% static 'core/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="print" onload="this.media='all'">
+    <script async src="{% static 'core/vendor/font-awesome/js/all.js' %}"></script>
     <link href="{% static 'core/css/main.css' %}" rel="stylesheet">
   </head>
   <body class="fondo" >
@@ -80,10 +84,10 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
                 </a>
                 <div class="dropdown-menu">
                   <a class="dropdown-item" href="{% url 'pages:pages' 0 %}">
-                    <img class="iconoMenu float-left" src="{% static 'core/img/presencial-menu.png' %}" alt="">
+                    <img class="iconoMenu float-left" src="{% static 'core/img/presencial-menu.png' %}" alt=""loading="lazy">
                   Actividades</a>
                   <a class="dropdown-item" href="{% url 'pages:pages' 1 %}">
-                    <img class="iconoMenu float-left" src="{% static 'core/img/virtual-menu.png' %}" alt="">
+                    <img class="iconoMenu float-left" src="{% static 'core/img/virtual-menu.png' %}" alt=""loading="lazy">
                   Cowork</a>
 
 <!--
@@ -108,7 +112,7 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
         !-->
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'pages:onward' %}">
-                  <img class="iconoMenuOnward" src="{% static 'core/img/onward-menuB.png' %}" alt="">
+                  <img class="iconoMenuOnward" src="{% static 'core/img/onward-menuB.png' %}" alt=""loading="lazy">
                 Onward</a>
               </li>
                
@@ -170,11 +174,16 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
                   </a> 
               </li>
 
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'logout' %}"> 
-                  <i class="fas fa-sign-out-alt"></i> 
-                  Salir</a> 
-              </li>
+              <li class="nav-item d-flex align-items-center">
+                <form method="post" action="{% url 'account_logout' %}" class="m-0 p-0 d-flex align-items-center">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link btn btn-link p-0" >
+                        <i class="fas fa-sign-out-alt"></i> Salir
+                    </button>
+                </form>
+            </li>
+            
+            
               {% endif %}
 
              
@@ -225,7 +234,7 @@ content="http://static1.squarespace.com/static/5f8a2848ebd44c30a517b8af/t/5f91e9
 
       <!-- Javascript -->
       <script src="{% static 'core/vendor/jquery/jquery.min.js' %}"></script>
-      <script src="{% static 'core/vendor/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+      <script src="{% static 'core/vendor/bootstrap/js/bootstrap.bundle.min.js'%}" defer></script>
       <script src="{% static 'core/js/main.js' %}"></script>
   </body>
 </html>

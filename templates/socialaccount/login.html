@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}Inicio de sesión mediante Google{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <h2 class="text-center">
+            {% if process == "connect" %}
+                {% blocktrans with provider.name as provider %}Conectar con {{ provider }}{% endblocktrans %}
+            {% else %}
+                {% blocktrans with provider.name as provider %}Iniciar sesión con {{ provider }}{% endblocktrans %}
+            {% endif %}
+        </h2>
+
+        <p class="text-center text-muted">
+            {% blocktrans with provider.name as provider %}Estás a punto de iniciar sesión usando {{ provider }}.{% endblocktrans %}
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="text-center">
+                <button type="submit" class="btn btn-dark">
+                    <i class="fas fa-sign-in-alt"></i> Continuar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

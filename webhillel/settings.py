@@ -23,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "+k!@)$demq7!z@dlf4hk0jiy=z3l3_d)&cx4hxhtc^u85ps_rj"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["www.hillelargentina.org.ar", "127.0.0.1"]
-
+ALLOWED_HOSTS = ["www.hillelargentina.org.ar", "127.0.0.1",'localhost',]
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -45,38 +45,84 @@ INSTALLED_APPS = [
     "core",
     "pages.apps.PagesConfig",
     "social.apps.SocialConfig",
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',  # Google OAuth
+    'allauth.socialaccount.providers.facebook',  # Facebook OAuth
 ]
 AUTHENTICATION_BACKENDS = [
     "registration.backends.EmailVerifiedBackend",
+    'django.contrib.auth.backends.ModelBackend',  # Default authentication
+    'allauth.account.auth_backends.AuthenticationBackend',  # django-allauth
 ]
 
 
 if DEBUG:
-    SITE_ID = 2
+#    SITE_ID = 2
+    SITE_ID = 5
 else:
     SITE_ID = 3
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': '998343550118-b4o62mn48v1g638294a7pdar0ht9n07s.apps.googleusercontent.com',
+            'secret': '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',  # Replace with your actual secret
+            'key': ''
+        }
+    }
+}
+ 
+#LOGIN_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+#ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_AUTHENTICATION_METHOD = "email"  # ✅ Use email instead of username
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+SOCIALACCOUNT_ADAPTER = "webhillel.adapters.MySocialAccountAdapter"
 
 DBBACKUP_STORAGE = "django.core.files.storage.FileSystemStorage"
 DBBACKUP_STORAGE_OPTIONS = {"location": BASE_DIR / "backup"}
 
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_LOGOUT_ON_GET = True
 
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+
+
+# MIDDLEWARE = [
+#     "django.middleware.security.SecurityMiddleware",
+#     "django.contrib.sessions.middleware.SessionMiddleware",
+#     "django.middleware.common.CommonMiddleware",
+#     "django.middleware.csrf.CsrfViewMiddleware",
+#     "django.contrib.auth.middleware.AuthenticationMiddleware",
+#     "django.contrib.messages.middleware.MessageMiddleware",
+#     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+#     "django.middleware.gzip.GZipMiddleware",  # gzip
+# ]
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django.middleware.gzip.GZipMiddleware",  # gzip
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+    "django.middleware.gzip.GZipMiddleware",
 ]
-
 ROOT_URLCONF = "webhillel.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS":  [BASE_DIR / "templates"],  # Ensure it includes the custom folder
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -91,6 +137,7 @@ TEMPLATES = [
         },
     },
 ]
+ 
 
 WSGI_APPLICATION = "webhillel.wsgi.application"
 

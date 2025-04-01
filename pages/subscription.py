@@ -42,23 +42,20 @@ class SubscriptionManager(models.Manager):
 
 
 class Subscription(models.Model):
-    user = models.OneToOneField(User, on_delete=CASCADE, null=True)
-    pages = models.ManyToManyField("Page", related_name="page_subscriptions")
-    created = models.DateTimeField(
-        auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True
-    )
-    updated = models.DateTimeField(
-        auto_now=True, verbose_name="Fecha de edición", blank=True, null=True
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    #pages = models.ManyToManyField("Page", related_name="page_subscriptions")
+    pages = models.ManyToManyField("Page", related_name="subscripciones")
+    qr_code = models.ImageField(upload_to="qr_codes/", blank=True, null=True)
 
-    objects = SubscriptionManager()
+    created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
+    updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
 
+    objects = SubscriptionManager()  # ✅ Ensure the custom manager is used
     class Meta:
         verbose_name = "Subscripcion"
         verbose_name_plural = "Subscripciones"
         ordering = ["-updated"]
-
     def __str__(self):
         if self.user is None:
             return "Sin datos"
-        return self.user.username
+        return f"{self.user.username} - Última inscripción: {self.pages.last().title if self.pages.exists() else 'Ninguna'}"

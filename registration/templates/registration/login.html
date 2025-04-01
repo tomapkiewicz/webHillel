@@ -1,5 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load socialaccount %}
+
 {% block title %}Hillel Argentina{% endblock %}
 {% block content %}
 <style>.errorlist{color:red;}</style>
@@ -7,6 +9,7 @@
   <div class="card container">
     <div class="row mt-3">
       <div class="col-md-9 mx-auto mb-5">
+      
       {% if 'register' in request.GET %}
         <p style="color:green;"></p>
         <div class="alert alert-success alert-dismissible fade show">
@@ -25,9 +28,8 @@
 
           {% if form.non_field_errors %}
           {% for error in form.non_field_errors %}
-          <p style="color:red">  {{error}}</p>
+          <p style="color:red">{{ error }}</p>
           {% endfor %}
-  
           {% endif %}
 
           <p>
@@ -39,12 +41,18 @@
               id="id_password" class="form-control" placeholder="Contraseña"/>
           </p>
           <p><input type="submit" class="btn btn-dark btn-block" value="Acceder"></p>
+
+<!-- ✅ Google Login Button (Blue) -->
+<a href="{% provider_login_url 'google' %}" class="btn btn-primary btn-block" style="background-color: #4285F4; border-color: #4285F4;">
+  <i class="fab fa-google"></i> Iniciar sesión con Google
+</a>
         </form>
+
         <p>
-        ¿Olvidaste tu clave? Podés restaurarla <a href="{% url 'password_reset' %}">Acá</a>
+          ¿Olvidaste tu clave? Podés restaurarla <a href="{% url 'password_reset' %}">Acá</a>
         </p>
         <p>
-         Si todavía no te registraste hace click <a href="{% url 'signup' %}">Acá</a>
+          Si todavía no te registraste hace click <a href="{% url 'signup' %}">Acá</a>
         </p>
       </div>
     </div>

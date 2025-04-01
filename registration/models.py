@@ -206,7 +206,7 @@ class Profile(models.Model):
         non_recurrent_pages = []
 
         # Separate recurrent and non-recurrent pages
-        for page in subscription.pages.filter(activa=True):
+        for page in subscription.pages.filter(activa=True,fecha__gte=date.today()):
             if page.recurrent_page:
                 recurrent_pages.append(page)
             else:
@@ -221,7 +221,8 @@ class Profile(models.Model):
 
         # Combine recurrent and non-recurrent pages, sorted by fecha
         combined_pages = grouped_recurrent_pages + non_recurrent_pages
-        sorted_pages = sorted(combined_pages, key=lambda p: p.fecha)
+        sorted_pages = sorted(combined_pages, key=lambda p: p.fecha or datetime.date.max)
+        
 
         return sorted_pages
 

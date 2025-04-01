@@ -1,119 +1,161 @@
 {% extends 'core/base.html' %}
 {% load static %}
-{% block title %}{{page.title}}{% endblock %}
+{% block title %}{{ page.title }}{% endblock %}
 {% block content %}
   {% include 'pages/includes/pages_menu.html' %}
   <main role="main">
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+    <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script> <!-- ✅ Corrected QR Scanner Library -->
 
-    <label hidden id="anotados">{{page.Qanotados}}</label>
-    <label hidden id="asistencias">{{page.Qasistentes}}</label>
+    <!-- ✅ ALERTS DIV -->
+    <div id="qr-alerts"></div>
 
+    <label hidden id="anotados">{{ page.Qanotados }}</label>
+    <label hidden id="asistencias">{{ page.Qasistentes }}</label>
 
-<div class="container">
-    <div class="card mx-auto border-1 mb-5 w-20 " style="max-width:600px">
-      <div class="card-body mx-auto" >
-{%if page.modalidad %}
-    <a class="btn btn-dark mb-3" href="{% url 'pages:asistencia' 1 %}"> 
-{% else %}
-    <a class="btn btn-dark mb-3" href="{% url 'pages:asistencia' 0 %}"> 
-{% endif %}
-        <i class="fas fa-long-arrow-alt-left"></i>
-    Volver</a> 
-
-        <h2 class="card-title text-center">¿Quién vino hoy?</h2>
-        <h4 class="card-title text-center">{{page.title}}
-        <a id="info" class="badge badge-pill badge-info" href="#" data-toggle="tooltip" title="Asistentes/Anotados">{{page.Qasistentes}}/{{page.Qanotados}}</a>
-        </h4>
-        <p class="card-text text-center"> {{page.fecha|date:"l d \d\e F"}} De {{page.horaDesde}} a {{page.horaHasta}} Hs</p> 
-                            
-        {% if subscribers.count > 0 %}
-        
-          <dl>  
-            <dt class="text-center mb-2">Marcar los presentes</dt>
-            {% for subscription in subscribers|dictsort:"user.profile.apellido" %}           
-              <dd> 
-              <h5>
-                {% if subscription.user in page.asistentes %}
-                <button id="btn_{{ subscription.user  }}" class="btn btn-success btn-sm btn-block">{{ subscription.user.profile.apellido }} {{ subscription.user.profile.nombre }}</button>
+    <div class="container">
+        <div class="card mx-auto border-1 mb-5 w-20" style="max-width:600px">
+            <div class="card-body mx-auto">
+                {% if page.modalidad %}
+                    <a class="btn btn-dark mb-3" href="{% url 'pages:asistencia' 1 %}"> 
                 {% else %}
-                <button id="btn_{{ subscription.user  }}" class="btn btn-dark btn-sm btn-block">{{ subscription.user.profile.apellido }} {{ subscription.user.profile.nombre }}</button>
+                    <a class="btn btn-dark mb-3" href="{% url 'pages:asistencia' 0 %}"> 
                 {% endif %}
-              </h5>
-              </dd>
-              <script>
-                var send = document.getElementById("btn_{{ subscription.user  }}");
-                send.addEventListener("click", function(){
-                var usuario = encodeURIComponent("{{subscription.user}}") 
-                send = document.getElementById("btn_{{ subscription.user  }}");
+                    <i class="fas fa-long-arrow-alt-left"></i> Volver
+                </a> 
 
-                var presente = true 
-                if(usuario.length > 0 ){
-                  var userBtn = document.getElementById("btn_{{ subscription.user }}")
-                  var yaRegistrado = userBtn.classList.contains("btn-success")
-                  var url = "{% url 'pages:asistenciaAdd' page.pk %}" + "?user=" + usuario;
-                  if(yaRegistrado){
-                    url = "{% url 'pages:asistenciaRemove' page.pk %}" + "?user=" + usuario;
-                  }
-                  
+                <h2 class="card-title text-center">¿Quién vino hoy?</h2>
+                <h4 class="card-title text-center">{{ page.title }}
+                    <a id="info" class="badge badge-pill badge-info" href="#" data-toggle="tooltip" title="Asistentes/Anotados">{{ page.Qasistentes }}/{{ page.Qanotados }}</a>
+                </h4>
+                <p class="card-text text-center"> {{ page.fecha|date:"l d \d\e F" }} De {{ page.horaDesde }} a {{ page.horaHasta }} Hs</p> 
+                
+                {% if subscribers.count > 0 %}
 
-                  fetch(url, {'credentials':'include'}).then(response => response.json()).then(function(data){
-                    console.log(data)
-                    toogleRegistro(userBtn, yaRegistrado)
-                    })
-                  }
-                })
-              </script>
-            {% endfor %}
-            <script>
+                <!-- ✅ SEARCH BOX FOR QUICK NAME FINDING -->
+                <input type="text" id="searchBox" class="form-control mb-3" placeholder="Buscar por nombre o apellido..." autofocus>
 
-              function toogleRegistro(userBtn,yaRegistrado){
-                    var qanotados = 0
-                    var qasistencias = 0
-                    qasistencias = document.getElementById("asistencias").innerHTML
-                    if(yaRegistrado==false){
-                        userBtn.classList.remove("btn-dark")
-                        userBtn.classList.add("btn-success")
-                        qasistencias++           
-                      }
-                      else {
-                        userBtn.classList.remove("btn-success")
-                        userBtn.classList.add("btn-dark") 
-                        qasistencias-- 
-                      }
-                      document.getElementById("asistencias").innerHTML = qasistencias 
-                      qanotados =document.getElementById("anotados").innerHTML
-                      document.getElementById("info").innerHTML = qasistencias + "/" + qanotados
-              }
-            </script>
-          </dl>
-            
-        {% endif %}  
+                <!-- ✅ QR SCANNER BUTTON -->
+                <button id="scanQR" class="btn btn-primary btn-block mb-3">Escanear QR</button>
+                <div id="qr-reader" style="display:none; width: 100%;"></div>
 
-        {% if request.user.is_staff %}  
-      
-          <!-- INFO DE STAFF  !-->
-          <dt class="text-center mt-3 mb-2">Descargar</dt> 
-          <a class="btn btn-dark btn-block" href="{% url 'pages:descargarasistencias' page.id %}">Planilla del día    
-          <i class="fa fa-download "></i></a>
-          <a class="btn btn-dark btn-block" href="{% url 'pages:descargarhistoricoasistencias' page.id %}">Planilla Histórica
-          <i class="fa fa-download "></i></a>
-    
-        {% endif %}      
-      </div>
-  
+                <dl>  
+                    <dt class="text-center mb-2">Marcar los presentes</dt>
+                    {% for subscription in subscribers|dictsort:"user.profile.apellido" %}           
+                        <dd> 
+                            <h5>
+                                {% if subscription.user in page.asistentes %}
+                                    <button id="btn_{{ subscription.user }}" data-slug="{{ subscription.user|slugify }}" class="btn btn-success btn-sm btn-block">
+                                        {{ subscription.user.profile.apellido }} {{ subscription.user.profile.nombre }}
+                                    </button>
+                                {% else %}
+                                    <button id="btn_{{ subscription.user }}" data-slug="{{ subscription.user|slugify }}" class="btn btn-dark btn-sm btn-block">
+                                        {{ subscription.user.profile.apellido }} {{ subscription.user.profile.nombre }}
+                                    </button>
+                                {% endif %}
+                            </h5>
+                        </dd>
+                        <script>
+                            document.getElementById("btn_{{ subscription.user }}").addEventListener("click", function() {
+                                var usuario = encodeURIComponent("{{ subscription.user }}");
+                                var userBtn = document.getElementById("btn_{{ subscription.user }}");
+                                var yaRegistrado = userBtn.classList.contains("btn-success");
+                                var url = "{% url 'pages:asistenciaAdd' page.pk %}" + "?user=" + usuario;
+                                if (yaRegistrado) {
+                                    url = "{% url 'pages:asistenciaRemove' page.pk %}" + "?user=" + usuario;
+                                }
+
+                                // Optimistic UI Update
+                                toggleRegistro(userBtn, yaRegistrado);
+
+                                // Send request
+                                fetch(url, { credentials: 'include' })
+                                .then(response => response.json())
+                                .then(function(data) {
+                                    if (!data.created) {
+                                        toggleRegistro(userBtn, !yaRegistrado);
+                                    }
+                                })
+                                .catch(() => {
+                                    toggleRegistro(userBtn, !yaRegistrado);
+                                });
+                            });
+                        </script>
+                    {% endfor %}
+                </dl>
+                {% endif %}  
+
+                {% if request.user.is_staff %}  
+                    <!-- ✅ STAFF DOWNLOAD OPTIONS -->
+                    <dt class="text-center mt-3 mb-2">Descargar</dt> 
+                    <a class="btn btn-dark btn-block" href="{% url 'pages:descargarasistencias' page.id %}">Planilla del día <i class="fa fa-download"></i></a>
+                    <a class="btn btn-dark btn-block" href="{% url 'pages:descargarhistoricoasistencias' page.id %}">Planilla Histórica <i class="fa fa-download"></i></a>
+                {% endif %}      
+            </div>
+        </div>
     </div>
 
-  </div>
-  
-    
-  <script>
-  $(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();
-  });
-  </script>
+    <!-- ✅ JAVASCRIPT -->
+    <script>
+        // ✅ SEARCH FUNCTION: Live filtering for attendees
+        document.getElementById("searchBox").addEventListener("keyup", function() {
+            var searchText = this.value.toLowerCase();
+            document.querySelectorAll(".btn-sm.btn-block").forEach(function(btn) {
+                btn.style.display = btn.innerText.toLowerCase().includes(searchText) ? "block" : "none";
+            });
+        });
 
+        function toggleRegistro(userBtn, yaRegistrado) {
+            let qasistencias = parseInt(document.getElementById("asistencias").innerText, 10);
+            userBtn.classList.toggle("btn-dark", yaRegistrado);
+            userBtn.classList.toggle("btn-success", !yaRegistrado);
+            document.getElementById("asistencias").innerText = yaRegistrado ? --qasistencias : ++qasistencias;
+        }
 
+        function showQRAlert(type, message) {
+            let alertDiv = document.createElement("div");
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong>${type === "success" ? "Éxito!" : "Error!"}</strong> ${message}
+            `;
+            document.getElementById("qr-alerts").appendChild(alertDiv);
+            setTimeout(() => { alertDiv.remove(); }, 5000); // Remove alert after 5 seconds
+        }
+
+        // ✅ QR SCANNER
+        $("#scanQR").click(function() {
+            $("#qr-reader").toggle();
+            if ($("#qr-reader").is(":visible")) {
+                const html5QrCode = new Html5Qrcode("qr-reader");
+                html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+                    (decodedText) => {
+                        $("#qr-reader").hide();
+                        let qrUrl = decodedText.startsWith("http") ? decodedText : `${window.location.origin}/${decodedText}`;
+                        fetch(qrUrl, { credentials: "include" })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "valid") {  
+                              
+                                showQRAlert("success", `Asistencia confirmada para <b>${data.user}</b>!`);
+                                let userId = `${data.user.replace(/[^a-zA-Z0-9-_]/g, "")}`;
+                                let userBtn = document.querySelector(`button[data-slug="${userId}"]`);
+                                html5QrCode.stop();
+                                console.log("userid",userId);
+                                if (userBtn) toggleRegistro(userBtn, false);
+                            } else {
+                                showQRAlert("danger", "⚠ El usuario no está anotado.");
+                                html5QrCode.stop();
+                            }
+                            
+                        })
+                        .catch(() => showQRAlert("danger", "⚠ Error al escanear el código."));
+                    }
+                );
+             
+            }
+        });
+    </script>
 {% endblock %}

@@ -1,8 +1,10 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block title %}{{page.title}}{% endblock %}
 {% block content %}
 {% include 'pages/includes/pages_menu.html' %}
+
 <main role="main">
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -89,13 +91,20 @@
             
                 <div class="tab-content">
                   <div class="tab-pane fade show active" id="orden-llegada">
+
+                    {% load tz %}
+                    {% now "m-d" as today_date %}  {# Obtiene la fecha actual en formato MM-DD #}
+
                     {% for UserSubscripcion in page.anotados %}
                       <div class="row mt-3">
                           <p class="col-6">
                               <b>
                                   <a href="{% url 'profiles:detail' UserSubscripcion.user.username %}">
                                       {{ UserSubscripcion.user.profile.apellido|truncatechars:"16" }}
-                                      {{ UserSubscripcion.user.profile.nombre|truncatechars:"16" }}
+                                      {{ UserSubscripcion.user.profile.nombre|truncatechars:"16" }}                               
+                                      {% if UserSubscripcion.user.profile.fechaNacimiento|date:"m-d" == today_date %}
+                                      🎂
+                                  {% endif %}
                                   </a>
                               </b>
                               {{ UserSubscripcion.user.profile.edad }}
@@ -225,187 +234,94 @@
     </div>  
 
 
-    <!-- Modal Anotarse -->
-    <div class="modal fade" id="ModalConfirmar">
-      <div class="modal-dialog">
-        <div class="modal-content">
+<!-- Modal Anotarse -->
+<div class="modal fade" id="ModalConfirmar">
+  <div class="modal-dialog">
+    <div class="modal-content">
 
-          <!-- Modal Header -->
-          <div class="modal-header">
-            {% if page.con_preinscripcion  %}
-            <h4 class="modal-title">¿Querés preinscribirte a {{page.title}}?</h4>
-            {% else %}
-            <h4 class="modal-title">Confirmá</h4>
-            {% endif %}
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
+      <!-- Modal Header -->
+      <div class="modal-header">
+        {% if page.con_preinscripcion %}
+          <h4 class="modal-title">¿Querés preinscribirte a {{ page.title }}?</h4>
+        {% else %}
+          <h4 class="modal-title">Confirmá</h4>
+        {% endif %}
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
 
-          <!-- Modal body -->
-          <div class="modal-body">
-              <form action="{%  url 'pages:register' page.id %} " method="post">{% csrf_token %}  
-   
-            {% if cuestionario.pregunta1 != "" and cuestionario.pregunta1 is not None %}   
-            Pero contanos algo antes... 🤓 <br><br>
-            {% endif %}
+      <!-- Modal body -->
+      <div class="modal-body">
 
-            {% if cuestionario.pregunta1 != ""  and cuestionario.pregunta1 is not None %}   
-              {{cuestionario.pregunta1}}     
-                <input type="text" name="respuesta1" required
-                id="id_respuesta1" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}
-
-            {% if cuestionario.pregunta2 != ""  and cuestionario.pregunta2 is not None %}   
-              {{cuestionario.pregunta2}}     
-                <input type="text" name="respuesta2" required
-                id="id_respuesta2" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}     
-
-            {% if cuestionario.pregunta3 != ""  and cuestionario.pregunta3 is not None %}   
-              {{cuestionario.pregunta3}}     
-                <input type="text" name="respuesta3" required
-                id="id_respuesta3" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}  
-
-            {% if cuestionario.pregunta4 != ""  and cuestionario.pregunta4 is not None %}   
-              {{cuestionario.pregunta4}}     
-                <input type="text" name="respuesta4" required
-                id="id_respuesta4" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}  
-
-            {% if cuestionario.pregunta5 != "" and cuestionario.pregunta5 is not None %}   
-              {{cuestionario.pregunta5}}     
-                <input type="text" name="respuesta5" required
-                id="id_respuesta5" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}     
-            {% if cuestionario.pregunta6 != ""  and cuestionario.pregunta6 is not None %}   
-              {{cuestionario.pregunta6}}     
-                <input type="text" name="respuesta6" required
-                id="id_respuesta6" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}
-
-            {% if cuestionario.pregunta7 != ""  and cuestionario.pregunta7 is not None %}   
-              {{cuestionario.pregunta7}}     
-                <input type="text" name="respuesta7" required
-                id="id_respuesta7" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}     
-
-            {% if cuestionario.pregunta8 != ""  and cuestionario.pregunta8 is not None %}   
-              {{cuestionario.pregunta8}}     
-                <input type="text" name="respuesta8" required
-                id="id_respuesta8" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}  
-
-            {% if cuestionario.pregunta9 != ""  and cuestionario.pregunta9 is not None %}   
-              {{cuestionario.pregunta9}}     
-                <input type="text" name="respuesta9" required
-                id="id_respuesta9" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}  
-
-            {% if cuestionario.pregunta10 != "" and cuestionario.pregunta10 is not None %}   
-              {{cuestionario.pregunta10}}     
-                <input type="text" name="respuesta10" required
-                id="id_respuesta10" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}     
-
-            {% if cuestionario.pregunta11 != ""  and cuestionario.pregunta11 is not None %}   
-              {{cuestionario.pregunta11}}     
-                <input type="text" name="respuesta11" required
-                id="id_respuesta11" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}
-
-            {% if cuestionario.pregunta12 != ""  and cuestionario.pregunta12 is not None %}   
-              {{cuestionario.pregunta12}}     
-                <input type="text" name="respuesta12" required
-                id="id_respuesta12" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}     
-
-            {% if cuestionario.pregunta13 != ""  and cuestionario.pregunta13 is not None %}   
-              {{cuestionario.pregunta13}}     
-                <input type="text" name="respuesta13" required
-                id="id_respuesta13" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}  
-            {% if cuestionario.pregunta14 != ""  and cuestionario.pregunta14 is not None %}   
-              {{cuestionario.pregunta14}}     
-                <input type="text" name="respuesta14" required
-                id="id_respuesta14" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}  
-
-            {% if cuestionario.pregunta15 != "" and cuestionario.pregunta15 is not None %}   
-              {{cuestionario.pregunta15}}     
-                <input type="text" name="respuesta15" required
-                id="id_respuesta15" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}     
-            {% if cuestionario.pregunta16 != ""  and cuestionario.pregunta16 is not None %}   
-              {{cuestionario.pregunta16}}     
-                <input type="text" name="respuesta16" required
-                id="id_respuesta16" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}  
-
-            {% if cuestionario.pregunta17 != "" and cuestionario.pregunta17 is not None %}   
-              {{cuestionario.pregunta17}}     
-                <input type="text" name="respuesta17" required
-                id="id_respuesta17" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}     
-
-            {% if cuestionario.pregunta18 != ""  and cuestionario.pregunta18 is not None %}   
-              {{cuestionario.pregunta18}}     
-                <input type="text" name="respuesta18" required
-                id="id_respuesta18" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}
-
-            {% if cuestionario.pregunta19 != ""  and cuestionario.pregunta19 is not None %}   
-              {{cuestionario.pregunta19}}     
-                <input type="text" name="respuesta19" required
-                id="id_respuesta19" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}     
-
-            {% if cuestionario.pregunta20 != ""  and cuestionario.pregunta20 is not None %}   
-              {{cuestionario.pregunta20}}     
-                <input type="text" name="respuesta20" required
-                id="id_respuesta20" class="form-control mt-3 mb-3" placeholder=""/>
-            {% endif %}  
-
-
-            {% if page.secreta %} 
-                  <b>Este evento es privado 🔒</b><br><br>
-                   Ingresá la clave para  entrar    
-                <input type="password" name="password" required
-                  id="id_password" class="form-control mt-3 mb-3" placeholder="Contraseña"/>
-                  <br>
-            {% endif %}
-
-           {% if overlaps %}
-            <b>¡Estás anotadx a otra actividad en el mismo horario! 🤪 </b> <br>
-            {% endif %}
-
-            {% if page.con_preinscripcion  %}
-            Te recordamos que esto es una preinscripción. 📱Te vamos a escribir por Whatsapp para confirmar tu cupo, al menos 3 días antes de la actividad.
-            <br><br>
-            {% else %}
-            ¿Te esperamos {% if overlaps %} igual {% endif %}en {{page.title}} {% if page.modalidad  %}<b> Online</b>{% else %} <b> Presencial</b> {% endif %}
-              el {{page.fecha|date:"l d \d\e F"}}
-            a las {{page.horaDesde}} HS?  
-            {% endif %}
-            <br><br>
-
-          </div>
-
-          <!-- Modal footer -->
-
-          <div class="modal-footer">
-            {% if not page.con_preinscripcion  %}
-                 <input type="submit" class="btn btn-success" value="Si" />    
-                     </form>              
-
-            <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
-            {% else %}
-            <input type="submit" class="btn btn-success" value="Preinscribirme" />    
-            </form>              
-            {% endif %}
+        {% if page.alerta %}
+        <div id="alerta-panel" class="alert alert-warning">
+          <strong>Importante:</strong><br>
+          {{ page.alerta|linebreaksbr }}
+          <div class="text-right mt-3">
+            <button class="btn btn-success" id="confirmar-alerta">Aceptar</button>
+            <button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
           </div>
         </div>
+        {% endif %}
+
+        <form id="form-anotarse" action="{% url 'pages:register' page.id %}" method="post"
+              {% if page.alerta %}style="display: none;"{% endif %}>
+          {% csrf_token %}
+
+          {% if cuestionario.pregunta1 %}
+            Pero contanos algo antes... 🤓 <br><br>
+          {% endif %}
+
+          {% for i in preguntas_range %}
+            {% with field="pregunta"|add:i|stringformat:"s" %}
+              {% if cuestionario|get:field %}
+                {{ cuestionario|get:field }}
+                <input type="text" name="respuesta{{ i }}" required
+                       id="id_respuesta{{ i }}" class="form-control mt-3 mb-3" placeholder="" />
+              {% endif %}
+            {% endwith %}
+          {% endfor %}
+
+          {% if page.secreta %}
+            <b>Este evento es privado 🔒</b><br><br>
+            Ingresá la clave para entrar
+            <input type="password" name="password" required
+                   id="id_password" class="form-control mt-3 mb-3" placeholder="Contraseña" />
+            <br>
+          {% endif %}
+
+          {% if overlaps %}
+            <b>¡Estás anotadx a otra actividad en el mismo horario! 🤪 </b> <br>
+          {% endif %}
+
+          {% if page.con_preinscripcion %}
+            Te recordamos que esto es una preinscripción. 📱Te vamos a escribir por Whatsapp para confirmar tu cupo, al menos 3 días antes de la actividad.
+            <br><br>
+          {% else %}
+            ¿Te esperamos {% if overlaps %} igual {% endif %}en {{ page.title }}
+            {% if page.modalidad %}
+              <b> Online</b>
+            {% else %}
+              <b> Presencial</b>
+            {% endif %}
+            el {{ page.fecha|date:"l d \d\e F" }} a las {{ page.horaDesde }} HS?
+          {% endif %}
+          <br><br>
+
+          <!-- Modal footer dentro del form -->
+          <div class="modal-footer">
+            {% if not page.con_preinscripcion %}
+              <input type="submit" class="btn btn-success" value="Sí" />
+              <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+            {% else %}
+              <input type="submit" class="btn btn-success" value="Preinscribirme" />
+            {% endif %}
+          </div>
+        </form>
       </div>
-    </div>  
+    </div>
+  </div>
+</div>
+
   
 
     <!-- Modal Confirmar Desuscripción -->
@@ -478,7 +394,28 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script>
+         const mostrarAlerta = "{{ page.alerta|default_if_none:'' }}" !== "";
+
         $(document).ready(function () {
+
+           
+     // Mostrar el panel de alerta si corresponde
+     $('#ModalConfirmar').on('show.bs.modal', function () {
+            if (mostrarAlerta) {
+                $('#alerta-panel').show();
+                $('#form-anotarse').hide();
+            } else {
+                $('#form-anotarse').show();
+            }
+        });
+
+        // Cuando el usuario acepta la alerta
+        $('#confirmar-alerta').click(function () {
+            $('#alerta-panel').hide();
+            $('#form-anotarse').fadeIn();
+        });
+
+     
             // catch the form's submit event
             $('#MainNavAgotados').click(function () {
                 

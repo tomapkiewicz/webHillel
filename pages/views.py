@@ -18,7 +18,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.template import loader
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.http import HttpResponse
 import csv
 from social.models import MailContacto
@@ -26,7 +26,15 @@ import pytz
 from django.template.defaultfilters import date as date_format
 from datetime import date
 from django.db.models import Q
+from django.core.files.base import ContentFile
+from django.core.mail import EmailMultiAlternatives
+import qrcode
+from io import BytesIO
+from email.mime.image import MIMEImage
 
+from itertools import groupby
+from operator import attrgetter
+import re  
 
 def CuposAgotados(request, pk):
     page = get_object_or_404(Page, pk=pk)
@@ -36,7 +44,8 @@ def CuposAgotados(request, pk):
         else request.user
     )
 
-    formatted_fecha = date_format(page.fecha, "l d \d\e F")
+    #formatted_fecha = date_format(page.fecha, "l d \d\e F")
+    formatted_fecha = date_format(page.fecha, r"l d \d\e F")
 
     asunto = "Cupos agotados - " + page.title
     html_message = loader.render_to_string(
@@ -67,31 +76,7 @@ def CuposAgotados(request, pk):
     return JsonResponse(response)
 
 
-# En desuso porque el servidor no acepta hilos
-class EmailThread(threading.Thread):
-    def __init__(self, subject, html_content, recipient_list, mail_from):
-        self.subject = subject
-        self.recipient_list = recipient_list
-        self.html_content = html_content
-        self.mail_from = mail_from
-        threading.Thread.__init__(self)
-
-    def run(self):
-        print("enviando mail")
-        mail = send_mail(
-            self.subject,
-            self.html_content,
-            self.mail_from,
-            self.recipient_list,
-            fail_silently=True,
-            html_message=self.html_content,
-        )
-        print(mail)
-
-
 def send_html_mail(subject, html_content, recipient_list, mail_from):
-    # EmailThread(subject, html_content, recipient_list, mail_from).start()
-    print("enviando mail")
     mail = send_mail(
         subject,
         html_content,
@@ -109,8 +94,6 @@ class StaffRequiredMixin(object):
 
 
 # Create your views here.
-
-
 def Onward(request):
     return render(request, "pages/onward.html")
 
@@ -138,12 +121,14 @@ class PageList(ListView):
             active_pages = Page.objects.filter(
                 Q(modalidad=True) | Q(provincia=provincia),
                 activa=True,
+                oculta=False,
                 cowork=False,
                 fecha__gte=today,
             ).order_by("fecha", "horaDesde", "-title")
         else:
             active_pages = Page.objects.filter(
                 activa=True,
+                oculta=False,
                 cowork=False,
                 fecha__gte=today,
             ).order_by("fecha", "horaDesde", "-title")
@@ -166,9 +151,35 @@ class PageList(ListView):
                     active_pages_map[page.fecha].append(page)
                     recurrent_pages_map[recurrent_page_id] = True
 
-        cowork_pages = Page.objects.filter(activa=True, cowork=True).order_by(
-            "horaDesde", "-title"
-        )
+        
+        #New way to group by title
+        cowork_pages = Page.objects.filter(activa=True,oculta=False, cowork=True)
+
+        for page in cowork_pages:
+            match = re.split(r'\s*[-–—]\s*', page.title.strip(), maxsplit=1)
+
+            if len(match) == 2:
+                separator, activity_name = match
+            else:
+                separator = activity_name = page.title.strip()
+
+            page.separator = separator.strip()
+            page.activity_name = activity_name.strip()
+
+        # 🔑 ordenamos antes de agrupar
+        cowork_pages = sorted(cowork_pages, key=lambda p: p.separator)
+
+        from itertools import groupby
+
+        cowork_grouped = {}
+        for sep, group in groupby(cowork_pages, key=lambda p: p.separator):
+            cowork_grouped[sep] = list(group)
+
+        context["cowork_grouped"] = cowork_grouped
+
+        
+        #context["cowork_grouped"] = dict(cowork_grouped)  # importante: casteamos a dict
+        
         context["cowork_pages"] = cowork_pages
         context["active_pages_map"] = active_pages_map
         context["cowork_pages"] = cowork_pages
@@ -190,7 +201,8 @@ class PageDetail(DetailView):
         local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
         current_date = datetime.now(local_tz)
 
-        if obj.fecha < current_date.date():
+
+        if obj.fecha and obj.fecha < current_date.date():
             obj.activa = False
             obj.save()
 
@@ -203,6 +215,7 @@ class PageDetail(DetailView):
         cuestionario = Cuestionario.objects.find_or_create(page=self.object)
         if cuestionario is not None:
             context["cuestionario"] = cuestionario
+            context["preguntas_range"] = range(1, 21) 
             print(context["cuestionario"])
 
         if self.request.user.is_anonymous:
@@ -257,6 +270,7 @@ class PageUpdate(UpdateView):
                 cupo=self.object.cupo,
                 nuevo=self.object.nuevo,
                 activa=self.object.activa,
+                oculta=self.object.oculta,
                 responsable=self.object.responsable,
                 colaborador=self.object.colaborador,
                 secreta=self.object.secreta,
@@ -275,202 +289,152 @@ class PageDelete(DeleteView):
     success_url = reverse_lazy("pages:pages")
 
 
+
 def Register(request, pk):
     if request.user.is_authenticated:
         page = get_object_or_404(Page, pk=pk)
         cuestionario = Cuestionario.objects.get(page=page)
+
+        # Store user responses
         if cuestionario is not None:
-            cuestionarioRespuesta = CuestionarioRespuesta.objects.find_or_create(
-                user=request.user, page=page
-            )
+            cuestionarioRespuesta, _ = CuestionarioRespuesta.objects.get_or_create(user=request.user, page=page)
 
-            if request.POST.get("respuesta1", None) is not None:
-                cuestionarioRespuesta.pregunta1 = cuestionario.pregunta1
-                cuestionarioRespuesta.respuesta1 = request.POST["respuesta1"]
+        for i in range(1, 21):  
+            respuesta_key = f"respuesta{i}"
+            if request.POST.get(respuesta_key, None) is not None:
+                setattr(cuestionarioRespuesta, f"pregunta{i}", getattr(cuestionario, f"pregunta{i}"))
+                setattr(cuestionarioRespuesta, f"respuesta{i}", request.POST[respuesta_key])
 
-            if request.POST.get("respuesta2", None) is not None:
-                cuestionarioRespuesta.pregunta2 = cuestionario.pregunta2
-                cuestionarioRespuesta.respuesta2 = request.POST["respuesta2"]
+        cuestionarioRespuesta.save()
 
-            if request.POST.get("respuesta3", None) is not None:
-                cuestionarioRespuesta.pregunta3 = cuestionario.pregunta3
-                cuestionarioRespuesta.respuesta3 = request.POST["respuesta3"]
+        # Validate secret key if required
+        if page.secreta and request.POST.get("password") != page.clave:
+            return redirect(reverse_lazy("pages:page", args=[page.id]) + "?claveincorrecta")
 
-            if request.POST.get("respuesta4", None) is not None:
-                cuestionarioRespuesta.pregunta4 = cuestionario.pregunta4
-                cuestionarioRespuesta.respuesta4 = request.POST["respuesta4"]
-
-            if request.POST.get("respuesta5", None) is not None:
-                cuestionarioRespuesta.pregunta5 = cuestionario.pregunta5
-                cuestionarioRespuesta.respuesta5 = request.POST["respuesta5"]
-
-            if request.POST.get("respuesta6", None) is not None:
-                cuestionarioRespuesta.pregunta6 = cuestionario.pregunta6
-                cuestionarioRespuesta.respuesta6 = request.POST["respuesta6"]
-
-            if request.POST.get("respuesta7", None) is not None:
-                cuestionarioRespuesta.pregunta7 = cuestionario.pregunta7
-                cuestionarioRespuesta.respuesta7 = request.POST["respuesta7"]
-
-            if request.POST.get("respuesta8", None) is not None:
-                cuestionarioRespuesta.pregunta8 = cuestionario.pregunta8
-                cuestionarioRespuesta.respuesta8 = request.POST["respuesta8"]
-
-            if request.POST.get("respuesta9", None) is not None:
-                cuestionarioRespuesta.pregunta9 = cuestionario.pregunta9
-                cuestionarioRespuesta.respuesta9 = request.POST["respuesta9"]
-
-            if request.POST.get("respuesta10", None) is not None:
-                cuestionarioRespuesta.pregunta10 = cuestionario.pregunta10
-                cuestionarioRespuesta.respuesta10 = request.POST["respuesta10"]
-
-            if request.POST.get("respuesta11", None) is not None:
-                cuestionarioRespuesta.pregunta11 = cuestionario.pregunta11
-                cuestionarioRespuesta.respuesta11 = request.POST["respuesta11"]
-
-            if request.POST.get("respuesta12", None) is not None:
-                cuestionarioRespuesta.pregunta12 = cuestionario.pregunta12
-                cuestionarioRespuesta.respuesta12 = request.POST["respuesta12"]
-
-            if request.POST.get("respuesta13", None) is not None:
-                cuestionarioRespuesta.pregunta13 = cuestionario.pregunta13
-                cuestionarioRespuesta.respuesta13 = request.POST["respuesta13"]
-
-            if request.POST.get("respuesta14", None) is not None:
-                cuestionarioRespuesta.pregunta14 = cuestionario.pregunta14
-                cuestionarioRespuesta.respuesta14 = request.POST["respuesta14"]
-
-            if request.POST.get("respuesta15", None) is not None:
-                cuestionarioRespuesta.pregunta15 = cuestionario.pregunta15
-                cuestionarioRespuesta.respuesta15 = request.POST["respuesta15"]
-
-            if request.POST.get("respuesta16", None) is not None:
-                cuestionarioRespuesta.pregunta16 = cuestionario.pregunta16
-                cuestionarioRespuesta.respuesta16 = request.POST["respuesta16"]
-
-            if request.POST.get("respuesta17", None) is not None:
-                cuestionarioRespuesta.pregunta17 = cuestionario.pregunta17
-                cuestionarioRespuesta.respuesta17 = request.POST["respuesta17"]
-
-            if request.POST.get("respuesta18", None) is not None:
-                cuestionarioRespuesta.pregunta18 = cuestionario.pregunta18
-                cuestionarioRespuesta.respuesta18 = request.POST["respuesta18"]
-
-            if request.POST.get("respuesta19", None) is not None:
-                cuestionarioRespuesta.pregunta19 = cuestionario.pregunta19
-                cuestionarioRespuesta.respuesta19 = request.POST["respuesta19"]
-
-            if request.POST.get("respuesta20", None) is not None:
-                cuestionarioRespuesta.pregunta20 = cuestionario.pregunta20
-                cuestionarioRespuesta.respuesta20 = request.POST["respuesta20"]
-
-            cuestionarioRespuesta.save()
-
-        # Si la page es secreta validar la clave
-        if page.secreta:
-            if request.POST["password"] != page.clave:
-                return redirect(
-                    reverse_lazy(
-                        "pages:page",
-                        args=[
-                            page.id,
-                        ],
-                    )
-                    + "?claveincorrecta"
-                )
-
-        # Chequear que haya cupos disponibles (No debería llegar acá)
+        # Ensure there are available spots
         if page.Qanotados >= page.cupo and page.cupo != 0:
             return redirect(reverse_lazy("pages:pages") + "?agotado")
 
-        # chequear que el perfil esté completo
-        if request.user.profile.validado is not True:
-            return redirect(
-                reverse_lazy(
-                    "profile",
-                    args=[
-                        page.id,
-                    ],
-                )
-                + "?completar=si&pk="
-                + str(pk)
-            )
+        # Ensure user profile is complete
+        if not request.user.profile.validado:
+            return redirect(reverse_lazy("profile", args=[page.id]) + "?completar=si&pk=" + str(pk))
 
-        subscription = Subscription.objects.find_or_create(request.user)
-
-        if page.recurrent_page:
-            new_pages = page.recurrent_page.pages.all()
-        else:
-            new_pages = [page]
+        # ✅ Create or update Subscription
+        subscription, _ = Subscription.objects.get_or_create(user=request.user)
+        new_pages = page.recurrent_page.pages.all() if page.recurrent_page else [page]
         subscription.pages.add(*new_pages)
 
-    else:
-        raise Http404("Usuario no está autenticado")
+        # ✅ Generate QR Code
+        host = request.get_host()
+        host = host if "127.0.0.1" in host else "https://" + host
+        #qr_data = f"{host}/validate_qr/{page.id}/{request.user.id}"  # Unique validation URL
+        qr_data = f"/pages/validate_qr/{page.id}/{request.user.id}"  # Relative URL
 
-    # Mail automático
-    modalidad = " Online" if page.modalidad else " Presencial"
-    asunto = (
-        "Te esperamos en " + page.title + modalidad + "!"
-        if not page.con_mail_personalizado
-        else page.asunto_mail
-    )
-    to_mail = [request.user.email]
-    from_mail = "Hillel Argentina <no_responder@domain.com>"
-    host = request.get_host()
-    host = host if "127.0.0.1" in host else "https://" + host
-    textoExtraMail = (
-        page.textoExtraMail if page.textoExtraMail is not None else page.description
-    )
-    if page.con_mail_personalizado:
-        html_message = loader.render_to_string(
-            "custom_mail_body.html",
-            {
-                "mail_body": page.cuerpo_mail,
-            },
-        )
-    else:
-        html_message = loader.render_to_string(
-            "mail_body.html",
-            {
-                "user_name": "Hola " + request.user.username + "!",
-                "subject": "Te anotaste en "
-                + page.title
-                + modalidad
-                + " a las "
-                + str(page.horaDesde)
-                + "HS."
-                + " Podés darte de baja acá: "
-                + host
-                + "/pages/"
-                + str(page.id),
-                "description": textoExtraMail,
-            },
-        )
-    send_html_mail(asunto, html_message, to_mail, from_mail)
-    return redirect(reverse_lazy("home") + "?ok")
+        qr = qrcode.make(qr_data)
+        qr_image = BytesIO()
+        qr.save(qr_image, format="PNG")
+        qr_image_content = ContentFile(qr_image.getvalue(), name=f"qr_{request.user.id}_{page.id}.png")
 
+        # ✅ Store QR Code in Subscription Model
+        subscription.qr_code.save(f"qr_{request.user.id}_{page.id}.png", qr_image_content)
+
+        # ✅ Email Content
+        modalidad = " Online" if page.modalidad else " Presencial"
+        asunto = f"Te esperamos en {page.title}{modalidad}!"
+        to_mail = [request.user.email]
+        from_mail = "Hillel Argentina <no_responder@domain.com>"
+        textoExtraMail = page.textoExtraMail if page.textoExtraMail is not None else page.description
+
+        textoExtraMail += page.alerta if page.alerta is not None else "" 
+        page.cuerpo_mail += page.alerta if page.alerta is not None else "" 
+
+        # ✅ Render email template
+        if page.con_mail_personalizado:
+            html_message = loader.render_to_string(
+                "custom_mail_body.html",
+                {
+                    "mail_body": page.cuerpo_mail,
+                    "qr_url": qr_data,  # Link for QR validation
+                    "qr_image_cid": "qr_code",  # Content ID for embedding
+                },
+            )
+        else:
+            html_message = loader.render_to_string(
+                "mail_body.html",
+                {
+                    "user_name": f"Hola {request.user.username}!",
+                    "subject": f"Te anotaste en {page.title}{modalidad} a las {page.horaDesde}HS.",
+                    "description": textoExtraMail,
+                    "qr_url": qr_data,  # URL for validation
+                    "qr_image_cid": "qr_code",  # Content ID for embedding
+                },
+            )
+
+        # ✅ Send Email with Embedded QR Code
+        email = EmailMultiAlternatives(asunto, "", from_mail, to_mail)
+        email.attach_alternative(html_message, "text/html")
+
+        # ✅ Embed QR Code Inside Email Body
+        image = MIMEImage(qr_image.getvalue(), _subtype="png")
+        image.add_header("Content-ID", "<qr_code>")  # Set Content-ID for embedding
+        email.attach(image)
+
+
+        # ✅ Attach QR as a downloadable file too
+        email.attach(f"qr_{request.user.id}_{page.id}.png", qr_image.getvalue(), "image/png")
+
+        # ✅ Send Email
+        email.send()
+
+        return redirect(reverse_lazy("home") + "?ok")
+
+    raise Http404("Usuario no está autenticado")
+
+def validate_qr(request, page_id, user_id):
+    """Validate QR Code when scanned"""
+    page = get_object_or_404(Page, id=page_id)
+    user = get_object_or_404(User, id=user_id)
+
+    # ✅ Use the correct related_name for the ManyToMany field
+    if Subscription.objects.filter(user=user, pages=page).exists():
+        return JsonResponse({"status": "valid", "message": "QR Code is valid!", "user": user.username})
+
+    return JsonResponse({"status": "invalid", "message": "QR Code is not valid!"})
 
 def Unregister(request, pk):
     if request.user.is_authenticated:
         page = get_object_or_404(Page, pk=pk)
         subscription = Subscription.objects.find_or_create(request.user)
-        subscription.pages.remove(page)
+        
+        if page.recurrent_page:
+            # Si la actividad pertenece a una actividad recurrente, eliminar todas sus instancias
+            related_pages = page.recurrent_page.pages.all()
+            subscription.pages.remove(*related_pages)
+        else:
+            # Si no es recurrente, eliminar solo la actividad específica
+            subscription.pages.remove(page)
+
     else:
         raise Http404("Usuario no está autenticado")
     return redirect(reverse_lazy("home") + "?remove")
-
 
 def Asistencia(request, modalidad):
     if request.user.is_authenticated:
         if request.user.groups.filter(name="BITAJON").exists() or request.user.is_staff:
             local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
-            dia = datetime.now(local_tz).weekday() + 1
-            pages = Page.objects.filter(activa=True, modalidad=modalidad)
+            today = datetime.now(local_tz).date()
+            yesterday = today - timedelta(days=1)
+            tomorrow = today + timedelta(days=1)
+
+            # ✅ Filter pages for only yesterday, today, and tomorrow
+            pages = Page.objects.filter(
+                activa=True,                
+                modalidad=modalidad,
+                fecha__in=[yesterday, today, tomorrow]  # ✅ Only include these dates
+            )
 
             # Get the unique dates of the pages and order them
-            unique_dates = (
-                pages.values_list("fecha", flat=True).distinct().order_by("fecha")
-            )
+            unique_dates = pages.values_list("fecha", flat=True).distinct().order_by("fecha")
 
             # Fetch pages for each unique date and annotate with the date itself
             annotated_pages = pages.annotate(date=F("fecha"))
@@ -480,7 +444,7 @@ def Asistencia(request, modalidad):
                 "pages/asistencia.html",
                 {
                     "pages": annotated_pages,
-                    "dia": dia,
+                    "dia": today.weekday() + 1,
                     "modalidad": modalidad,
                     "unique_dates": unique_dates,
                 },
@@ -489,7 +453,6 @@ def Asistencia(request, modalidad):
         raise Http404("Usuario no es bitajon/staff")
 
     raise Http404("Usuario no está autenticado")
-
 
 def AsistenciaDetail(request, pk, slug):
     if request.user.is_authenticated:
@@ -673,341 +636,61 @@ def DescargarHistoricoAsistenciasALLItem(request):
 
     return responseB
 
-
+# Function to export attendance history
 def DescargarHistoricoAsistencias(request, pk):
     page = get_object_or_404(Page, pk=pk)
-    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
-    response = HttpResponse(content="")
-    response["Content-Disposition"] = (
-        "attachment; filename=asistencias-"
-        + page.titleSTR
-        + "-all-"
-        + str(datetime.now(local_tz))
-        + ".csv"
-    )
-    response.write("\ufeff".encode("utf8"))
-    writer = csv.writer(response, dialect="excel")
-    writer.writerow(
-        [
-            "Actividad",
-            "Fecha",
-            "Hora Desde",
-            "Usuario anotado",
-            "Nombre",
-            "Apellido",
-            "Celular",
-            "Asistio?",
-            "Asis",
-        ]
-    )
+    headers = ["Actividad", "Fecha", "Hora Desde", "Usuario anotado", "Nombre", "Apellido", "Celular", "Asistio?", "Asis"]
+    historial_entries = Historial.objects.find_page(page=page)
+    if not historial_entries:
+        raise Http404("Historial no encontrado")
+    rows = []
+    for h in historial_entries:
+        for anotado in h.anotados.all():
+            asistio = "Si" if anotado in h.asistentes.all() else "No"
+            rows.append([
+                h.page.titleSTR, h.page.fecha, h.page.horaDesde, anotado.username,
+                anotado.profile.nombre, anotado.profile.apellido, anotado.profile.whatsapp,
+                asistio, 1 if asistio == "Si" else 0
+            ])
+    return generate_csv_response(f"asistencias-{page.titleSTR}-all", headers, rows)
 
-    hs = Historial.objects.find_page(page=page)
-    if hs is None:
-        return Http404("Historial no encontrado")
-    for h in hs:
-        WriteRowAsistencias(h, writer)
-
-    return response
-
-
+# Function to export activities
 def DescargarActividades(request):
-    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
-    response = HttpResponse(content="")
-    response["Content-Disposition"] = (
-        "attachment; filename=actividades-" + str(datetime.now(local_tz)) + ".csv"
-    )
+    headers = ["Titulo", "Fecha", "Hora Desde", "Hora Hasta", "Cupo", "Modalidad", "Nuevo", "Activa","Oculta", "Qanotados", "Categorias", "Responsable", "Colaborador", "Secreta", "Clave"]
+    rows = [[p.titleSTR, p.fecha, p.horaDesde, p.horaHasta, p.cupo, p.modalidadSTR, p.nuevo, p.activa,p.oculta, p.Qanotados, p.categoriesSTR, p.responsable, p.colaborador, p.secreta, p.clave] for p in Page.objects.all()]
+    return generate_csv_response("actividades", headers, rows)
 
-    response.write("\ufeff".encode("utf8"))
-
-    writer = csv.writer(response, dialect="excel")
-
-    writer.writerow(
-        [
-            "Titulo",
-            "Fecha",
-            "Hora Desde",
-            "Hora Hasta",
-            "Cupo",
-            "Modalidad",
-            "Nuevo",
-            "Activa",
-            "Qanotados",
-            "Categorias",
-            "responsable",
-            "colaborador",
-            "secreta",
-            "clave",
-        ]
-    )
-
-    pages = Page.objects.all()
-
-    for p in pages:
-        if p is None:
-            return Http404("Actividad no encontrada")
-
-        writer.writerow(
-            [
-                p.titleSTR,
-                p.fecha,
-                p.horaDesde,
-                p.horaHasta,
-                p.cupo,
-                p.modalidadSTR,
-                p.nuevo,
-                p.activa,
-                p.Qanotados,
-                p.categoriesSTR,
-                p.responsable,
-                p.colaborador,
-                p.secreta,
-                p.clave,
-            ]
-        )
-
-    return response
-
-
+# Function to export user profiles
 def DescargarPerfiles(request):
+    headers = ["Usuario", "Mail", "Nombre", "Apellido", "Fecha de nacimiento", "Edad", "Celular", "Instagram", "Onward", "Taglit", "Cómo conoció Hillel", "Estudios", "Experiencia comunitaria", "Tematicas de Interes", "Propuestas de Interes", "Observaciones", "Perfil Ok?"]
+    rows = [[p.user.username, p.user.email, p.nombre, p.apellido, p.fechaNacimiento, p.edad, p.whatsapp, p.instagram, p.onward, p.taglit, p.comoConociste, p.estudios, p.experienciaComunitaria, p.tematicasInteresSTR, p.propuestasInteresSTR, p.observaciones, p.perfil_ok] for p in Profile.objects.filter(validado=True)]
+    return generate_csv_response("perfiles", headers, rows)
+
+
+# Helper function to generate CSV responses
+def generate_csv_response(filename, headers, rows):
     local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
-    response = HttpResponse(content="")
-    response["Content-Disposition"] = (
-        "attachment; filename=perfiles-" + str(datetime.now(local_tz)) + ".csv"
-    )
-    writer = csv.writer(response, dialect="excel")
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f"attachment; filename={filename}-{datetime.now(local_tz).strftime('%Y-%m-%d_%H-%M-%S')}.csv"
     response.write("\ufeff".encode("utf8"))
-    writer.writerow(
-        [
-            "Usuario",
-            "Mail",
-            "Nombre",
-            "Apellido",
-            "Fecha de nacimiento",
-            "Edad",
-            "Celular",
-            "Instagram",
-            "Onward",
-            "Taglit",
-            "Cómo conoció Hillel",
-            "Estudios",
-            "Experiencia comunitaria",
-            "tematicasInteres",
-            "propuestasInteres",
-            "observaciones",
-            "Perfil Ok?",
-        ]
-    )
-
-    profiles = Profile.objects.all()
-
-    for p in profiles:
-        if p is None:
-            return Http404("Perfil no encontrado")
-        if p.validado:
-            writer.writerow(
-                [
-                    p,
-                    p.user.email,
-                    p.nombre,
-                    p.apellido,
-                    p.fechaNacimiento,
-                    p.edad,
-                    p.whatsapp,
-                    p.instagram,
-                    p.onward,
-                    p.taglit,
-                    p.comoConociste,
-                    p.estudios,
-                    p.experienciaComunitaria,
-                    p.tematicasInteresSTR,
-                    p.propuestasInteresSTR,
-                    p.observaciones,
-                    p.perfil_ok,
-                ]
-            )
+    writer = csv.writer(response, dialect="excel")
+    writer.writerow(headers)
+    writer.writerows(rows)
     return response
 
-
+# Function to export questionaries
 def DescargarCuestionarios(request):
-    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
-    response = HttpResponse(content="")
-    response["Content-Disposition"] = (
-        "attachment; filename=Cuestionarios-" + str(datetime.now(local_tz)) + ".csv"
-    )
-    writer = csv.writer(response, dialect="excel")
-    response.write("\ufeff".encode("utf8"))
-    writer.writerow(
-        [
-            "Actividad",
-            "Pregunta1",
-            "Pregunta2",
-            "Pregunta3",
-            "Pregunta4",
-            "Pregunta5",
-            "Pregunta6",
-            "Pregunta7",
-            "Pregunta8",
-            "Pregunta9",
-            "Pregunta10",
-            "Pregunta11",
-            "Pregunta12",
-            "Pregunta13",
-            "Pregunta14",
-            "Pregunta15",
-            "Pregunta16",
-            "Pregunta17",
-            "Pregunta18",
-            "Pregunta19",
-            "Pregunta20",
-        ]
-    )
+    headers = ["Actividad"] + [f"Pregunta{i}" for i in range(1, 21)]
+    rows = [[c.page.titleSTR] + [getattr(c, f"pregunta{i}", "") for i in range(1, 21)] for c in Cuestionario.objects.all()]
+    return generate_csv_response("Cuestionarios", headers, rows)
 
-    cuestionarios = Cuestionario.objects.all()
-
-    for c in cuestionarios:
-        if c is None:
-            return Http404("Cuestionario no encontrado")
-        writer.writerow(
-            [
-                c.page.titleSTR,
-                c.pregunta1,
-                c.pregunta2,
-                c.pregunta3,
-                c.pregunta4,
-                c.pregunta5,
-                c.pregunta6,
-                c.pregunta7,
-                c.pregunta8,
-                c.pregunta9,
-                c.pregunta10,
-                c.pregunta11,
-                c.pregunta12,
-                c.pregunta13,
-                c.pregunta14,
-                c.pregunta15,
-                c.pregunta16,
-                c.pregunta17,
-                c.pregunta18,
-                c.pregunta19,
-                c.pregunta20,
-            ]
-        )
-    return response
-
-
+# Function to export responses to questionaries
 def DescargarCuestionariosRespuestas(request):
-    local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
-    response = HttpResponse(content="")
-    response["Content-Disposition"] = (
-        "attachment; filename=Cuestionarios-Respuestas-"
-        + str(datetime.now(local_tz))
-        + ".csv"
-    )
-    writer = csv.writer(response, dialect="excel")
-    response.write("\ufeff".encode("utf8"))
-    writer.writerow(
-        [
-            "Actividad",
-            "Pregunta1",
-            "Pregunta2",
-            "Pregunta3",
-            "Pregunta4",
-            "Pregunta5",
-            "Pregunta6",
-            "Pregunta7",
-            "Pregunta8",
-            "Pregunta9",
-            "Pregunta10",
-            "Pregunta11",
-            "Pregunta12",
-            "Pregunta13",
-            "Pregunta14",
-            "Pregunta15",
-            "Pregunta16",
-            "Pregunta17",
-            "Pregunta18",
-            "Pregunta19",
-            "Pregunta20",
-            "Usuario",
-            "Respuesta1",
-            "Respuesta2",
-            "Respuesta3",
-            "Respuesta4",
-            "Respuesta5",
-            "Respuesta6",
-            "Respuesta7",
-            "Respuesta8",
-            "Respuesta9",
-            "Respuesta10",
-            "Respuesta11",
-            "Respuesta12",
-            "Respuesta13",
-            "Respuesta14",
-            "Respuesta15",
-            "Respuesta16",
-            "Respuesta17",
-            "Respuesta18",
-            "Respuesta19",
-            "Respuesta20",
-            "Fecha de compleción",
-        ]
-    )
+    headers = ["Actividad"] + [f"Pregunta{i}" for i in range(1, 21)] + ["Usuario"] + [f"Respuesta{i}" for i in range(1, 21)] + ["Fecha de compleción"]
+    rows = [[c.page.titleSTR] + [getattr(c, f"pregunta{i}", "") for i in range(1, 21)] + [c.user.username if c.user else ""] + [getattr(c, f"respuesta{i}", "") for i in range(1, 21)] + [c.updated.strftime('%Y-%m-%d %H:%M:%S') if c.updated else ""] for c in CuestionarioRespuesta.objects.all()]
+    return generate_csv_response("Cuestionarios-Respuestas", headers, rows)
 
-    cuestionariosRespuesta = CuestionarioRespuesta.objects.all()
-
-    for c in cuestionariosRespuesta:
-        if c is None:
-            return Http404("Cuestionario no encontrado")
-        writer.writerow(
-            [
-                c.page.titleSTR,
-                c.pregunta1,
-                c.pregunta2,
-                c.pregunta3,
-                c.pregunta4,
-                c.pregunta5,
-                c.pregunta6,
-                c.pregunta7,
-                c.pregunta8,
-                c.pregunta9,
-                c.pregunta10,
-                c.pregunta11,
-                c.pregunta12,
-                c.pregunta13,
-                c.pregunta14,
-                c.pregunta15,
-                c.pregunta16,
-                c.pregunta17,
-                c.pregunta18,
-                c.pregunta19,
-                c.pregunta20,
-                c.user.username,
-                c.respuesta1,
-                c.respuesta2,
-                c.respuesta3,
-                c.respuesta4,
-                c.respuesta5,
-                c.respuesta6,
-                c.respuesta7,
-                c.respuesta8,
-                c.respuesta9,
-                c.respuesta10,
-                c.respuesta11,
-                c.respuesta12,
-                c.respuesta13,
-                c.respuesta14,
-                c.respuesta15,
-                c.respuesta16,
-                c.respuesta17,
-                c.respuesta18,
-                c.respuesta19,
-                c.respuesta20,
-                c.updated,
-            ]
-        )
-    return response
-
-
+# Render export page for authenticated users
 def Exportar(request):
     if request.user.is_authenticated:
         return render(request, "pages/exportar.html")

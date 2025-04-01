@@ -63,12 +63,14 @@ class PageAdmin(admin.ModelAdmin):
         "Qanotados",
         "secreta",
         "activa",
+        "oculta",
         "horaDesde",
     )
     search_fields = (
         "title",
         "fecha",
         "activa",
+        "oculta",
         "secreta",
         "provincia__title",
     )
@@ -76,6 +78,7 @@ class PageAdmin(admin.ModelAdmin):
         ModalidadFilter,
         "fecha",
         "activa",
+        "oculta",
         "secreta",
         "horaDesde",
         "cupo",
@@ -99,6 +102,7 @@ class PageAdmin(admin.ModelAdmin):
         "cowork_day_title",
         "fecha",
         "activa",
+        "oculta",
         "horaDesde",
         "horaHasta",
         "flyer",
@@ -125,6 +129,7 @@ class RecurrentPageAdmin(admin.ModelAdmin):
         "cupo",
         "secreta",
         "activa",
+        "oculta",
         "horaDesde",
     )
     search_fields = (
@@ -132,6 +137,7 @@ class RecurrentPageAdmin(admin.ModelAdmin):
         "fechaDesde",
         "fechaHasta",
         "activa",
+        "oculta",
         "secreta",
         "provincia__title",
     )
