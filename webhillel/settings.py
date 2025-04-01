@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,11 +20,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "+k!@)$demq7!z@dlf4hk0jiy=z3l3_d)&cx4hxhtc^u85ps_rj"
-
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["www.hillelargentina.org.ar", "127.0.0.1",'localhost',]
 ALLOWED_HOSTS = ['*']
@@ -70,7 +69,7 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
             'client_id': '998343550118-b4o62mn48v1g638294a7pdar0ht9n07s.apps.googleusercontent.com',
-            'secret': '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',  # Replace with your actual secret
+          'secret': os.getenv('GOOGLE_OAUTH_CLIENT_SECRET'),
             'key': ''
         }
     }
@@ -78,8 +77,7 @@ SOCIALACCOUNT_PROVIDERS = {
  
 #LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-#ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-ACCOUNT_AUTHENTICATION_METHOD = "email"  # ✅ Use email instead of username
+ACCOUNT_AUTHENTICATION_METHOD = "email" 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 SOCIALACCOUNT_QUERY_EMAIL = True
@@ -95,17 +93,7 @@ ACCOUNT_LOGOUT_ON_GET = True
 
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 
-
-# MIDDLEWARE = [
-#     "django.middleware.security.SecurityMiddleware",
-#     "django.contrib.sessions.middleware.SessionMiddleware",
-#     "django.middleware.common.CommonMiddleware",
-#     "django.middleware.csrf.CsrfViewMiddleware",
-#     "django.contrib.auth.middleware.AuthenticationMiddleware",
-#     "django.contrib.messages.middleware.MessageMiddleware",
-#     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-#     "django.middleware.gzip.GZipMiddleware",  # gzip
-# ]
+ 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
