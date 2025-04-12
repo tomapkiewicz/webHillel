@@ -74,10 +74,10 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
- 
+
 #LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-ACCOUNT_AUTHENTICATION_METHOD = "email" 
+ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 SOCIALACCOUNT_QUERY_EMAIL = True
@@ -93,7 +93,7 @@ ACCOUNT_LOGOUT_ON_GET = True
 
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 
- 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -125,7 +125,7 @@ TEMPLATES = [
         },
     },
 ]
- 
+
 
 WSGI_APPLICATION = "webhillel.wsgi.application"
 

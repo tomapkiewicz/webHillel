@@ -324,64 +324,84 @@ def Register(request, pk):
         new_pages = page.recurrent_page.pages.all() if page.recurrent_page else [page]
         subscription.pages.add(*new_pages)
 
-        # ✅ Generate QR Code
-        host = request.get_host()
-        host = host if "127.0.0.1" in host else "https://" + host
-        #qr_data = f"{host}/validate_qr/{page.id}/{request.user.id}"  # Unique validation URL
-        qr_data = f"/pages/validate_qr/{page.id}/{request.user.id}"  # Relative URL
-
-        qr = qrcode.make(qr_data)
-        qr_image = BytesIO()
-        qr.save(qr_image, format="PNG")
-        qr_image_content = ContentFile(qr_image.getvalue(), name=f"qr_{request.user.id}_{page.id}.png")
-
-        # ✅ Store QR Code in Subscription Model
-        subscription.qr_code.save(f"qr_{request.user.id}_{page.id}.png", qr_image_content)
-
         # ✅ Email Content
         modalidad = " Online" if page.modalidad else " Presencial"
-        asunto = f"Te esperamos en {page.title}{modalidad}!"
+        aux_text = "anotaste" if page.con_preinscripcion else "esperamos"
+
+        asunto = f"Te {aux_text} en {page.title}{modalidad}!"
+        asunto = page.asunto_mail if page.con_mail_personalizado else asunto
+
         to_mail = [request.user.email]
         from_mail = "Hillel Argentina <no_responder@domain.com>"
         textoExtraMail = page.textoExtraMail if page.textoExtraMail is not None else page.description
+    
+        # 📨 Si NO hay preinscripción, generamos y enviamos QR
+        if not page.con_preinscripcion:
+        # ✅ Generate QR Code
+            host = request.get_host()
+            host = host if "127.0.0.1" in host else "https://" + host
+            qr_data = f"/pages/validate_qr/{page.id}/{request.user.id}"  # Relative URL
 
-        textoExtraMail += page.alerta if page.alerta is not None else "" 
-        page.cuerpo_mail += page.alerta if page.alerta is not None else "" 
+            qr = qrcode.make(qr_data)
+            qr_image = BytesIO()
+            qr.save(qr_image, format="PNG")
+            qr_image_content = ContentFile(qr_image.getvalue(), name=f"qr_{request.user.id}_{page.id}.png")
 
-        # ✅ Render email template
-        if page.con_mail_personalizado:
-            html_message = loader.render_to_string(
-                "custom_mail_body.html",
-                {
+            # ✅ Store QR Code in Subscription Model
+            subscription.qr_code.save(f"qr_{request.user.id}_{page.id}.png", qr_image_content)
+
+
+            textoExtraMail += page.alerta if page.alerta is not None else "" 
+            page.cuerpo_mail += page.alerta if page.alerta is not None else "" 
+
+            # ✅ Render email template
+            if page.con_mail_personalizado:
+                html_message = loader.render_to_string(
+                    "custom_mail_body.html",
+                    {
+                        "mail_body": page.cuerpo_mail,
+                        "qr_url": qr_data,  # Link for QR validation
+                        "qr_image_cid": "qr_code",  # Content ID for embedding
+                    },
+                )
+            else:
+                
+                html_message = loader.render_to_string(
+                    "mail_body.html",
+                    {
+                        "user_name": f"Hola {request.user.username}!",
+                        "description": textoExtraMail,
+                        "qr_url": qr_data,  # URL for validation
+                        "qr_image_cid": "qr_code",  # Content ID for embedding
+                    },
+                )
+
+            # ✅ Send Email with Embedded QR Code
+            email = EmailMultiAlternatives(asunto, "", from_mail, to_mail)
+            email.attach_alternative(html_message, "text/html")
+
+            # ✅ Attach QR as a downloadable file too
+            email.attach(f"qr_{request.user.id}_{page.id}.png", qr_image.getvalue(), "image/png")
+        else: #Sin QR
+            if page.con_mail_personalizado:
+                html_message = loader.render_to_string(
+                    "custom_mail_body_sin_qr.html",
+                    {
                     "mail_body": page.cuerpo_mail,
-                    "qr_url": qr_data,  # Link for QR validation
-                    "qr_image_cid": "qr_code",  # Content ID for embedding
-                },
-            )
-        else:
-            html_message = loader.render_to_string(
+                    },
+                )
+            else:
+                html_message = loader.render_to_string(
                 "mail_body.html",
                 {
+                    "mail_body": page.cuerpo_mail,
                     "user_name": f"Hola {request.user.username}!",
-                    "subject": f"Te anotaste en {page.title}{modalidad} a las {page.horaDesde}HS.",
                     "description": textoExtraMail,
-                    "qr_url": qr_data,  # URL for validation
-                    "qr_image_cid": "qr_code",  # Content ID for embedding
                 },
             )
 
-        # ✅ Send Email with Embedded QR Code
-        email = EmailMultiAlternatives(asunto, "", from_mail, to_mail)
-        email.attach_alternative(html_message, "text/html")
-
-        # ✅ Embed QR Code Inside Email Body
-        image = MIMEImage(qr_image.getvalue(), _subtype="png")
-        image.add_header("Content-ID", "<qr_code>")  # Set Content-ID for embedding
-        email.attach(image)
-
-
-        # ✅ Attach QR as a downloadable file too
-        email.attach(f"qr_{request.user.id}_{page.id}.png", qr_image.getvalue(), "image/png")
+            email = EmailMultiAlternatives(asunto, "", from_mail, to_mail)
+            email.attach_alternative(html_message, "text/html")
 
         # ✅ Send Email
         email.send()
@@ -392,14 +412,20 @@ def Register(request, pk):
 
 def validate_qr(request, page_id, user_id):
     """Validate QR Code when scanned"""
-    page = get_object_or_404(Page, id=page_id)
-    user = get_object_or_404(User, id=user_id)
+    try:
+        page = Page.objects.get(id=page_id)
+    except Page.DoesNotExist:
+        return JsonResponse({"status": "invalid", "message": "QR Code is not valid! (page not found)"})
 
-    # ✅ Use the correct related_name for the ManyToMany field
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"status": "invalid", "message": "QR Code is not valid! (user not found)"})
+
     if Subscription.objects.filter(user=user, pages=page).exists():
         return JsonResponse({"status": "valid", "message": "QR Code is valid!", "user": user.username})
 
-    return JsonResponse({"status": "invalid", "message": "QR Code is not valid!"})
+    return JsonResponse({"status": "invalid", "message": "QR Code is not valid! (not subscribed)"})
 
 def Unregister(request, pk):
     if request.user.is_authenticated:
@@ -417,8 +443,9 @@ def Unregister(request, pk):
     else:
         raise Http404("Usuario no está autenticado")
     return redirect(reverse_lazy("home") + "?remove")
+from django.db.models import Q, F
 
-def Asistencia(request, modalidad):
+def Asistencia(request, cowork):
     if request.user.is_authenticated:
         if request.user.groups.filter(name="BITAJON").exists() or request.user.is_staff:
             local_tz = pytz.timezone("America/Argentina/Buenos_Aires")
@@ -426,26 +453,39 @@ def Asistencia(request, modalidad):
             yesterday = today - timedelta(days=1)
             tomorrow = today + timedelta(days=1)
 
-            # ✅ Filter pages for only yesterday, today, and tomorrow
-            pages = Page.objects.filter(
-                activa=True,                
-                modalidad=modalidad,
-                fecha__in=[yesterday, today, tomorrow]  # ✅ Only include these dates
+            cowork = int(cowork)
+
+            if cowork == 1:  # COWORK
+                pages = Page.objects.filter(
+                    activa=True,
+                    cowork=cowork
+                ).filter(
+                    Q(fecha__in=[yesterday, today, tomorrow]) | Q(fecha__isnull=True)
+                )
+            else:  # ACTIVIDADES
+                pages = Page.objects.filter(
+                    activa=True,
+                    cowork=cowork,
+                    fecha__in=[yesterday, today, tomorrow]
+                )
+
+            unique_dates = (
+                pages.filter(fecha__isnull=False)
+                     .values_list("fecha", flat=True)
+                     .distinct()
+                     .order_by("fecha")
             )
-
-            # Get the unique dates of the pages and order them
-            unique_dates = pages.values_list("fecha", flat=True).distinct().order_by("fecha")
-
-            # Fetch pages for each unique date and annotate with the date itself
-            annotated_pages = pages.annotate(date=F("fecha"))
-
+            print("Total pages:", pages.count())
+            print("Sin fecha:", pages.filter(fecha__isnull=True).count())
+            for p in pages.filter(fecha__isnull=True):
+                print(" -", p.title, "| cowork:", p.cowork, "| activa:", p.activa)
             return render(
                 request,
                 "pages/asistencia.html",
                 {
-                    "pages": annotated_pages,
+                    "pages": pages,
                     "dia": today.weekday() + 1,
-                    "modalidad": modalidad,
+                    "cowork": cowork,
                     "unique_dates": unique_dates,
                 },
             )

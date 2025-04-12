@@ -64,6 +64,7 @@ class PageAdmin(admin.ModelAdmin):
         "secreta",
         "activa",
         "oculta",
+        "alerta",
         "horaDesde",
     )
     search_fields = (
@@ -103,6 +104,7 @@ class PageAdmin(admin.ModelAdmin):
         "fecha",
         "activa",
         "oculta",
+        "alerta",
         "horaDesde",
         "horaHasta",
         "flyer",

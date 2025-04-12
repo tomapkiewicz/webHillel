@@ -10,7 +10,7 @@
         <div class="card-body  mx-auto col-md-8"  >
           <h3  class="text-center font-weight-bold">ASISTENCIA</h3>
           <h3 class="text-center">
-            {% if modalidad  %}
+            {% if cowork  %}
               <a href="{% url 'pages:asistencia' 0 %}" class="text-center badge badge-pill badge-online text-white">COWORK</a> 
             {% else %}
               <a href="{% url 'pages:asistencia' 1 %}" class="text-center badge badge-pill badge-presencial text-white">ACTIVIDADES</a>
@@ -63,6 +63,36 @@
           
         {% endfor %}
         
+        {% for page in pages %}
+        {% if not page.fecha %}
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <a class="btn btn-dark btn-block" href="{% url 'pages:asistenciaDetail' page.id page.title|slugify %}">
+              <dl class="mb-0" style="white-space: normal;">
+                <dt class="mb-0 text-center">{{ page.title }}</dt>
+                <dd class="mb-0 text-center">
+                  <span class="text-left badge badge-pill badge-info">{{ page.Qasistentes }}/{{ page.Qanotados }}</span>
+                  {% if page.horaDesde %}
+                    De {{ page.horaDesde }}
+                    {% if page.horaHasta %}
+                      a {{ page.horaHasta }} HS.
+                    {% endif %}
+                  {% endif %}
+                  {% if page.Qanotados >= page.cupo and page.cupo != 0 %}
+                    <span class="badge badge-pill badge-danger">AGOTADO</span>
+                  {% endif %}
+                  {% if page.nuevo %}
+                    <span class="badge badge-pill badge-warning">NUEVO!</span>
+                  {% endif %}
+                </dd>
+              </dl>
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+
+
         </div>
       </div>
     </div>

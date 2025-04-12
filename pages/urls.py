@@ -36,7 +36,7 @@ PagesPatterns = (
         path("delete/<int:pk>/", PageDelete.as_view(), name="delete"),
         path("register/<int:pk>/add", Register, name="register"),
         path("unregister/<int:pk>/remove", Unregister, name="unregister"),
-        path("asistencia/<int:modalidad>", Asistencia, name="asistencia"),
+        path("asistencia/<int:cowork>", Asistencia, name="asistencia"),
         path(
             "asistencia/<int:pk>/<slug:slug>/",
             AsistenciaDetail,

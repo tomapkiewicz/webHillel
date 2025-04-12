@@ -130,24 +130,32 @@
             $("#qr-reader").toggle();
             if ($("#qr-reader").is(":visible")) {
                 const html5QrCode = new Html5Qrcode("qr-reader");
+                scanning = false; // reset flag
                 html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
                     (decodedText) => {
+
+                        if (scanning) return; // prevent double scan
+                        scanning = true;
+
                         $("#qr-reader").hide();
                         let qrUrl = decodedText.startsWith("http") ? decodedText : `${window.location.origin}/${decodedText}`;
                         fetch(qrUrl, { credentials: "include" })
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === "valid") {  
-                              
+                                html5QrCode.stop();
                                 showQRAlert("success", `Asistencia confirmada para <b>${data.user}</b>!`);
+                    
                                 let userId = `${data.user.replace(/[^a-zA-Z0-9-_]/g, "")}`;
                                 let userBtn = document.querySelector(`button[data-slug="${userId}"]`);
-                                html5QrCode.stop();
+                             
                                 console.log("userid",userId);
-                                if (userBtn) toggleRegistro(userBtn, false);
+                             //   if (userBtn) toggleRegistro(userBtn, false);
+                                if (userBtn) userBtn.click();  // ✅ Simula clic y ejecuta toda la lógica
                             } else {
-                                showQRAlert("danger", "⚠ El usuario no está anotado.");
                                 html5QrCode.stop();
+                                showQRAlert("danger", "⚠ El usuario no está anotado.");
+                            
                             }
                             
                         })

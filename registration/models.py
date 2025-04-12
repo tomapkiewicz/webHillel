@@ -10,6 +10,7 @@ from django.db.models.signals import post_save
 from pages.models import Category, Subscription
 from location.models import Provincia
 from itertools import groupby
+from django.db.models import Q
 
 
 def custom_upload_to(instance, filename):
@@ -205,8 +206,8 @@ class Profile(models.Model):
         recurrent_pages = []
         non_recurrent_pages = []
 
-        # Separate recurrent and non-recurrent pages
-        for page in subscription.pages.filter(activa=True,fecha__gte=date.today()):
+        # ✅ Include pages with no date too
+        for page in subscription.pages.filter(activa=True).filter(Q(fecha__gte=date.today()) | Q(fecha__isnull=True)):
             if page.recurrent_page:
                 recurrent_pages.append(page)
             else:
@@ -221,8 +222,7 @@ class Profile(models.Model):
 
         # Combine recurrent and non-recurrent pages, sorted by fecha
         combined_pages = grouped_recurrent_pages + non_recurrent_pages
-        sorted_pages = sorted(combined_pages, key=lambda p: p.fecha or datetime.date.max)
-        
+        sorted_pages = sorted(combined_pages, key=lambda p: p.fecha or date.max)
 
         return sorted_pages
 
