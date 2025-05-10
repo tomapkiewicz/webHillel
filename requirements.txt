@@ -4,3 +4,9 @@ django-ckeditor==6.7.2
 python-dotenv==1.1.0
 Pillow==11.1.0
 qrcode==8.0
+
+# Módulos adicionales usados por el proyecto
+requests>=2.25.0
+pytz>=2020.1
+PyJWT>=2.8.0
+cryptography>=41.0.0
