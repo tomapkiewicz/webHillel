@@ -335,9 +335,19 @@ def Register(request, pk):
         from_mail = "Hillel Argentina <no_responder@domain.com>"
         textoExtraMail = page.textoExtraMail if page.textoExtraMail is not None else page.description
     
-        # 📨 Si NO hay preinscripción, generamos y enviamos QR
-        if not page.con_preinscripcion:
+        con_QR = not page.con_preinscripcion
+  
+        nombre = request.user.profile.nombre if request.user.profile.nombre is not None else request.user.username
+        cuerpo_default = f"Hola {nombre}! \n Te anotaste en {page.title} el día {page.fecha} a las {page.horaDesde}HS. \n\n"
+    
+        textoExtraMail += page.alerta if page.alerta is not None else "" 
+        qr_data = None
+
+        if con_QR:
         # ✅ Generate QR Code
+            host = request.get_host()
+            host = host if "127.0.0.1" in host else "https://" + host
+            qr_data = f"/pages/validate_qr/{page.id}/{request.user.id}"  # Relative URL
             host = request.get_host()
             host = host if "127.0.0.1" in host else "https://" + host
             qr_data = f"/pages/validate_qr/{page.id}/{request.user.id}"  # Relative URL
@@ -350,58 +360,22 @@ def Register(request, pk):
             # ✅ Store QR Code in Subscription Model
             subscription.qr_code.save(f"qr_{request.user.id}_{page.id}.png", qr_image_content)
 
-
-            textoExtraMail += page.alerta if page.alerta is not None else "" 
-            page.cuerpo_mail += page.alerta if page.alerta is not None else "" 
-
-            # ✅ Render email template
-            if page.con_mail_personalizado:
-                html_message = loader.render_to_string(
-                    "custom_mail_body.html",
-                    {
-                        "mail_body": page.cuerpo_mail,
-                        "qr_url": qr_data,  # Link for QR validation
-                        "qr_image_cid": "qr_code",  # Content ID for embedding
-                    },
-                )
-            else:
-                
-                html_message = loader.render_to_string(
-                    "mail_body.html",
-                    {
-                        "user_name": f"Hola {request.user.username}!",
-                        "description": textoExtraMail,
-                        "qr_url": qr_data,  # URL for validation
-                        "qr_image_cid": "qr_code",  # Content ID for embedding
-                    },
-                )
-
-            # ✅ Send Email with Embedded QR Code
-            email = EmailMultiAlternatives(asunto, "", from_mail, to_mail)
-            email.attach_alternative(html_message, "text/html")
-
-            # ✅ Attach QR as a downloadable file too
-            email.attach(f"qr_{request.user.id}_{page.id}.png", qr_image.getvalue(), "image/png")
-        else: #Sin QR
-            if page.con_mail_personalizado:
-                html_message = loader.render_to_string(
-                    "custom_mail_body_sin_qr.html",
-                    {
-                    "mail_body": page.cuerpo_mail,
-                    },
-                )
-            else:
-                html_message = loader.render_to_string(
-                "mail_body.html",
-                {
-                    "mail_body": page.cuerpo_mail,
-                    "user_name": f"Hola {request.user.username}!",
-                    "description": textoExtraMail,
-                },
-            )
-
-            email = EmailMultiAlternatives(asunto, "", from_mail, to_mail)
-            email.attach_alternative(html_message, "text/html")
+        html_message = loader.render_to_string(
+                        "mail_body.html",
+                        {
+                            "cuerpo_default": cuerpo_default,
+                            "texto_extra": textoExtraMail,
+                            "mail_body": page.cuerpo_mail,
+                            "qr_url": qr_data,  # Link for QR validation
+                            "personalizado": page.con_mail_personalizado,
+                        
+                        },  )
+        
+        email = EmailMultiAlternatives(asunto, "", from_mail, to_mail)
+        email.attach_alternative(html_message, "text/html")
+        # ✅ Attach QR as a downloadable file too
+        if con_QR:
+            email.attach(f"qr_{request.user.id}_{page.id}.png", qr_image.getvalue(), "image/png") 
 
         # ✅ Send Email
         email.send()
@@ -459,14 +433,14 @@ def Asistencia(request, cowork):
                 pages = Page.objects.filter(
                     activa=True,
                     cowork=cowork
-                ).filter(
-                    Q(fecha__in=[yesterday, today, tomorrow]) | Q(fecha__isnull=True)
-                )
+                )#.filter(
+                #    Q(fecha__in=[yesterday, today, tomorrow]) | Q(fecha__isnull=True)
+              #  )
             else:  # ACTIVIDADES
                 pages = Page.objects.filter(
                     activa=True,
                     cowork=cowork,
-                    fecha__in=[yesterday, today, tomorrow]
+                   # fecha__in=[yesterday, today, tomorrow]
                 )
 
             unique_dates = (

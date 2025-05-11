@@ -1,10 +1,33 @@
 <!DOCTYPE html>
-<html>
-    <head>
-    </head>
-    <body>
-        <h1>{{ user_name }}</h1>
-        <h2>{{ subject }}</h2>
-        {% comment %} <h3>{{ description|safe }}</h3> {% endcomment %}
-    </body>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"> 
+</head>
+<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; margin: 20px;">
+    <div style="max-width: 600px; margin: auto;">
+
+        {% if personalizado %}
+            {{ mail_body|safe }}
+        {% else %}
+            <p>{{ cuerpo_default|safe }}</p>
+        {% endif %}
+
+        <div style="margin-top: 30px; text-align: center; line-height: 1.9;"></div>
+        {% if texto_extra %}
+            <p>
+                ¡Importante!
+                Acordate que: 
+                {{ texto_extra|safe }}
+            </p>
+        {% endif %}
+         </div>
+
+        {% if qr_url %}
+        <div style="margin-top: 30px; text-align: center;">
+            <p>Podés mostrar el código QR adjunto en la entrada:</p>
+        </div>
+        {% endif %}
+   
+    </div>
+</body>
 </html>

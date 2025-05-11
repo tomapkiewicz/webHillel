@@ -52,3 +52,4 @@ registration/migrations/*
 db.sqlite3
 media/*
 .prettierignore
+.env
