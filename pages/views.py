@@ -36,6 +36,71 @@ from itertools import groupby
 from operator import attrgetter
 import re  
 
+def generar_qr_para_subscription(subscription, page, user, host):
+    qr_data = f"/pages/validate_qr/{page.id}/{user.id}"
+    if "127.0.0.1" not in host:
+        qr_data = f"https://{host}{qr_data}"
+    qr = qrcode.make(qr_data)
+    qr_image = BytesIO()
+    qr.save(qr_image, format="PNG")
+    qr_image_content = ContentFile(qr_image.getvalue(), name=f"qr_{user.id}_{page.id}.png")
+    subscription.qr_code.save(f"qr_{user.id}_{page.id}.png", qr_image_content)
+    return qr_data, qr_image
+
+
+def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=None):
+     
+    html_message = loader.render_to_string("mail_body.html", {
+                "texto_extra": page.textoExtraMail,
+                "texto_alerta": page.alerta,
+                "mail_body": cuerpo,
+                "qr_url": qr_data,  # Link for QR validation
+                "personalizado": page.con_mail_personalizado,
+    })
+
+    email = EmailMultiAlternatives(asunto, "", "Hillel Argentina <no_responder@domain.com>", [user.email])
+    email.attach_alternative(html_message, "text/html")
+    email.attach(f"qr_{user.id}_{page.id}.png", qr_image.getvalue(), "image/png")
+    email.send()
+
+
+@staff_member_required
+def unconfirm_subscription(request, page_id, user_id):
+    page = get_object_or_404(Page, pk=page_id)
+    user = get_object_or_404(User, pk=user_id)
+    subscription = Subscription.objects.find_or_create(user)
+
+    if page in subscription.pages_confirmadas.all():
+        subscription.pages_confirmadas.remove(page)
+
+    return redirect('pages:page', pk=page.id)
+
+def ConfirmSubscription(request, page_id, user_id):
+    if not request.user.is_staff:
+        raise Http404("No autorizado")
+
+    page = get_object_or_404(Page, pk=page_id)
+    user = get_object_or_404(User, pk=user_id)
+    subscription = Subscription.objects.find_or_create(user)
+    subscription.pages_confirmadas.add(page)
+
+    qr_data, qr_image = generar_qr_para_subscription(subscription, page, user, request.get_host())
+    nombre = request.user.profile.nombre if request.user.profile.nombre is not None else request.user.username
+    formatted_fecha = date_format(page.fecha, r"l d \d\e F")
+    cuerpo = f"Hola {nombre}, Te confirmamos la inscripción a {page.title} "
+    cuerpo += f"el {page.fecha} a las {page.horaDesde}HS." if page.fecha is not None else ""
+
+    enviar_mail_confirmacion(
+        user=user,
+        page=page,
+        qr_data=qr_data,
+        qr_image=qr_image,
+        cuerpo=cuerpo,
+        asunto=f"Confirmamos tu cupo en {page.title} {'Online' if page.modalidad else 'Presencial'} 🙌"
+    )
+
+    return redirect(reverse("pages:page", args=[page.id]))
+
 def CuposAgotados(request, pk):
     page = get_object_or_404(Page, pk=pk)
     usu = (
@@ -44,7 +109,6 @@ def CuposAgotados(request, pk):
         else request.user
     )
 
-    #formatted_fecha = date_format(page.fecha, "l d \d\e F")
     formatted_fecha = date_format(page.fecha, r"l d \d\e F")
 
     asunto = "Cupos agotados - " + page.title
@@ -289,100 +353,57 @@ class PageDelete(DeleteView):
     success_url = reverse_lazy("pages:pages")
 
 
-
 def Register(request, pk):
-    if request.user.is_authenticated:
-        page = get_object_or_404(Page, pk=pk)
-        cuestionario = Cuestionario.objects.get(page=page)
+    if not request.user.is_authenticated:
+        raise Http404("Usuario no está autenticado")
 
-        # Store user responses
-        if cuestionario is not None:
-            cuestionarioRespuesta, _ = CuestionarioRespuesta.objects.get_or_create(user=request.user, page=page)
+    page = get_object_or_404(Page, pk=pk)
+    cuestionario = Cuestionario.objects.get(page=page)
 
-        for i in range(1, 21):  
+    # Guardar respuestas
+    if cuestionario:
+        cuestionarioRespuesta, _ = CuestionarioRespuesta.objects.get_or_create(user=request.user, page=page)
+        for i in range(1, 21):
             respuesta_key = f"respuesta{i}"
-            if request.POST.get(respuesta_key, None) is not None:
+            if request.POST.get(respuesta_key):
                 setattr(cuestionarioRespuesta, f"pregunta{i}", getattr(cuestionario, f"pregunta{i}"))
                 setattr(cuestionarioRespuesta, f"respuesta{i}", request.POST[respuesta_key])
-
         cuestionarioRespuesta.save()
 
-        # Validate secret key if required
-        if page.secreta and request.POST.get("password") != page.clave:
-            return redirect(reverse_lazy("pages:page", args=[page.id]) + "?claveincorrecta")
+    if page.secreta and request.POST.get("password") != page.clave:
+        return redirect(reverse_lazy("pages:page", args=[page.id]) + "?claveincorrecta")
 
-        # Ensure there are available spots
-        if page.Qanotados >= page.cupo and page.cupo != 0:
-            return redirect(reverse_lazy("pages:pages") + "?agotado")
+    if page.Qanotados >= page.cupo and page.cupo != 0:
+        return redirect(reverse_lazy("pages:pages") + "?agotado")
 
-        # Ensure user profile is complete
-        if not request.user.profile.validado:
-            return redirect(reverse_lazy("profile", args=[page.id]) + "?completar=si&pk=" + str(pk))
+    if not request.user.profile.validado:
+        return redirect(reverse_lazy("profile", args=[page.id]) + "?completar=si&pk=" + str(pk))
 
-        # ✅ Create or update Subscription
-        subscription, _ = Subscription.objects.get_or_create(user=request.user)
-        new_pages = page.recurrent_page.pages.all() if page.recurrent_page else [page]
-        subscription.pages.add(*new_pages)
+    subscription, _ = Subscription.objects.get_or_create(user=request.user)
+    pages_to_add = page.recurrent_page.pages.all() if page.recurrent_page else [page]
+    subscription.pages.add(*pages_to_add)
 
-        # ✅ Email Content
-        modalidad = " Online" if page.modalidad else " Presencial"
-        aux_text = "anotaste" if page.con_preinscripcion else "esperamos"
+    con_qr = not page.con_preinscripcion
+    if con_qr:
+        qr_data, qr_image = generar_qr_para_subscription(subscription, page, request.user, request.get_host())
+    else:
+        qr_data, qr_image = None, None
 
-        asunto = f"Te {aux_text} en {page.title}{modalidad}!"
-        asunto = page.asunto_mail if page.con_mail_personalizado else asunto
+    nombre = request.user.profile.nombre if request.user.profile.nombre is not None else request.user.username
+    cuerpo_default = f"Hola {nombre}! \n Te anotaste en {page.title} el día {page.fecha} a las {page.horaDesde}HS. \n\n"
+    cuerpo = page.cuerpo_mail if page.con_mail_personalizado else cuerpo_default
+    asunto = page.asunto_mail if page.con_mail_personalizado else f"Te {'anotaste' if page.con_preinscripcion else 'esperamos'} en {page.title} {'Online' if page.modalidad else 'Presencial'}!"
+    enviar_mail_confirmacion(
+        cuerpo=cuerpo,
+        user=request.user,
+        page=page,
+        qr_data=qr_data,
+        qr_image=qr_image,
+        personalizado=page.con_mail_personalizado,
+        asunto=asunto
+    )
 
-        to_mail = [request.user.email]
-        from_mail = "Hillel Argentina <no_responder@domain.com>"
-        textoExtraMail = page.textoExtraMail if page.textoExtraMail is not None else page.description
-    
-        con_QR = not page.con_preinscripcion
-  
-        nombre = request.user.profile.nombre if request.user.profile.nombre is not None else request.user.username
-        cuerpo_default = f"Hola {nombre}! \n Te anotaste en {page.title} el día {page.fecha} a las {page.horaDesde}HS. \n\n"
-    
-        textoExtraMail += page.alerta if page.alerta is not None else "" 
-        qr_data = None
-
-        if con_QR:
-        # ✅ Generate QR Code
-            host = request.get_host()
-            host = host if "127.0.0.1" in host else "https://" + host
-            qr_data = f"/pages/validate_qr/{page.id}/{request.user.id}"  # Relative URL
-            host = request.get_host()
-            host = host if "127.0.0.1" in host else "https://" + host
-            qr_data = f"/pages/validate_qr/{page.id}/{request.user.id}"  # Relative URL
-
-            qr = qrcode.make(qr_data)
-            qr_image = BytesIO()
-            qr.save(qr_image, format="PNG")
-            qr_image_content = ContentFile(qr_image.getvalue(), name=f"qr_{request.user.id}_{page.id}.png")
-
-            # ✅ Store QR Code in Subscription Model
-            subscription.qr_code.save(f"qr_{request.user.id}_{page.id}.png", qr_image_content)
-
-        html_message = loader.render_to_string(
-                        "mail_body.html",
-                        {
-                            "cuerpo_default": cuerpo_default,
-                            "texto_extra": textoExtraMail,
-                            "mail_body": page.cuerpo_mail,
-                            "qr_url": qr_data,  # Link for QR validation
-                            "personalizado": page.con_mail_personalizado,
-                        
-                        },  )
-        
-        email = EmailMultiAlternatives(asunto, "", from_mail, to_mail)
-        email.attach_alternative(html_message, "text/html")
-        # ✅ Attach QR as a downloadable file too
-        if con_QR:
-            email.attach(f"qr_{request.user.id}_{page.id}.png", qr_image.getvalue(), "image/png") 
-
-        # ✅ Send Email
-        email.send()
-
-        return redirect(reverse_lazy("home") + "?ok")
-
-    raise Http404("Usuario no está autenticado")
+    return redirect(reverse_lazy("home") + "?ok")
 
 def validate_qr(request, page_id, user_id):
     """Validate QR Code when scanned"""

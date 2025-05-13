@@ -43,10 +43,11 @@ class SubscriptionManager(models.Manager):
 
 class Subscription(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-    #pages = models.ManyToManyField("Page", related_name="page_subscriptions")
     pages = models.ManyToManyField("Page", related_name="subscripciones")
-    qr_code = models.ImageField(upload_to="qr_codes/", blank=True, null=True)
+    pages_confirmadas = models.ManyToManyField("Page", related_name="subscripciones_confirmadas") 
 
+    qr_code = models.ImageField(upload_to="qr_codes/", blank=True, null=True)
+   
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación", blank=True, null=True)
     updated = models.DateTimeField(auto_now=True, verbose_name="Fecha de edición", blank=True, null=True)
 

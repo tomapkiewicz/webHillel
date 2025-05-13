@@ -7,6 +7,8 @@ from .views import (
     PageDelete,
     Register,
     Unregister,
+    ConfirmSubscription,
+    unconfirm_subscription,
     Asistencia,
     AsistenciaDetail,
     AsistenciaAdd,
@@ -22,7 +24,7 @@ from .views import (
     DescargarCuestionarios,
     DescargarCuestionariosRespuestas,
     Onward,
-    validate_qr,  # ✅ Added QR validation view
+    validate_qr,  
 )
 
 PagesPatterns = (
@@ -34,6 +36,8 @@ PagesPatterns = (
         path("create/", PageCreate.as_view(), name="create"),
         path("update/<int:pk>/", PageUpdate.as_view(), name="update"),
         path("delete/<int:pk>/", PageDelete.as_view(), name="delete"),
+        path("confirm_subscription/<int:page_id>/<int:user_id>/", ConfirmSubscription, name="confirm_subscription"),
+        path("unconfirm_subscription/<int:page_id>/<int:user_id>/", unconfirm_subscription, name="unconfirm_subscription"),
         path("register/<int:pk>/add", Register, name="register"),
         path("unregister/<int:pk>/remove", Unregister, name="unregister"),
         path("asistencia/<int:cowork>", Asistencia, name="asistencia"),

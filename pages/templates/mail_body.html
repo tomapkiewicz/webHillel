@@ -6,18 +6,22 @@
 <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; margin: 20px;">
     <div style="max-width: 600px; margin: auto;">
 
-        {% if personalizado %}
-            {{ mail_body|safe }}
-        {% else %}
-            <p>{{ cuerpo_default|safe }}</p>
-        {% endif %}
+        {{ mail_body|safe }}
 
         <div style="margin-top: 30px; text-align: center; line-height: 1.9;"></div>
         {% if texto_extra %}
+            <p> 
+                {{ texto_extra|safe }}
+            </p>
+        {% endif %}
+         </div>
+
+                 <div style="margin-top: 30px; text-align: center; line-height: 1.9;"></div>
+        {% if texto_alerta %}
             <p>
                 ¡Importante!
                 Acordate que: 
-                {{ texto_extra|safe }}
+                {{ texto_alerta|safe }}
             </p>
         {% endif %}
          </div>
