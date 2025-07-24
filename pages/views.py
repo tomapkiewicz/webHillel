@@ -36,6 +36,38 @@ from itertools import groupby
 from operator import attrgetter
 import re  
 
+@staff_member_required
+def enviar_mails_confirmados(request, page_id):
+    page = get_object_or_404(Page, pk=page_id)
+
+    # Solo los que fueron confirmados
+    confirmados = Subscription.objects.find_page(page).filter(pages_confirmadas=page)
+
+    enviados = 0
+    for subs in confirmados:
+        user = subs.user
+        nombre = user.profile.nombre or user.username
+        cuerpo_default = f"Hola {nombre}! Confirmamos tu inscripción a {page.title} el día {page.fecha} a las {page.horaDesde}HS."
+        cuerpo = page.cuerpo_mail if page.con_mail_personalizado else cuerpo_default
+        asunto = page.asunto_mail if page.con_mail_personalizado else f"Confirmación: {page.title}"
+
+        qr_data, qr_image = generar_qr_para_subscription(subs, page, user, request.get_host())
+
+        enviar_mail_confirmacion(
+            user=user,
+            page=page,
+            qr_data=qr_data,
+            qr_image=qr_image,
+            asunto=asunto,
+            cuerpo=cuerpo
+        )
+        enviados += 1
+
+    from django.contrib import messages
+    messages.success(request, f"Se enviaron {enviados} mails a personas confirmadas.")
+    return redirect("pages:page", pk=page.id)
+
+
 def generar_qr_para_subscription(subscription, page, user, host):
     qr_data = f"/pages/validate_qr/{page.id}/{user.id}"
     if "127.0.0.1" not in host:
@@ -60,7 +92,8 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
 
     email = EmailMultiAlternatives(asunto, "", "Hillel Argentina <no_responder@domain.com>", [user.email])
     email.attach_alternative(html_message, "text/html")
-    email.attach(f"qr_{user.id}_{page.id}.png", qr_image.getvalue(), "image/png")
+    if qr_image:
+        email.attach(f"qr_{user.id}_{page.id}.png", qr_image.getvalue(), "image/png")
     email.send()
 
 
@@ -399,8 +432,7 @@ def Register(request, pk):
         page=page,
         qr_data=qr_data,
         qr_image=qr_image,
-        personalizado=page.con_mail_personalizado,
-        asunto=asunto
+        asunto=asunto  
     )
 
     return redirect(reverse_lazy("home") + "?ok")

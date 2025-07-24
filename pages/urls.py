@@ -24,7 +24,8 @@ from .views import (
     DescargarCuestionarios,
     DescargarCuestionariosRespuestas,
     Onward,
-    validate_qr,  
+    validate_qr,
+    enviar_mails_confirmados,
 )
 
 PagesPatterns = (
@@ -88,6 +89,9 @@ PagesPatterns = (
 
         # ✅ QR Validation Endpoint
         path("validate_qr/<int:page_id>/<int:user_id>/", validate_qr, name="validate_qr"),
+
+path("enviar_mails_confirmados/<int:page_id>/", enviar_mails_confirmados, name="enviar_mails_confirmados"),
+
     ],
     "pages",
 )

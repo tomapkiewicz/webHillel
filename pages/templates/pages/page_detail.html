@@ -76,6 +76,14 @@
                 <a class="" href="{% url 'pages:update' page.id %}">Editar</a>   
             {% if page.Qanotados > 0 %}
             
+
+<form method="post" action="{% url 'pages:enviar_mails_confirmados' page.id %}" onsubmit="return confirm('¿Enviar mails a confirmados?');">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-info mt-3">
+    📧 Enviar mails a confirmados
+  </button>
+</form>
+
             <div class="card mx-auto border-0" style="max-width: 600px">
               <h5 class="card-title mx-auto mt-4">Anotados</h5>
               <div class="card-body">
@@ -135,8 +143,8 @@
                                     </button>
                                   </form>
                                 {% else %}
-                                  <form method="post" action="{% url 'pages:confirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Confirmar inscripción?');">
-                                    {% csrf_token %}
+                                 <form method="post" action="{% url 'pages:confirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Confirmar la inscripción de {{ subs.user.profile.nombre }} {{ subs.user.profile.apellido }}?');">
+                                  {% csrf_token %}
                                     <button type="submit" class="btn btn-outline-success btn-block font-weight-bold">
                                       Confirmar inscripción
                                     </button>
