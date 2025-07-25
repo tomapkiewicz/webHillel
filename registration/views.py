@@ -22,7 +22,17 @@ from .backends import EmailVerifiedBackend
 
 User = get_user_model()
 
+from django.contrib.auth.views import PasswordResetView
 
+class CustomPasswordResetView(PasswordResetView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['domain'] = 'www.hillelargentina.org.ar'
+        context['protocol'] = 'https'
+        print("👉 CustomPasswordResetView ejecutada correctamente")
+        return context
+    
+    
 class CustomLoginView(LoginView):
     template_name = "registration/login.html"
     authentication_backend = EmailVerifiedBackend
@@ -132,3 +142,4 @@ class EmailUpdate(UpdateView):
             attrs={"class": "form-control mb-2", "placeholder": "Email"}
         )
         return form
+

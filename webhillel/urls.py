@@ -18,6 +18,7 @@ from django.urls import path, include
 from pages.urls import PagesPatterns
 from profiles.urls import ProfilesPatterns
 from django.conf import settings
+from registration.views import CustomPasswordResetView   
 
 urlpatterns = [
     path("", include("core.urls")),
@@ -25,6 +26,11 @@ urlpatterns = [
     path("profiles/", include(ProfilesPatterns)),
     path("admin/", admin.site.urls),
     # paths de Auth
+
+
+    # 👉 Tu vista custom de reset
+    path("accounts/password_reset/", CustomPasswordResetView.as_view(), name="password_reset"),
+ 
 
     path("accounts/", include("django.contrib.auth.urls")),  # ✅ Re-add this
     path("accounts/", include("allauth.urls")),  # ✅ Keep allauth
