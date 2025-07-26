@@ -117,42 +117,55 @@
                               {{ UserSubscripcion.user.profile.edad }}
                           </p>
 
-                          {% if UserSubscripcion.user.profile.whatsapp %}
+                          <!-- {% if UserSubscripcion.user.profile.whatsapp %}
                           <p class="col-2">
                               <a href="https://wa.me/+549{{ UserSubscripcion.user.profile.whatsapp }}" class="text-center btn btn-success btn-sm mt-0">
                                   <i class="fab fa-whatsapp fa-2x"></i>
                               </a>
                           </p>
-                          {% endif %}
+                          {% endif %} -->
 
-                          <p class="col-4">
-                              <a class="btn btn-dark" href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id %}">
-                                  Editar
-                              </a>
-                          </p>
+       <div class="col-12 mb-3">
+  <div class="d-flex flex-row align-items-center gap-2 flex-wrap">
 
-                         
-                          {% if page.con_preinscripcion %}
-                            <p class="col-12 mt-2">
-                              {% with subs=UserSubscripcion %}
-                                {% if subs.pages_confirmadas.all|contains:page %}
-                                  <form method="post" action="{% url 'pages:unconfirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Dar de baja la confirmación?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger btn-block font-weight-bold">
-                                      Bajar suscripción
-                                    </button>
-                                  </form>
-                                {% else %}
-                                 <form method="post" action="{% url 'pages:confirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Confirmar la inscripción de {{ subs.user.profile.nombre }} {{ subs.user.profile.apellido }}?');">
-                                  {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-success btn-block font-weight-bold">
-                                      Confirmar inscripción
-                                    </button>
-                                  </form>
-                                {% endif %}
-                              {% endwith %}
-                            </p>
-                          {% endif %}
+    <!-- Botón Editar -->
+    <a class="btn btn-dark mr-2" href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id %}">
+      Editar
+    </a>
+
+    <!-- Botón Confirmar o Bajar -->
+    {% if page.con_preinscripcion %}
+      {% with subs=UserSubscripcion %}
+        {% if subs.pages_confirmadas.all|contains:page %}
+          <form method="post" action="{% url 'pages:unconfirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Dar de baja la confirmación de {{ subs.user.profile.nombre }} {{ subs.user.profile.apellido }}?');"class="mr-2 mb-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger font-weight-bold">
+              Bajar suscripción
+            </button>
+          </form>
+        {% else %}
+          <form method="post" action="{% url 'pages:confirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Confirmar la inscripción de {{ subs.user.profile.nombre }} {{ subs.user.profile.apellido }}?');" class="mr-2 mb-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-success font-weight-bold">
+              Confirmar inscripción
+            </button>
+          </form>
+        {% endif %}
+      {% endwith %}
+    {% endif %}
+
+    <!-- Botón WhatsApp -->
+{% if UserSubscripcion.user.profile.whatsapp %}
+  <a href="https://wa.me/+549{{ UserSubscripcion.user.profile.whatsapp }}"
+     class="btn btn-success d-flex align-items-center justify-content-center"
+     style="width: 42px; height: 38px;"
+     title="WhatsApp" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+{% endif %}
+
+  </div>
+</div>
 
 
                           {% if UserSubscripcion.user.profile.perfil_ok is not none %}

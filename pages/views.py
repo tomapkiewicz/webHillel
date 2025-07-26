@@ -117,20 +117,6 @@ def ConfirmSubscription(request, page_id, user_id):
     subscription = Subscription.objects.find_or_create(user)
     subscription.pages_confirmadas.add(page)
 
-    qr_data, qr_image = generar_qr_para_subscription(subscription, page, user, request.get_host())
-    nombre = request.user.profile.nombre if request.user.profile.nombre is not None else request.user.username
-    formatted_fecha = date_format(page.fecha, r"l d \d\e F")
-    cuerpo = f"Hola {nombre}, Te confirmamos la inscripción a {page.title} "
-    cuerpo += f"el {page.fecha} a las {page.horaDesde}HS." if page.fecha is not None else ""
-
-    enviar_mail_confirmacion(
-        user=user,
-        page=page,
-        qr_data=qr_data,
-        qr_image=qr_image,
-        cuerpo=cuerpo,
-        asunto=f"Confirmamos tu cupo en {page.title} {'Online' if page.modalidad else 'Presencial'} 🙌"
-    )
 
     return redirect(reverse("pages:page", args=[page.id]))
 
