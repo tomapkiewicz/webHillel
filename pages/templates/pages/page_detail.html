@@ -73,9 +73,9 @@
 
 
             {% if request.user.is_staff %}
-                <a class="" href="{% url 'pages:update' page.id %}">Editar</a>   
-            {% if page.Qanotados > 0 %}
-            
+              <a class="" href="{% url 'pages:update' page.id %}">Editar</a>   
+          {% if page.Qanotados > 0 %}
+          
 
 <form method="post" action="{% url 'pages:enviar_mails_confirmados' page.id %}" onsubmit="return confirm('¿Enviar mails a confirmados?');">
   {% csrf_token %}
@@ -140,7 +140,7 @@
           <form method="post" action="{% url 'pages:unconfirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Dar de baja la confirmación de {{ subs.user.profile.nombre }} {{ subs.user.profile.apellido }}?');"class="mr-2 mb-0">
             {% csrf_token %}
             <button type="submit" class="btn btn-outline-danger font-weight-bold">
-              Bajar suscripción
+              Bajar subcripción
             </button>
           </form>
         {% else %}
@@ -188,51 +188,77 @@
                   </div>
             
                   <div class="tab-pane fade" id="orden-alfabetico">
-                    {% for UserSubscripcion in page.anotados|dictsort:'user.profile.apellido' %}
-                    <div class="row mt-3">
-        
-                      <p class="col-6 ">
-            
-                     <b><a href="{% url 'profiles:detail' UserSubscripcion.user.username  %}">
-                      {{UserSubscripcion.user.profile.apellido|truncatechars:"16"}}
-                      {{UserSubscripcion.user.profile.nombre|truncatechars:"16"}}
-                      
-                    </a></b>
-                    {{UserSubscripcion.user.profile.edad}}
-                     </p>
-            
-                        {% if UserSubscripcion.user.profile.whatsapp  %}
-                          <p class="col-2 ">
-                            <a href="https://wa.me/+549{{UserSubscripcion.user.profile.whatsapp}}" 
-                            class="text-center btn btn-success btn-sm  mt-0" >
-                            <i class="fab fa-whatsapp fa-2x"></i>                     
-                            </a>
-                          </p> 
-                        {% endif %}
-                
-                       <p class="col-2 ">      
-                        <a class="btn btn-dark " href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id  %}">
-                        Editar</a>
-                        </p>
-                        {% if UserSubscripcion.user.profile.perfil_ok is not none %}
-            
-                        <p class="col-md-12">
-                          <b>Perfil OK:</b>
-                            {{ UserSubscripcion.user.profile.perfil_ok }}
-                        </p>
-                    {% endif %}
-            
-                    {% if UserSubscripcion.user.profile.observaciones is not none %}
-                    <p class="col-md-12">
-                      <b>Observaciones:</b>
-                        {{ UserSubscripcion.user.profile.observaciones }}
-                    </p>
-                    {% endif %}
-                       
-            
-                  </div>
-                    {% endfor %}
-                  </div>
+  {% for UserSubscripcion in subscribers_ordenados %}
+    <div class="row mt-3">
+      <p class="col-6">
+        <b>
+          <a href="{% url 'profiles:detail' UserSubscripcion.user.username %}">
+            {{ UserSubscripcion.user.profile.apellido|truncatechars:"16" }}
+            {{ UserSubscripcion.user.profile.nombre|truncatechars:"16" }}
+            {% if UserSubscripcion.user.profile.fechaNacimiento|date:"m-d" == today_date %}
+              🎂
+            {% endif %}
+          </a>
+        </b>
+        {{ UserSubscripcion.user.profile.edad }}
+      </p>
+
+      <div class="col-12 mb-3">
+        <div class="d-flex flex-row align-items-center gap-2 flex-wrap">
+
+          <!-- Botón Editar -->
+          <a class="btn btn-dark mr-2" href="{% url 'admin:registration_profile_change' UserSubscripcion.user.profile.id %}">
+            Editar
+          </a>
+
+          <!-- Botón Confirmar o Bajar -->
+          {% if page.con_preinscripcion %}
+            {% with subs=UserSubscripcion %}
+              {% if subs.pages_confirmadas.all|contains:page %}
+                <form method="post" action="{% url 'pages:unconfirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Dar de baja la confirmación de {{ subs.user.profile.nombre }} {{ subs.user.profile.apellido }}?');" class="mr-2 mb-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger font-weight-bold">
+                    Bajar suscripción
+                  </button>
+                </form>
+              {% else %}
+                <form method="post" action="{% url 'pages:confirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Confirmar la inscripción de {{ subs.user.profile.nombre }} {{ subs.user.profile.apellido }}?');" class="mr-2 mb-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-success font-weight-bold">
+                    Confirmar inscripción
+                  </button>
+                </form>
+              {% endif %}
+            {% endwith %}
+          {% endif %}
+
+          <!-- Botón WhatsApp -->
+          {% if UserSubscripcion.user.profile.whatsapp %}
+            <a href="https://wa.me/+549{{ UserSubscripcion.user.profile.whatsapp }}"
+               class="btn btn-success d-flex align-items-center justify-content-center"
+               style="width: 42px; height: 38px;"
+               title="WhatsApp" target="_blank">
+              <i class="fab fa-whatsapp"></i>
+            </a>
+          {% endif %}
+
+        </div>
+      </div>
+
+      {% if UserSubscripcion.user.profile.perfil_ok is not none %}
+        <p class="col-md-12">
+          <b>Perfil OK:</b> {{ UserSubscripcion.user.profile.perfil_ok }}
+        </p>
+      {% endif %}
+
+      {% if UserSubscripcion.user.profile.observaciones is not none %}
+        <p class="col-md-12">
+          <b>Observaciones:</b> {{ UserSubscripcion.user.profile.observaciones }}
+        </p>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
                 </div>
               </div>
             </div>

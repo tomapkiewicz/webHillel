@@ -305,7 +305,16 @@ class PageDetail(DetailView):
             return context
         subscribers = Subscription.objects.find_page(self.object)
         overlaps = Subscription.objects.overlaps(self.request.user, self.object)
+        # Orden alfabético sin distinguir mayúsculas/minúsculas
+        subscribers_ordenados = sorted(
+            subscribers,
+            key=lambda sub: (
+                sub.user.profile.apellido.lower() if sub.user.profile.apellido else '',
+                sub.user.profile.nombre.lower() if sub.user.profile.nombre else ''
+            )
+        )
 
+        context["subscribers_ordenados"] = subscribers_ordenados
         context["subscribers"] = subscribers
         context["overlaps"] = overlaps
         if subscribers is not None:
