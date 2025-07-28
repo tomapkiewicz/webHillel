@@ -321,9 +321,25 @@ class PageDetail(DetailView):
         )
 
 
+        subscribers_raw = list(Subscription.objects.find_page(self.object))
+        subs_with_fecha = []
+
+        for sub in subscribers_raw:
+            #print(f"\n🔍 Evaluando usuario: {sub.user.username}")
+            respuesta = CuestionarioRespuesta.objects.filter(user=sub.user, page=self.object).first()
+            if respuesta and respuesta.updated:
+                fecha = respuesta.updated
+                #print(f"✅ Tiene respuesta: {respuesta}")
+            else:
+                fecha = datetime.min  # o podés usar None si querés excluirlos    
+            subs_with_fecha.append((fecha, sub))
+ 
+
+        subs_sorted = [sub for fecha, sub in sorted(subs_with_fecha, key=lambda x: x[0])]
+        context["subscribers"] = subs_sorted
 
         context["subscribers_ordenados"] = subscribers_ordenados
-        context["subscribers"] = subscribers
+
         context["overlaps"] = overlaps
         if subscribers is not None:
             context["usuarioAnotado"] = subscribers.filter(
