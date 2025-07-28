@@ -76,14 +76,15 @@
               <a class="" href="{% url 'pages:update' page.id %}">Editar</a>   
           {% if page.Qanotados > 0 %}
           
-
+   {% if page.con_preinscripcion %}
 <form method="post" action="{% url 'pages:enviar_mails_confirmados' page.id %}" onsubmit="return confirm('¿Enviar mails a confirmados?');">
   {% csrf_token %}
   <button type="submit" class="btn btn-info mt-3">
     📧 Enviar mails a confirmados
   </button>
 </form>
-
+ {% endif %}
+ 
             <div class="card mx-auto border-0" style="max-width: 600px">
               <h5 class="card-title mx-auto mt-4">Anotados</h5>
               <div class="card-body">
@@ -341,18 +342,18 @@
           {% csrf_token %}
 
           {% if cuestionario.pregunta1 %}
-            Pero contanos algo antes... 🤓 <br><br>
+            Pero contanos algo antes... 🤓 <br><br> 
           {% endif %}
 
-          {% for i in preguntas_range %}
-            {% with field="pregunta"|add:i|stringformat:"s" %}
-              {% if cuestionario|get:field %}
-                {{ cuestionario|get:field }}
-                <input type="text" name="respuesta{{ i }}" required
-                       id="id_respuesta{{ i }}" class="form-control mt-3 mb-3" placeholder="" />
-              {% endif %}
-            {% endwith %}
-          {% endfor %}
+      {% for i, pregunta in preguntas_dict.items %}
+  <div class="form-group">
+    <label for="id_respuesta{{ i }}">{{ pregunta }}</label>
+    <input type="text" name="respuesta{{ i }}" required
+           id="id_respuesta{{ i }}" class="form-control mt-2 mb-4" />
+    </div>
+  {% endfor %}
+     
+         
 
           {% if page.secreta %}
             <b>Este evento es privado 🔒</b><br><br>

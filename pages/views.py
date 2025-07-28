@@ -299,7 +299,13 @@ class PageDetail(DetailView):
         if cuestionario is not None:
             context["cuestionario"] = cuestionario
             context["preguntas_range"] = range(1, 21) 
-            print(context["cuestionario"])
+            print(cuestionario)
+
+            context["preguntas_dict"] = {
+            i: getattr(cuestionario, f"pregunta{i}")
+            for i in range(1, 21)
+            if getattr(cuestionario, f"pregunta{i}")
+        }
 
         if self.request.user.is_anonymous:
             return context
@@ -307,12 +313,14 @@ class PageDetail(DetailView):
         overlaps = Subscription.objects.overlaps(self.request.user, self.object)
         # Orden alfabético sin distinguir mayúsculas/minúsculas
         subscribers_ordenados = sorted(
-            subscribers,
+            subscribers or [],
             key=lambda sub: (
                 sub.user.profile.apellido.lower() if sub.user.profile.apellido else '',
                 sub.user.profile.nombre.lower() if sub.user.profile.nombre else ''
             )
         )
+
+
 
         context["subscribers_ordenados"] = subscribers_ordenados
         context["subscribers"] = subscribers
