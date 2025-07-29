@@ -12,7 +12,7 @@
     <!-- ✅ ALERTS DIV -->
     <div id="qr-alerts"></div>
 
-    <label hidden id="anotados">{{ page.Qanotados }}</label>
+    <label hidden id="anotados">{{ page.Qconfirmados }}</label>
     <label hidden id="asistencias">{{ page.Qasistentes }}</label>
 
     <div class="container">
@@ -28,11 +28,11 @@
 
                 <h2 class="card-title text-center">¿Quién vino hoy?</h2>
                 <h4 class="card-title text-center">{{ page.title }}
-                    <a id="info" class="badge badge-pill badge-info" href="#" data-toggle="tooltip" title="Asistentes/Anotados">{{ page.Qasistentes }}/{{ page.Qanotados }}</a>
+                    <a id="info" class="badge badge-pill badge-info" href="#" data-toggle="tooltip" title="Asistentes/Anotados">{{ page.Qasistentes }}/{{ page.Qconfirmados }}</a>
                 </h4>
                 <p class="card-text text-center"> {{ page.fecha|date:"l d \d\e F" }} De {{ page.horaDesde }} a {{ page.horaHasta }} Hs</p> 
                 
-                {% if subscribers.count > 0 %}
+            {% if confirmed_subscribers %}
 
                 <!-- ✅ SEARCH BOX FOR QUICK NAME FINDING -->
                 <input type="text" id="searchBox" class="form-control mb-3" placeholder="Buscar por nombre o apellido..." autofocus>
@@ -42,8 +42,11 @@
                 <div id="qr-reader" style="display:none; width: 100%;"></div>
 
                 <dl>  
+                  
+                        
                     <dt class="text-center mb-2">Marcar los presentes</dt>
-                    {% for subscription in subscribers|dictsort:"user.profile.apellido" %}           
+                    {% for subscription in confirmed_subscribers %}  
+                             
                         <dd> 
                             <h5>
                                 {% if subscription.user in page.asistentes %}

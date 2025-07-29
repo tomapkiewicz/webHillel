@@ -293,6 +293,12 @@ class Page(models.Model):
         return 0
 
     @property
+    def Qconfirmados(self):
+        if not self.con_preinscripcion:
+            return self.Qanotados
+        return Subscription.objects.filter(pages_confirmadas=self).count()
+
+    @property
     def anotados(self):
         subscripcion = Subscription.objects.find_page(self)
         if subscripcion is None:

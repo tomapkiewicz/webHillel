@@ -45,14 +45,12 @@ class PageForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-control"}),
             "textoExtraMail": forms.Textarea(attrs={"class": "form-control"}),
             "fecha": forms.DateInput(
-                attrs={
-                    "required": False,
-                    "class": "form-control",
-                    "placeholder": "Fecha",
-                    "type": "date",
-                    "format": "%d-%m-%Y",
-                }
-            ),
+        format="%Y-%m-%d",
+        attrs={
+            "type": "date",
+            "class": "form-control"
+        }
+    ),
             "horaDesde": forms.TimeInput(
                 format="%H:%M", attrs={"type": "time", "required": True}
             ),

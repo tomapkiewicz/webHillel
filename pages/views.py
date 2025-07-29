@@ -48,8 +48,8 @@ def enviar_mails_confirmados(request, page_id):
         user = subs.user
         nombre = user.profile.nombre or user.username
         cuerpo_default = f"Hola {nombre}! Confirmamos tu inscripción a {page.title} el día {page.fecha} a las {page.horaDesde}HS."
-        cuerpo = page.cuerpo_mail if page.con_mail_personalizado else cuerpo_default
-        asunto = page.asunto_mail if page.con_mail_personalizado else f"Confirmación: {page.title}"
+        cuerpo = cuerpo_default
+        asunto = f"Confirmación: {page.title}"
 
         qr_data, qr_image = generar_qr_para_subscription(subs, page, user, request.get_host())
 
@@ -335,11 +335,37 @@ class PageDetail(DetailView):
             subs_with_fecha.append((fecha, sub))
  
 
+        # Confirmados (filtrados si la actividad es con preinscripción)
+        if self.object.con_preinscripcion:
+            confirmed_subscribers = [
+                s for s in subscribers
+                if self.object in s.pages_confirmadas.all()
+            ]
+        else:
+            # Si no es con preinscripción, se consideran todos confirmados
+            confirmed_subscribers = list(subscribers)
+
+        # Ordenar alfabéticamente por apellido y nombre (case-insensitive, con manejo de nulos)
+        confirmed_sorted = sorted(
+            confirmed_subscribers,
+            key=lambda s: (
+                (s.user.profile.apellido or "").lower(),
+                (s.user.profile.nombre or "").lower()
+            )
+        )
+
+        # Cargar al context
+        context["confirmed_subscribers"] = confirmed_sorted  # los visibles para asistencia
+
         subs_sorted = [sub for fecha, sub in sorted(subs_with_fecha, key=lambda x: x[0])]
         context["subscribers"] = subs_sorted
 
         context["subscribers_ordenados"] = subscribers_ordenados
 
+        print("🧾 Confirmed subscribers:")
+        for sub in confirmed_sorted:
+            print(f"✔️ {sub.user.username} ({sub.user.profile.apellido}, {sub.user.profile.nombre})")
+            
         context["overlaps"] = overlaps
         if subscribers is not None:
             context["usuarioAnotado"] = subscribers.filter(
@@ -425,7 +451,7 @@ def Register(request, pk):
     if page.secreta and request.POST.get("password") != page.clave:
         return redirect(reverse_lazy("pages:page", args=[page.id]) + "?claveincorrecta")
 
-    if page.Qanotados >= page.cupo and page.cupo != 0:
+    if page.Qconfirmados >= page.cupo and page.cupo != 0:
         return redirect(reverse_lazy("pages:pages") + "?agotado")
 
     if not request.user.profile.validado:
@@ -541,15 +567,48 @@ def Asistencia(request, cowork):
     raise Http404("Usuario no está autenticado")
 
 def AsistenciaDetail(request, pk, slug):
-    if request.user.is_authenticated:
-        page = get_object_or_404(Page, pk=pk)
-        subscribers = Subscription.objects.find_page(page)
-        return render(
-            request,
-            "pages/asistencia_detail.html",
-            {"page": page, "subscribers": subscribers},
+    if not request.user.is_authenticated:
+        raise Http404("Usuario no está autenticado")
+
+    page = get_object_or_404(Page, pk=pk)
+    subscribers = Subscription.objects.filter(pages=page)
+
+    print(f"\n🔎 AsistenciaDetail: Page = {page.title}")
+    print(f"📦 Total de suscripciones que contienen esta página: {subscribers.count()}")
+
+    if page.con_preinscripcion:
+        print("📋 La actividad requiere preinscripción. Buscando confirmados...")
+        confirmed_subscribers = []
+        for s in subscribers:
+            if page in s.pages_confirmadas.all():
+                print(f"✅ Confirmado: {s.user.username}")
+                confirmed_subscribers.append(s)
+            else:
+                print(f"🚫 NO confirmado: {s.user.username}")
+    else:
+        print("🔓 La actividad no requiere preinscripción. Todos los suscriptores son válidos.")
+        confirmed_subscribers = list(subscribers)
+
+    confirmed_sorted = sorted(
+        confirmed_subscribers,
+        key=lambda s: (
+            (s.user.profile.apellido or "").lower(),
+            (s.user.profile.nombre or "").lower()
         )
-    raise Http404("Usuario no está autenticado")
+    )
+
+    print(f"🧾 Total confirmados que se mostrarán: {len(confirmed_sorted)}\n")
+
+    return render(
+        request,
+        "pages/asistencia_detail.html",
+        {
+            "page": page,
+            "subscribers": subscribers,
+            "confirmed_subscribers": confirmed_sorted,
+        },
+    )
+
 
 
 def AsistenciaAdd(request, pk):
@@ -715,7 +774,7 @@ def DescargarHistoricoAsistenciasALLItem(request):
                 h.page.titleSTR,
                 h.page.fecha,
                 h.page.horaDesde,
-                h.Qanotados,
+                h.Qconfirmados,
                 h.Qasistentes,
             ]
         )
@@ -743,7 +802,7 @@ def DescargarHistoricoAsistencias(request, pk):
 # Function to export activities
 def DescargarActividades(request):
     headers = ["Titulo", "Fecha", "Hora Desde", "Hora Hasta", "Cupo", "Modalidad", "Nuevo", "Activa","Oculta", "Qanotados", "Categorias", "Responsable", "Colaborador", "Secreta", "Clave"]
-    rows = [[p.titleSTR, p.fecha, p.horaDesde, p.horaHasta, p.cupo, p.modalidadSTR, p.nuevo, p.activa,p.oculta, p.Qanotados, p.categoriesSTR, p.responsable, p.colaborador, p.secreta, p.clave] for p in Page.objects.all()]
+    rows = [[p.titleSTR, p.fecha, p.horaDesde, p.horaHasta, p.cupo, p.modalidadSTR, p.nuevo, p.activa,p.oculta, p.Qconfirmados, p.categoriesSTR, p.responsable, p.colaborador, p.secreta, p.clave] for p in Page.objects.all()]
     return generate_csv_response("actividades", headers, rows)
 
 # Function to export user profiles

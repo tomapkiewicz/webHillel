@@ -69,6 +69,7 @@ else:
     SITE_ID = 5
 
 
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {

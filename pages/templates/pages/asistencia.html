@@ -36,7 +36,7 @@
                   </dt>
                   <dd class=" mb-0 text-center">
                 
-                      <span class="text-left badge badge-pill badge-info">{{page.Qasistentes}}/{{page.Qanotados}}</span>
+                      <span class="text-left badge badge-pill badge-info">{{page.Qasistentes}}/{{page.Qconfirmados}}</span>
                    
                     De {{page.horaDesde}}
                     {% if page.horaHasta > 0 %}
@@ -44,7 +44,7 @@
                     {% endif %}
                     HS.
 
-                  {% if page.Qanotados >= page.cupo and page.cupo != 0 %}
+                  {% if page.Qconfirmados >= page.cupo and page.cupo != 0 %}
                     <span class="badge badge-pill badge-danger">AGOTADO</span>
                   {% endif %}
 
@@ -71,14 +71,14 @@
               <dl class="mb-0" style="white-space: normal;">
                 <dt class="mb-0 text-center">{{ page.title }}</dt>
                 <dd class="mb-0 text-center">
-                  <span class="text-left badge badge-pill badge-info">{{ page.Qasistentes }}/{{ page.Qanotados }}</span>
+                  <span class="text-left badge badge-pill badge-info">{{ page.Qasistentes }}/{{ page.Qconfirmados }}</span>
                   {% if page.horaDesde %}
                     De {{ page.horaDesde }}
                     {% if page.horaHasta %}
                       a {{ page.horaHasta }} HS.
                     {% endif %}
                   {% endif %}
-                  {% if page.Qanotados >= page.cupo and page.cupo != 0 %}
+                  {% if page.Qconfirmados >= page.cupo and page.cupo != 0 %}
                     <span class="badge badge-pill badge-danger">AGOTADO</span>
                   {% endif %}
                   {% if page.nuevo %}
