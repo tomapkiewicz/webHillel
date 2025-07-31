@@ -130,14 +130,14 @@
     {% if page.con_preinscripcion %}
       {% with subs=UserSubscripcion %}
         {% if subs.pages_confirmadas.all|contains:page %}
-<form method="post" action="{% url 'pages:unconfirm_subscription' page.id subs.user.id %}" class="mr-2 mb-0">
+<form method="post" action="{% url 'pages:unconfirm_subscription' page.id subs.user.id %}" class="mr-2 mb-0 bajar-form">
             {% csrf_token %}
             <button type="submit" class="btn btn-outline-danger font-weight-bold">
               Bajar subcripción
             </button>
           </form>
         {% else %}
-<form method="post" action="{% url 'pages:confirm_subscription' page.id subs.user.id %}" class="mr-2 mb-0">
+<form method="post" action="{% url 'pages:confirm_subscription' page.id subs.user.id %}" class="mr-2 mb-0 confirmar-form">
             {% csrf_token %}
             <button type="submit" class="btn btn-outline-success font-weight-bold">
               Confirmar inscripción
@@ -208,14 +208,14 @@
           {% if page.con_preinscripcion %}
             {% with subs=UserSubscripcion %}
               {% if subs.pages_confirmadas.all|contains:page %}
-                <form method="post" action="{% url 'pages:unconfirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Dar de baja la confirmación de {{ subs.user.profile.nombre }} {{ subs.user.profile.apellido }}?');" class="mr-2 mb-0">
+<form method="post" action="{% url 'pages:unconfirm_subscription' page.id subs.user.id %}" class="mr-2 mb-0 bajar-form">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-outline-danger font-weight-bold">
                     Bajar suscripción
                   </button>
                 </form>
               {% else %}
-                <form method="post" action="{% url 'pages:confirm_subscription' page.id subs.user.id %}" onsubmit="return confirm('¿Confirmar la inscripción de {{ subs.user.profile.nombre }} {{ subs.user.profile.apellido }}?');" class="mr-2 mb-0">
+<form method="post" action="{% url 'pages:confirm_subscription' page.id subs.user.id %}" class="mr-2 mb-0 confirmar-form">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-outline-success font-weight-bold">
                     Confirmar inscripción
@@ -508,6 +508,25 @@
                 return false;
             });
         })
+ 
+$('.confirmar-form, .bajar-form').on('submit', function (e) {
+  e.preventDefault();
+  const form = $(this);
+
+  $.ajax({
+    type: 'POST',
+    url: form.attr('action'),
+    data: form.serialize(),
+    success: function () {
+      location.reload();
+    },
+    error: function () {
+      alert('Hubo un error al procesar la solicitud.');
+    }
+  });
+});
+
+ 
     </script>
     {% endblock javascript %}
 
