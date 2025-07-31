@@ -309,7 +309,7 @@ class PageDetail(DetailView):
 
         if self.request.user.is_anonymous:
             return context
-        subscribers = Subscription.objects.find_page(self.object)
+        subscribers = Subscription.objects.find_page(self.object) or Subscription.objects.none()
         overlaps = Subscription.objects.overlaps(self.request.user, self.object)
         # Orden alfabético sin distinguir mayúsculas/minúsculas
         subscribers_ordenados = sorted(
