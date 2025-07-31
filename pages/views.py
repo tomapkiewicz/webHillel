@@ -321,7 +321,7 @@ class PageDetail(DetailView):
         )
 
 
-        subscribers_raw = list(Subscription.objects.find_page(self.object)) or []
+        subscribers_raw = list(Subscription.objects.find_page(self.object) or [])
         subs_with_fecha = []
 
         for sub in subscribers_raw:
