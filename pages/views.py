@@ -109,8 +109,8 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
     title     = page.title or "Actividad Hillel"
     location  = getattr(page, "location", None) or getattr(page, "lugar", "") or ""
     details_h = cuerpo or ""
-    details_t = _html_to_plain(details_h)
-    from_email = "Hillel Argentina <no_responder@domain.com>"
+    details_t = _html_to_plain(details_h)   # texto plano para ICS
+    from_email = "Hillel Argentina <no-reply@hillel.org.ar>"  # usar remitente real
 
     # Horarios BA -> UTC
     event_tz = pytz.timezone("America/Argentina/Buenos_Aires")
@@ -135,26 +135,22 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
     ics_content = None
     google_link = None
 
-    # ✅ Solo generar calendario si hay QR (confirmado)
+    # ✅ Solo generar/adjuntar calendario si hay QR (confirmado)
     if qr_image and dtstart_utc and dtend_utc:
         uid = f"{page.id}-{user.id}@hillel.org.ar"
         dtstamp_utc = datetime.utcnow().replace(microsecond=0)
-        organizer_email = "no_responder@domain.com"
-        attendee_email  = user.email or "usuario@ejemplo.com"
-        attendee_name   = (getattr(user, "get_full_name", lambda: "")()
-                           or getattr(user, "username", "")
-                           or "Invitado")
 
         summary     = _ics_escape(title)
-        description = _ics_escape(details_t)
+        description = _ics_escape(details_t)      # sin HTML
         loc_escaped = _ics_escape(location)
 
+        # METHOD:PUBLISH (no organizer/attendee) => no genera respuestas automáticas
         ics_lines = [
             "BEGIN:VCALENDAR",
             "PRODID:-//Hillel//WebHillel//ES",
             "VERSION:2.0",
             "CALSCALE:GREGORIAN",
-            "METHOD:REQUEST",
+            "METHOD:PUBLISH",
             "BEGIN:VEVENT",
             f"UID:{uid}",
             f"DTSTAMP:{fmt_utc(dtstamp_utc)}",
@@ -166,15 +162,14 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
             "STATUS:CONFIRMED",
             "SEQUENCE:0",
             "TRANSP:OPAQUE",
-            f"ORGANIZER;CN=Hillel Argentina:mailto:{organizer_email}",
-            f"ATTENDEE;CN={_ics_escape(attendee_name)};ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE:mailto:{attendee_email}",
             "END:VEVENT",
             "END:VCALENDAR",
         ]
         ics_content = "\r\n".join(ics_lines)
-        print("[DEBUG] ICS (UTC, sin HTML) generado. Primeras 15 líneas:")
+        print("[DEBUG] ICS (UTC, PUBLISH) generado. Primeras 15 líneas:")
         print("\n".join(ics_content.splitlines()[:15]))
 
+        # Link “Agregar a Google Calendar”
         base = "https://www.google.com/calendar/render?action=TEMPLATE"
         params = [
             ("text", title),
@@ -192,10 +187,10 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
         {
             "texto_extra": page.textoExtraMail,
             "texto_alerta": page.alerta,
-            "mail_body": details_h,
+            "mail_body": details_h,          # HTML en cuerpo del correo
             "qr_url": qr_data,
             "personalizado": page.con_mail_personalizado,
-            "calendar_link": google_link,  # puede ser None si no hay QR
+            "calendar_link": google_link,    # None si no hay QR
         },
     )
 
@@ -209,15 +204,15 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
     email.extra_headers = {"Content-Class": "urn:content-classes:calendarmessage"}
     email.attach_alternative(html_message, "text/html")
 
-    # ✅ Adjuntar ICS solo si hay QR (confirmado)
+    # ✅ Adjuntar ICS inline solo si hay QR (confirmación real)
     if qr_image and ics_content:
         ical_part = MIMEText(ics_content, _subtype="calendar", _charset="UTF-8")
-        ical_part.replace_header("Content-Type", 'text/calendar; charset="UTF-8"; method=REQUEST; name="invite.ics"')
-        ical_part.add_header("Content-Disposition", 'inline; filename="invite.ics"')
+        ical_part.replace_header("Content-Type", 'text/calendar; charset="UTF-8"; method=PUBLISH; name="evento.ics"')
+        ical_part.add_header("Content-Disposition", 'inline; filename="evento.ics"')
         email.attach(ical_part)
-        print("[DEBUG] Adjuntado part inline text/calendar.")
+        print("[DEBUG] Adjuntado part inline text/calendar (PUBLISH).")
 
-    # QR adjunto (solo si corresponde)
+    # Adjuntar QR si corresponde
     if qr_image:
         email.attach(f"qr_{user.id}_{page.id}.png", qr_image.getvalue(), "image/png")
         print("[DEBUG] Adjuntado QR.")
@@ -225,7 +220,7 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
     result = email.send()
     print(f"[DEBUG] Email enviado. send()={result}")
     print("=== enviar_mail_confirmacion END ===")
-
+    
 @staff_member_required
 def unconfirm_subscription(request, page_id, user_id):
     page = get_object_or_404(Page, pk=page_id)
