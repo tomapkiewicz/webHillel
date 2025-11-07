@@ -120,54 +120,91 @@ def ConfirmSubscription(request, page_id, user_id):
 
     return redirect(reverse("pages:page", args=[page.id]))
 
+
 def CuposAgotados(request, pk):
+    print("=== CuposAgotados START ===")
+
+    # --- Page ---
     page = get_object_or_404(Page, pk=pk)
-    usu = (
-        request.user.profile.nombre + "  " + request.user.profile.apellido
-        if request.user.profile.nombre is not None
-        else request.user
+    print(f"[DEBUG] Page encontrada: {page.title} (id={page.id})")
+
+    # --- Usuario y perfil ---
+    perfil = getattr(request.user, "profile", None)
+    nombre = getattr(perfil, "nombre", "") or str(request.user)
+    apellido = getattr(perfil, "apellido", "") or ""
+    whatsapp = getattr(perfil, "whatsapp", "") or ""
+    perfil_ok = getattr(perfil, "perfil_ok", "") or ""
+
+    usu = f"{nombre}  {apellido}".strip()
+    print(f"[DEBUG] Usuario: {usu}")
+    print(f"[DEBUG] WhatsApp: {whatsapp}")
+    print(f"[DEBUG] Perfil OK: {perfil_ok}")
+
+    # --- Fecha formateada ---
+    formatted_fecha = date_format(page.fecha, r"l d \d\e F") if page.fecha else ""
+    print(f"[DEBUG] Fecha formateada: {formatted_fecha}")
+
+    # --- Asunto del mail ---
+    asunto = f"Cupos agotados - {page.title}"
+    print(f"[DEBUG] Asunto: {asunto}")
+
+    # --- Contexto para el template ---
+    mail_body = (
+        "<p>"
+        f"<strong>{usu}</strong> quiso anotarse en <strong>{page.title}</strong> "
+        f"a las {page.horaDesde}"
+        + (f" HS el día {formatted_fecha}" if page.fecha else "")
+        + " pero los cupos estaban agotados."
+        "</p>"
+        f'<p>Contacto: <a href="https://wa.me/+549{whatsapp}">+54 9 {whatsapp}</a> {perfil_ok}</p>'
     )
 
-    formatted_fecha = date_format(page.fecha, r"l d \d\e F")
+    context = {
+        "mail_body": mail_body,      # 👈 clave que usa el template
+        "texto_extra": "",           
+        "texto_alerta": "",          
+        "qr_url": None,              
+    }
 
-    asunto = "Cupos agotados - " + page.title
-    html_message = loader.render_to_string(
-        "mail_body.html",
-        {
-            "user_name": usu
-            + " https://wa.me/+549"
-            + str(request.user.profile.whatsapp)
-            + " "
-            + (
-                request.user.profile.perfil_ok
-                if request.user.profile.perfil_ok is not None
-                else ""
-            ),
-            "subject": "Se quiso anotar en "
-            + page.title
-            + " a las "
-            + str(page.horaDesde)
-            + ("HS  el día " + formatted_fecha if page.fecha is not None else "")
-            + " pero los cupos estaban agotados.",
-        },
-    )
-    mailContacto = MailContacto.objects.first()
-    to_mail = (mailContacto,)
-    from_mail = "Hillel Argentina"
-    rta = send_html_mail(asunto, html_message, to_mail, from_mail)
-    response = {"is_taken": rta}
+    # --- Render del HTML ---
+    html_message = loader.render_to_string("mail_body.html", context)
+    print(f"[DEBUG] HTML renderizado OK, longitud = {len(html_message)} caracteres")
+    print(f"[DEBUG] HTML preview (primeros 300 chars):\n{html_message[:300]}")
+
+    # --- Destinatario ---
+    mail_contacto = MailContacto.objects.first()
+    to_mail = []
+    if mail_contacto:
+        email_value = getattr(mail_contacto, "mail", None) or str(mail_contacto)
+        if isinstance(email_value, str) and "@" in email_value:
+            to_mail = [email_value]
+    print(f"[DEBUG] to_mail: {to_mail}")
+
+    # --- Remitente ---
+    from_mail = "Hillel Argentina <no-reply@hillel.org.ar>"
+    print(f"[DEBUG] from_mail: {from_mail}")
+
+    # --- Envío del mail ---
+    try:
+        print("[DEBUG] Enviando mail...")
+        sent = send_mail(
+            subject=asunto,
+            message=" ",  # cuerpo vacío en texto plano (solo usamos HTML)
+            from_email=from_mail,
+            recipient_list=to_mail,
+            fail_silently=False,
+            html_message=html_message,
+        )
+        print(f"[DEBUG] send_mail -> sent={sent}")
+    except Exception as e:
+        print("[ERROR] Falló send_mail:", e)
+        sent = 0
+
+    # --- Respuesta JSON ---
+    response = {"is_taken": bool(sent)}
+    print(f"[DEBUG] Respuesta final JSON: {response}")
+    print("=== CuposAgotados END ===")
     return JsonResponse(response)
-
-
-def send_html_mail(subject, html_content, recipient_list, mail_from):
-    mail = send_mail(
-        subject,
-        html_content,
-        mail_from,
-        recipient_list,
-        fail_silently=True,
-        html_message=html_content,
-    )
 
 
 class StaffRequiredMixin(object):
