@@ -108,11 +108,11 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
 
     title     = page.title or "Actividad Hillel"
     location  = getattr(page, "location", None) or getattr(page, "lugar", "") or ""
-    details_h = cuerpo or ""  # HTML para el cuerpo del mail
-    details_t = _html_to_plain(details_h)  # Texto plano para DESCRIPTION del ICS
+    details_h = cuerpo or ""
+    details_t = _html_to_plain(details_h)
     from_email = "Hillel Argentina <no_responder@domain.com>"
 
-    # Horarios: de BA -> UTC
+    # Horarios BA -> UTC
     event_tz = pytz.timezone("America/Argentina/Buenos_Aires")
     date_part  = getattr(page, "fecha", None)
     time_start = getattr(page, "horaDesde", None)
@@ -123,8 +123,7 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
         dtstart_utc = dtend_utc = None
     else:
         dtstart_local = event_tz.localize(datetime.combine(date_part, time_start))
-        dtend_local   = (event_tz.localize(datetime.combine(date_part, time_end))
-                         if time_end else dtstart_local + timedelta(hours=2))
+        dtend_local   = event_tz.localize(datetime.combine(date_part, time_end)) if time_end else dtstart_local + timedelta(hours=2)
         dtstart_utc = dtstart_local.astimezone(pytz.utc)
         dtend_utc   = dtend_local.astimezone(pytz.utc)
         print(f"[DEBUG] Evento local: {dtstart_local} -> {dtend_local}")
@@ -135,10 +134,11 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
 
     ics_content = None
     google_link = None
-    if dtstart_utc and dtend_utc:
+
+    # ✅ Solo generar calendario si hay QR (confirmado)
+    if qr_image and dtstart_utc and dtend_utc:
         uid = f"{page.id}-{user.id}@hillel.org.ar"
         dtstamp_utc = datetime.utcnow().replace(microsecond=0)
-
         organizer_email = "no_responder@domain.com"
         attendee_email  = user.email or "usuario@ejemplo.com"
         attendee_name   = (getattr(user, "get_full_name", lambda: "")()
@@ -146,7 +146,7 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
                            or "Invitado")
 
         summary     = _ics_escape(title)
-        description = _ics_escape(details_t)      # <-- sin HTML
+        description = _ics_escape(details_t)
         loc_escaped = _ics_escape(location)
 
         ics_lines = [
@@ -179,23 +179,23 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
         params = [
             ("text", title),
             ("dates", f"{fmt_utc(dtstart_utc)}/{fmt_utc(dtend_utc)}"),
-            ("details", details_t),  # texto plano también acá
+            ("details", details_t),
             ("location", location),
             ("trp", "true"),
         ]
         query = "&".join(f"{k}={quote_plus(v or '')}" for k, v in params)
         google_link = f"{base}&{query}"
 
-    # Render del HTML del mail (deja el HTML original para el cuerpo)
+    # Render del HTML
     html_message = loader.render_to_string(
         "mail_body.html",
         {
             "texto_extra": page.textoExtraMail,
             "texto_alerta": page.alerta,
-            "mail_body": details_h,      # HTML en el cuerpo del correo
+            "mail_body": details_h,
             "qr_url": qr_data,
             "personalizado": page.con_mail_personalizado,
-            "calendar_link": google_link,
+            "calendar_link": google_link,  # puede ser None si no hay QR
         },
     )
 
@@ -207,20 +207,17 @@ def enviar_mail_confirmacion(user, page, qr_data, qr_image, asunto=None, cuerpo=
         to=[user.email] if user.email else [],
     )
     email.extra_headers = {"Content-Class": "urn:content-classes:calendarmessage"}
-
-    # HTML como alternativa
     email.attach_alternative(html_message, "text/html")
 
-    # ICS como parte inline (clave para Gmail)
-    if ics_content:
+    # ✅ Adjuntar ICS solo si hay QR (confirmado)
+    if qr_image and ics_content:
         ical_part = MIMEText(ics_content, _subtype="calendar", _charset="UTF-8")
         ical_part.replace_header("Content-Type", 'text/calendar; charset="UTF-8"; method=REQUEST; name="invite.ics"')
         ical_part.add_header("Content-Disposition", 'inline; filename="invite.ics"')
         email.attach(ical_part)
         print("[DEBUG] Adjuntado part inline text/calendar.")
 
-
-    # QR adjunto
+    # QR adjunto (solo si corresponde)
     if qr_image:
         email.attach(f"qr_{user.id}_{page.id}.png", qr_image.getvalue(), "image/png")
         print("[DEBUG] Adjuntado QR.")
