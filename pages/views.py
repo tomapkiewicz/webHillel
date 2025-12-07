@@ -2,6 +2,8 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
+
 from django.utils.decorators import method_decorator
 from django.db.models import F
 from django.utils import timezone
@@ -244,6 +246,7 @@ def ConfirmSubscription(request, page_id, user_id):
 
     return redirect(reverse("pages:page", args=[page.id]))
 
+@login_required
 def CuposAgotados(request, pk):
     print("=== CuposAgotados START ===")
 
@@ -251,15 +254,23 @@ def CuposAgotados(request, pk):
     print(f"[DEBUG] Page encontrada: {page.title} (id={page.id})")
 
     perfil = getattr(request.user, "profile", None)
-    nombre = getattr(perfil, "nombre", "") or str(request.user)
-    apellido = getattr(perfil, "apellido", "") or ""
-    whatsapp = getattr(perfil, "whatsapp", "") or ""
-    perfil_ok = getattr(perfil, "perfil_ok", "") or ""
+    if not perfil:
+        print("[WARN] Usuario sin perfil llamando CuposAgotados")
+        return JsonResponse({"is_taken": False, "reason": "no_profile"}, status=400)
 
-    usu = f"{nombre}  {apellido}".strip()
-    print(f"[DEBUG] Usuario: {usu}")
-    print(f"[DEBUG] WhatsApp: {whatsapp}")
-    print(f"[DEBUG] Perfil OK: {perfil_ok}")
+    nombre = perfil.nombre or request.user.username
+    apellido = perfil.apellido or ""
+    whatsapp = perfil.whatsapp or ""
+    perfil_ok = perfil.perfil_ok or ""
+
+    if not whatsapp:
+        print("[WARN] Perfil sin whatsapp, no se manda mail de lista de espera")
+        return JsonResponse({"is_taken": False, "reason": "no_whatsapp"}, status=400)
+
+    # Opcional pero muy recomendable: no mandar mails si la página no está activa
+    if not page.activa or page.oculta:
+        print(f"[WARN] Page inactiva/oculta: {page.id} - no se envia mail de cupos agotados")
+        return JsonResponse({"is_taken": False, "reason": "page_inactive"}, status=400)
 
     formatted_fecha = date_format(page.fecha, r"l d \d\e F") if page.fecha else ""
     print(f"[DEBUG] Fecha formateada: {formatted_fecha}")
@@ -269,7 +280,7 @@ def CuposAgotados(request, pk):
 
     mail_body = (
         "<p>"
-        f"<strong>{usu}</strong> quiso anotarse en <strong>{page.title}</strong> "
+        f"<strong>{nombre} {apellido}</strong> quiso anotarse en <strong>{page.title}</strong> "
         f"a las {page.horaDesde}"
         + (f" HS el día {formatted_fecha}" if page.fecha else "")
         + " pero los cupos estaban agotados."
@@ -303,12 +314,11 @@ def CuposAgotados(request, pk):
         print("[WARN] No hay destinatario (to_mail vacío). No se enviará el mail.")
         return JsonResponse({"is_taken": False, "reason": "no_recipient"})
 
-    # --- función interna que corre en background ---
     def _send_cupos_mail():
         try:
             res = send_mail(
                 subject=asunto,
-                message=" ",  # solo HTML
+                message=" ",
                 from_email=from_mail,
                 recipient_list=to_mail,
                 fail_silently=False,
@@ -318,14 +328,14 @@ def CuposAgotados(request, pk):
         except Exception as e:
             print(f"[ERROR][BG] Falló send_mail: {e}")
 
-    # Encolar después del commit (o inmediatamente si no hay transacción activa)
     print("[DEBUG] Encolando envío async con run_after_commit...")
     run_after_commit(_send_cupos_mail)
 
-    response = {"is_taken": True}  # encolado OK
+    response = {"is_taken": True}
     print(f"[DEBUG] Respuesta final JSON: {response}")
     print("=== CuposAgotados END ===")
     return JsonResponse(response)
+
 
 class StaffRequiredMixin(object):
     @method_decorator(staff_member_required)
