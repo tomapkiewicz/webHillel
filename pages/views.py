@@ -452,9 +452,9 @@ class PageDetail(DetailView):
         current_date = datetime.now(local_tz)
 
 
-        if obj.fecha and obj.fecha < current_date.date():
-            obj.activa = False
-            obj.save()
+        #if obj.fecha and obj.fecha < current_date.date():
+            #obj.activa = False
+            #obj.save(update_fields=["activa"])
 
         return obj
 
